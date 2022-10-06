@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gettext libsqli
 RUN pip install --no-cache-dir sztpd==0.0.11
 
 # certificates
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf - -C /tmp/
 WORKDIR /tmp/sztpd-simulator/pki
 RUN sed -i 's/localhost/bootstrap/g' sztpd1/sbi/end-entity/openssl.cnf && \
