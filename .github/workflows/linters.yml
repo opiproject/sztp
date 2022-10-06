@@ -22,12 +22,20 @@ jobs:
 
   docker-lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - agent
+          - client
+          - dhcp
+          - bootstrap
     steps:
       - uses: actions/checkout@v3
       - uses: hadolint/hadolint-action@v2.1.0
         with:
           recursive: true
           ignore: DL3041
+          dockerfile: Dockerfile.${{ matrix.package }}
 
   shellcheck:
     runs-on: ubuntu-latest
