@@ -1,0 +1,37 @@
+name: 'OPI SZTP CI'
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'examples/sztp/**'
+      - '.github/workflows/sztp.yml'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'examples/sztp/**'
+      - '.github/workflows/sztp.yml'
+
+concurrency:
+  # if workflow for PR or push is already running stop it, and start new one
+  group: sztp-skip-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  sztp-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - agent
+          - client
+          - dhcp
+          - bootstrap
+    steps:
+      - run: 'echo "No SZTP test run required"'
+
+  sztp-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No SZTP test run required"'
