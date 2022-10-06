@@ -6,12 +6,12 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'examples/sztp/**'
+      - './**'
       - '.github/workflows/sztp.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'examples/sztp/**'
+      - './**'
       - '.github/workflows/sztp.yml'
 
 env:
@@ -57,8 +57,7 @@ jobs:
       id: build-and-push
       uses: docker/build-push-action@c84f38281176d4c9cdb1626ffafcd6b3911b5d94
       with:
-        context: examples/sztp
-        file: examples/sztp/Dockerfile.${{ matrix.package }}
+        file: Dockerfile.${{ matrix.package }}
         platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
@@ -81,18 +80,14 @@ jobs:
 
     - name: Start containers
       run: docker-compose up -d
-      working-directory: examples/sztp
 
     - name: Run Tests
       run: ./tests.sh
-      working-directory: examples/sztp
 
     - name: Logs
       if: failure()
       run: docker-compose logs
-      working-directory: examples/sztp
 
     - name: Stop containers
       if: always()
       run: docker-compose down
-      working-directory: examples/sztp
