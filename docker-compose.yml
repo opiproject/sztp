@@ -1,0 +1,86 @@
+version: '3.7'
+
+services:
+
+  bootstrap:
+    image: ghcr.io/opiproject/opi-sztp-bootstrap:main
+    build:
+      context: .
+      dockerfile: Dockerfile.bootstrap
+    environment:
+      SZTPD_INIT_PORT: 1080
+      SZTPD_SBI_PORT: 9090
+      SZTPD_INIT_MODE: 1
+      SZTPD_ACCEPT_CONTRACT: "Yes"
+      SZTPD_INIT_ADDR: 0.0.0.0
+    networks:
+      - opi
+    command: |
+      sh -e -u -x -c "env &&
+        envsubst '$$SZTPD_INIT_PORT,$$SZTPD_SBI_PORT,$$SZTPD_INIT_ADDR' < /tmp/running.json.static > /tmp/running.json && \
+        sztpd sqlite:///:memory 2>&1 & \
+        echo wait 5s... && sleep 5s && \
+        curl -i -X PUT --user my-admin@example.com:my-secret --data @/tmp/running.json -H 'Content-Type:application/yang-data+json' http:/127.0.0.1:$$SZTPD_INIT_PORT/restconf/ds/ietf-datastores:running && \
+        echo wait 5s... && sleep 5s && \
+        wait"
+
+  dhcp:
+    image: ghcr.io/opiproject/opi-sztp-dhcp:main
+    build:
+      context: .
+      dockerfile: Dockerfile.dhcp
+    environment:
+      NODE_IP_SUBNET: 10.127.127.0
+      NODE_IP_NETMASK: 255.255.255.0
+      NODE_IP_RANGE_MIN: 10.127.127.100
+      NODE_IP_RANGE_MAX: 10.127.127.253
+      NODE_IP_ADDRESS: 10.127.127.3
+    cap_add:
+      - CAP_NET_BIND_SERVICE
+      - CAP_NET_RAW
+    networks:
+      - opi
+    command: sh -e -u -x -c 'envsubst < /etc/dhcp/dhcpd.conf.template > /etc/dhcp/dhcpd.conf && dhcpd -d'
+
+  nmap:
+    image: instrumentisto/nmap:7.92
+    networks:
+      - opi
+    command: --script broadcast-dhcp-discover
+
+  web:
+    image: python:3.10.6-slim
+    volumes:
+      - ./config/my-boot-image.img:/var/lib/misc/my-boot-image.img:Z,ro
+    networks:
+      - opi
+    command: python3 -m http.server 8082
+
+  client:
+    image: ghcr.io/opiproject/opi-sztp-client:main
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    cap_add:
+      - CAP_NET_RAW
+    networks:
+      - opi
+    command: dhclient -d -v
+
+  agent:
+    image: ghcr.io/opiproject/opi-sztp-agent:main
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    volumes:
+      - ./config/input.json:/tmp/input.json:Z,ro
+    networks:
+      - opi
+    command: ['/bin/sh', '-c', 'sleep infinity']
+
+networks:
+  opi:
+    ipam:
+      config:
+        - subnet: "10.127.127.0/24"
+          gateway: "10.127.127.1"
