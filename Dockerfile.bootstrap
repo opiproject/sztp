@@ -1,29 +1,29 @@
 FROM docker.io/library/python:3.10.7-slim
 
-RUN apt-get update && apt-get install -y gettext libsqlite3-dev make curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends gettext libsqlite3-dev make curl && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir sztpd==0.0.11
 
 # certificates
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf - -C /tmp/
 WORKDIR /tmp/sztpd-simulator/pki
-RUN sed -i 's/localhost/bootstrap/g' sztpd1/sbi/end-entity/openssl.cnf
-RUN make pki
-
-# SBI Port certificates
-RUN cat sztpd1/sbi/end-entity/my_cert.pem sztpd1/sbi/intermediate2/my_cert.pem > /tmp/cert_chain.pem
-RUN openssl crl2pkcs7 -nocrl -certfile /tmp/cert_chain.pem -outform DER -out /tmp/cert_chain.cms
-
-# client cert (DevID) trust anchor
-RUN cat client/root-ca/my_cert.pem client/intermediate1/my_cert.pem client/intermediate2/my_cert.pem > /tmp/ta_cert_chain.pem
-RUN openssl crl2pkcs7 -nocrl -certfile /tmp/ta_cert_chain.pem -outform DER -out /tmp/ta_cert_chain.cms
-
-# TODO: remove this line and run test from agent container instead
-RUN cat sztpd1/sbi/root-ca/my_cert.pem sztpd1/sbi/intermediate1/my_cert.pem > /opi.pem
+RUN sed -i 's/localhost/bootstrap/g' sztpd1/sbi/end-entity/openssl.cnf && \
+    make pki && \
+    echo # SBI Port certificates && \
+    cat sztpd1/sbi/end-entity/my_cert.pem sztpd1/sbi/intermediate2/my_cert.pem > /tmp/cert_chain.pem && \
+    openssl crl2pkcs7 -nocrl -certfile /tmp/cert_chain.pem -outform DER -out /tmp/cert_chain.cms && \
+    echo # client cert (DevID) trust anchor && \
+    cat client/root-ca/my_cert.pem client/intermediate1/my_cert.pem client/intermediate2/my_cert.pem > /tmp/ta_cert_chain.pem && \
+    openssl crl2pkcs7 -nocrl -certfile /tmp/ta_cert_chain.pem -outform DER -out /tmp/ta_cert_chain.cms && \
+    echo # TODO: remove this line and run test from agent container instead && \
+    cat sztpd1/sbi/root-ca/my_cert.pem sztpd1/sbi/intermediate1/my_cert.pem > /opi.pem
 
 # configurations, images, templates
 COPY config/ /tmp/
 
 # generate static template
+
+# hadolint ignore=SC2016
 RUN \
     BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /tmp/my-boot-image.img | awk '{print $2}'` \
     PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-pre-configuration-script.sh` \
