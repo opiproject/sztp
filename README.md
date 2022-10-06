@@ -1,5 +1,10 @@
 # sZTP and DHCP and HTTP
 
+[![Linters](https://github.com/opiproject/sztp/actions/workflows/linters.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/linters.yml)
+[![Go](https://github.com/opiproject/sztp/actions/workflows/go.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/go.yml)
+[![License](https://img.shields.io/github/license/opiproject/sztp?style=flat-square&color=blue&label=License)](https://github.com/opiproject/sztp/blob/master/LICENSE)
+[![Last Release](https://img.shields.io/github/v/release/opiproject/sztp?label=Latest&style=flat-square&logo=go)](https://github.com/opiproject/sztp/releases)
+
 ## Docs
 
 * <https://www.rfc-editor.org/rfc/pdfrfc/rfc8572.txt.pdf> (Secure Zero Touch Provisioning (SZTP))
