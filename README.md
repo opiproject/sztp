@@ -12,11 +12,11 @@
 
 ## sZTP Diagram
 
-![xPU sZTP provisioning participants](../../architecture/sZTP-components.png)
+![xPU sZTP provisioning participants](./architecture/sZTP-components.png)
 
 ## sZTP on DPU Diagram
 
-![xPU sZTP provisioning block](../../architecture/sZTP-provisioning-blocks.png)
+![xPU sZTP provisioning block](./architecture/sZTP-provisioning-blocks.png)
 
 ## Run sZTP
 
