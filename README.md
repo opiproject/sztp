@@ -16,6 +16,10 @@ See [CONTRIBUTING](https://github.com/opiproject/opi/blob/main/CONTRIBUTING.md) 
 * <https://www.rfc-editor.org/rfc/pdfrfc/rfc8572.txt.pdf> (Secure Zero Touch Provisioning (SZTP))
 * <https://watsen.net/docs/sztpd/0.0.11/admin-guide/#simulator>
 
+## Videos
+
+* [Cisco Secure Zero-Touch with IOS XR](https://www.youtube.com/watch?v=rl2ucWoTqyg)
+
 ## sZTP Diagram
 
 ![xPU sZTP provisioning participants](./architecture/sZTP-components.png)
