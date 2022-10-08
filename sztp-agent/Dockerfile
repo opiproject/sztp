@@ -12,7 +12,7 @@ COPY go.sum ./
 RUN go mod download
 
 # build an app
-COPY *.go ./
+COPY . .
 RUN go build -o /opi-sztp-agent
 
 CMD [ "/opi-sztp-agent" ]

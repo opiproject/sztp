@@ -78,6 +78,13 @@ services:
       - opi
     command: ['/bin/sh', '-c', 'sleep infinity']
 
+  opi-sztp-go-agent:
+    build:
+      context: sztp-agent
+    networks:
+      - opi
+    command: ['/opi-sztp-agent', 'status']
+
 networks:
   opi:
     ipam:
