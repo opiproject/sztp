@@ -5,8 +5,7 @@ services:
   bootstrap:
     image: ghcr.io/opiproject/opi-sztp-bootstrap:main
     build:
-      context: .
-      dockerfile: Dockerfile.bootstrap
+      context: sztp-server
     environment:
       SZTPD_INIT_PORT: 1080
       SZTPD_SBI_PORT: 9090
@@ -27,8 +26,7 @@ services:
   dhcp:
     image: ghcr.io/opiproject/opi-sztp-dhcp:main
     build:
-      context: .
-      dockerfile: Dockerfile.dhcp
+      context: dhcp-server
     environment:
       NODE_IP_SUBNET: 10.127.127.0
       NODE_IP_NETMASK: 255.255.255.0
@@ -51,7 +49,7 @@ services:
   web:
     image: python:3.10.6-slim
     volumes:
-      - ./config/my-boot-image.img:/var/lib/misc/my-boot-image.img:Z,ro
+      - ./sztp-server/config/my-boot-image.img:/var/lib/misc/my-boot-image.img:Z,ro
     networks:
       - opi
     command: python3 -m http.server 8082
@@ -59,8 +57,7 @@ services:
   client:
     image: ghcr.io/opiproject/opi-sztp-client:main
     build:
-      context: .
-      dockerfile: Dockerfile.client
+      context: dhcp-client
     cap_add:
       - CAP_NET_RAW
     networks:
@@ -70,10 +67,9 @@ services:
   agent:
     image: ghcr.io/opiproject/opi-sztp-agent:main
     build:
-      context: .
-      dockerfile: Dockerfile.agent
+      context: sztp-simulator
     volumes:
-      - ./config/input.json:/tmp/input.json:Z,ro
+      - ./sztp-server/config/input.json:/tmp/input.json:Z,ro
     networks:
       - opi
     command: ['/bin/sh', '-c', 'sleep infinity']

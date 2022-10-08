@@ -45,7 +45,7 @@ Secure Zero Touch Provisioning (SZTP) adds a bootstrap server to DHCP-based ZTP 
 
 ## Components of ZTP deployment
 
-![sZTP components](architecture/sZTP-components.png)
+![sZTP components](doc/sZTP-components.png)
 
 - DPU or IPU device: new shipped device that is physically connected and powered but missing config and needs provisioning. Runs sZTP agent/client and uses DHCP client for deployment.
 - DHCP server (optional): allocates a temporary IP address, default gateway, DNS server address, and bootstrap server IP or URL to the device to be deployed using sZTP. Some customers don't use DHCP, so either mDNS or static IP address allocation is applied.
@@ -89,7 +89,7 @@ Those steps will also help to understand the sZTP process from the network/syste
 
 ## sZTP process
 
-![Provisioning Sequence](architecture/sZTP-sequence.png)
+![Provisioning Sequence](doc/sZTP-sequence.png)
 
 ### Discovery
 
@@ -153,7 +153,7 @@ Note: "DPU/IPU Validation" is done using [IEEE 802.1AR - Secure Device Identity]
   - Question: using what certificates?
   - Question: what about QUIC?
   - For environments that are predominately IPv6 based, we'll need a solution that supports SLAAC.
-  - More info is here <https://github.com/opiproject/opi-prov-life/blob/main/architecture/Zero-Touch-Provisioning%E2%80%94Approaches-to-Network-Layer-Onboarding.pdf>
+  - More info is here <https://github.com/opiproject/opi-prov-life/blob/main/doc/Zero-Touch-Provisioning%E2%80%94Approaches-to-Network-Layer-Onboarding.pdf>
 - Device sends a request to a "Bootstrap Server" to join the network by providing its IDevID.
 - "Bootstrap Server" decides to accept debvice to the network or reject
   - Needs trust anchor of IDevID
