@@ -1,4 +1,4 @@
-module github.com/opiproject/sztp/stpd-agent
+module github.com/opiproject/sztp/sztp-agent
 
 go 1.17
 
