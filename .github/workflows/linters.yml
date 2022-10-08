@@ -20,7 +20,7 @@ jobs:
       #   with:
       #     args: './*.md'
 
-  docker-lint:
+  docker-lint-matrix:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,6 +36,15 @@ jobs:
           recursive: true
           ignore: DL3041,DL3008
           dockerfile: Dockerfile.${{ matrix.package }}
+
+  docker-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hadolint/hadolint-action@v2.1.0
+        with:
+          recursive: true
+          ignore: DL3041,DL3008
 
   shellcheck:
     runs-on: ubuntu-latest
