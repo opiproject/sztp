@@ -28,13 +28,20 @@ See [CONTRIBUTING](https://github.com/opiproject/opi/blob/main/CONTRIBUTING.md) 
 
 ![xPU sZTP provisioning block](./doc/sZTP-provisioning-blocks.png)
 
-## Run sZTP
+## Run everything
+
+```text
+docker-compose down --volumes
+docker-compose up --build
+```
+
+## Run sZTP (Bootstrap) Server only
 
 ```text
 docker-compose up --build bootstrap
 ```
 
-## Test sZTP
+## Test sZTP (Bootstrap) Server only
 
 Fetching Host-meta
 
@@ -262,13 +269,13 @@ $ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"ima
   "hash-value": "7b:ca:e6:ac:23:06:d8:79:06:8c:ac:03:80:e2:16:44:7e:40:6a:65:fa:d4:69:61:6e:05:ce:f5:87:dc:2b:97"
 ```
 
-## Run DHCP
+## Run DHCP server only
 
 ```text
 docker-compose up --build dhcp
 ```
 
-## Test DHCP with NMAP
+## Test DHCP server with NMAP
 
 ```text
 $ docker-compose run --rm -T nmap
@@ -289,7 +296,7 @@ WARNING: No targets were specified, so 0 hosts scanned.
 Nmap done: 0 IP addresses (0 hosts up) scanned in 10.25 seconds
 ```
 
-## Test DHCP with client
+## Test DHCP server with DHCP client
 
 ```text
 $ docker-compose run --rm -T client
@@ -332,13 +339,13 @@ lease {
 }
 ```
 
-## Run HTTP
+## Run HTTP server
 
 ```text
 docker-compose up --build web
 ```
 
-## Test HTTP from agent
+## Test HTTP server from agent
 
 ```text
 docker-compose run --rm -T agent curl --fail http://web:8082/var/lib/
