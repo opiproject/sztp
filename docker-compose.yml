@@ -41,7 +41,7 @@ services:
     command: sh -e -u -x -c 'envsubst < /etc/dhcp/dhcpd.conf.template > /etc/dhcp/dhcpd.conf && dhcpd -d'
 
   nmap:
-    image: instrumentisto/nmap:7.92
+    image: instrumentisto/nmap:7.93
     networks:
       - opi
     command: --script broadcast-dhcp-discover
