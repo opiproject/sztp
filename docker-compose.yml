@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   bootstrap:
-    image: ghcr.io/opiproject/opi-sztp-bootstrap:main
+    image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
     environment:
@@ -24,7 +24,7 @@ services:
         wait"
 
   dhcp:
-    image: ghcr.io/opiproject/opi-sztp-dhcp:main
+    image: ghcr.io/opiproject/opi-dhcp-server:main
     build:
       context: dhcp-server
     environment:
@@ -55,7 +55,7 @@ services:
     command: python3 -m http.server 8082
 
   client:
-    image: ghcr.io/opiproject/opi-sztp-client:main
+    image: ghcr.io/opiproject/opi-dhcp-client:main
     build:
       context: dhcp-client
     cap_add:
@@ -65,7 +65,7 @@ services:
     command: dhclient -d -v
 
   agent:
-    image: ghcr.io/opiproject/opi-sztp-agent:main
+    image: ghcr.io/opiproject/opi-sztp-simulator:main
     build:
       context: sztp-simulator
     volumes:
@@ -75,6 +75,7 @@ services:
     command: ['/bin/sh', '-c', 'sleep infinity']
 
   opi-sztp-go-agent:
+    image: ghcr.io/opiproject/opi-sztp-agent:main
     build:
       context: sztp-agent
     networks:
