@@ -1,6 +1,6 @@
 module github.com/opiproject/sztp/sztp-agent
 
-go 1.17
+go 1.19
 
 require (
 	github.com/TwiN/go-color v1.1.0
