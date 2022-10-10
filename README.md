@@ -35,6 +35,12 @@ docker-compose down --volumes
 docker-compose up --build
 ```
 
+## Test everything
+
+```text
+./tests.sh
+```
+
 ## Run sZTP (Bootstrap) Server only
 
 ```text
@@ -339,7 +345,7 @@ lease {
 }
 ```
 
-## Run HTTP server
+## Run HTTP server only
 
 ```text
 docker-compose up --build web
