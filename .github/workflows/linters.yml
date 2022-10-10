@@ -34,3 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: azohra/shell-linter@v0.6.0
+
+  YAMLlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: docker-compose.yml
+          config_data: "{extends: default, rules: {line-length: disable}}"
