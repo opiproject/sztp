@@ -60,6 +60,8 @@ services:
       context: dhcp-client
     cap_add:
       - CAP_NET_RAW
+    volumes:
+      - dhcp-leases-folder:/var/lib/dhclient/
     networks:
       - opi
     command: dhclient -d -v
@@ -78,9 +80,14 @@ services:
     image: ghcr.io/opiproject/opi-sztp-agent:main
     build:
       context: sztp-agent
+    volumes_from:
+      - client:ro
     networks:
       - opi
     command: ['/opi-sztp-agent', 'status']
+
+volumes:
+  dhcp-leases-folder:
 
 networks:
   opi:
