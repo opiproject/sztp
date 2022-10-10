@@ -84,7 +84,7 @@ services:
       - client:ro
     networks:
       - opi
-    command: ['/opi-sztp-agent', 'status']
+    command: ['/opi-sztp-agent', 'daemon']
 
 volumes:
   dhcp-leases-folder:
