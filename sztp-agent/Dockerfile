@@ -2,7 +2,7 @@
 
 # Alpine is chosen for its small footprint
 # compared to Ubuntu
-FROM docker.io/library/golang:1.19.1-alpine
+FROM docker.io/library/golang:1.19.2-alpine
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY go.sum ./
 RUN go mod download
 
 # build an app
-COPY *.go ./
+COPY . .
 RUN go build -o /opi-sztp-agent
 
 CMD [ "/opi-sztp-agent" ]

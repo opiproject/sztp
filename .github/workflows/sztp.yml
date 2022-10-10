@@ -25,18 +25,19 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - agent
-          - client
-          - dhcp
-          - bootstrap
+          - dhcp-client
+          - dhcp-server
+          - sztp-agent
+          - sztp-server
+          - sztp-simulator
     steps:
     - uses: actions/checkout@v3
     - uses: docker/setup-qemu-action@v2
-    - uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+    - uses: docker/setup-buildx-action@d5234d6605774d496731c394511848830d37a200
 
     - name: Log into registry ${{ env.REGISTRY }}
       if: github.event_name != 'pull_request'
-      uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
@@ -44,15 +45,15 @@ jobs:
 
     - name: Extract Docker metadata
       id: meta
-      uses: docker/metadata-action@69f6fc9d46f2f8bf0d5491e4aabe0bb8c6a4678a
+      uses: docker/metadata-action@210d783f42dfbd5492271c72e5f4232408f1d169
       with:
-        images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/opi-sztp-${{ matrix.package }}
+        images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/opi-${{ matrix.package }}
 
     - name: Build and push Docker image
       id: build-and-push
-      uses: docker/build-push-action@c84f38281176d4c9cdb1626ffafcd6b3911b5d94
+      uses: docker/build-push-action@48888e0b1305dca3a741ceb3b5a04ea336cd2626
       with:
-        file: Dockerfile.${{ matrix.package }}
+        context: ${{ matrix.package }}
         platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
@@ -71,7 +72,7 @@ jobs:
 
     # Workaround: https://github.com/docker/build-push-action/issues/461
     - name: Setup Docker buildx
-      uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+      uses: docker/setup-buildx-action@d5234d6605774d496731c394511848830d37a200
 
     - name: Start containers
       run: docker-compose up -d
