@@ -41,13 +41,13 @@ services:
     command: sh -e -u -x -c 'envsubst < /etc/dhcp/dhcpd.conf.template > /etc/dhcp/dhcpd.conf && dhcpd -d'
 
   nmap:
-    image: instrumentisto/nmap:7.92
+    image: instrumentisto/nmap:7.93
     networks:
       - opi
     command: --script broadcast-dhcp-discover
 
   web:
-    image: python:3.10.6-slim
+    image: python:3.10.7-slim
     volumes:
       - ./sztp-server/config/my-boot-image.img:/var/lib/misc/my-boot-image.img:Z,ro
     networks:
