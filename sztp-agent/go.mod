@@ -3,7 +3,7 @@ module github.com/opiproject/sztp/sztp-agent
 go 1.19
 
 require (
-	github.com/TwiN/go-color v1.1.0
+	github.com/TwiN/go-color v1.2.0
 	github.com/spf13/cobra v1.6.0
 )
 
