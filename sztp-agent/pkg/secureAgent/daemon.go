@@ -19,11 +19,7 @@ const (
 )
 
 func (a *Agent) RunCommandDaemon() error {
-	err := a.runDaemon()
-	if err != nil {
-		return err
-	}
-	return err
+	return a.runDaemon()
 }
 
 func (a *Agent) runDaemon() error {
@@ -38,7 +34,6 @@ func (a *Agent) runDaemon() error {
 		}
 		a.BootstrapURL = extractURLfromLine(line, `(?m)[^"]*`)
 		log.Println(a)
-
 	} else {
 		log.Printf(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
 		return errors.New(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
