@@ -7,12 +7,20 @@ Copyright (C) 2022 Red Hat.
 
 package secureAgent
 
-func RunCommandRun() error {
-	a := NewAgent("")
-	err := a.run()
+func (a *Agent) RunCommand() error {
+
+	err := a.prepareEnv()
+	err = a.configure()
+	err = a.run()
 	return err
 }
 
+func (a *Agent) prepareEnv() error {
+	return nil
+}
+func (a *Agent) configure() error {
+	return nil
+}
 func (a *Agent) run() error {
 	return nil
 }

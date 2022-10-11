@@ -7,12 +7,20 @@ Copyright (C) 2022 Red Hat.
 
 package secureAgent
 
-func RunCommandDisable() error {
-	a := NewAgent("")
-	err := a.execDisable()
+func (a *Agent) RunCommandDisable() error {
+
+	err := a.prepareEnvDisable()
+	err = a.configureDisable()
+	err = a.runDisable()
 	return err
 }
 
-func (a *Agent) execDisable() error {
+func (a *Agent) prepareEnvDisable() error {
+	return nil
+}
+func (a *Agent) configureDisable() error {
+	return nil
+}
+func (a *Agent) runDisable() error {
 	return nil
 }

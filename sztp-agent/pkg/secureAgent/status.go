@@ -7,12 +7,20 @@ Copyright (C) 2022 Red Hat.
 
 package secureAgent
 
-func RunCommandStatus() error {
-	a := NewAgent("")
-	err := a.execStatus()
+func (a *Agent) RunCommandStatus() error {
+
+	err := a.prepareEnvStatus()
+	err = a.configureStatus()
+	err = a.runStatus()
 	return err
 }
 
-func (a *Agent) execStatus() error {
+func (a *Agent) prepareEnvStatus() error {
+	return nil
+}
+func (a *Agent) configureStatus() error {
+	return nil
+}
+func (a *Agent) runStatus() error {
 	return nil
 }

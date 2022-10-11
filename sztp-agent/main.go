@@ -25,8 +25,8 @@ func main() {
 
 func newCommand() *cobra.Command {
 	c := &cobra.Command{
-		Use:   "sztp",
-		Short: "aztp is the agent command line interface to work with the sztp workflow",
+		Use:   "opi-sztp-agent",
+		Short: "opi-sztp-agent is the agent command line interface to work with the sztp workflow",
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 			os.Exit(1)
