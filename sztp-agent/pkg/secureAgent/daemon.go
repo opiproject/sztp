@@ -19,32 +19,30 @@ const (
 )
 
 func (a *Agent) RunCommandDaemon() error {
-	err := a.prepareEnvDaemon()
+	err := a.runDaemon()
 	if err != nil {
 		return err
 	}
-	//err = a.configureDaemon()
-	//err = a.runDaemon()
 	return err
 }
 
-func (a *Agent) prepareEnvDaemon() error {
+func (a *Agent) runDaemon() error {
 	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
-
+	var line string
 	if _, err := os.Stat(DHCLIENT_LEASE_FILE); err == nil {
-		line := linesInFileContains(DHCLIENT_LEASE_FILE, SZTP_REDIRECT_URL)
+		for {
+			line = linesInFileContains(DHCLIENT_LEASE_FILE, SZTP_REDIRECT_URL)
+			if line != "" {
+				break
+			}
+		}
 		a.BootstrapURL = extractURLfromLine(line, `(?m)[^"]*`)
 		log.Println(a)
+
 	} else {
 		log.Printf(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
 		return errors.New(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
 	}
 	log.Println("[INFO] Bootstrap URL retrieved successfully")
-	return nil
-}
-func (a *Agent) configureDaemon() error {
-	return nil
-}
-func (a *Agent) runDaemon() error {
 	return nil
 }
