@@ -2,8 +2,15 @@ package secureAgent
 
 import (
 	"bufio"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -20,7 +27,50 @@ func linesInFileContains(file string, substr string) string {
 	return ""
 }
 
-func extractURLfromLine(line, regex string) string {
+func extractfromLine(line, regex string, index int) string {
 	re := regexp.MustCompile(regex)
-	return re.FindAllString(line, -1)[1]
+	return re.FindAllString(line, -1)[index]
+}
+
+func (a *Agent) doTLSRequestToBootstrap() (*BootstrapServerPostOutput, error) {
+
+	body := strings.NewReader(a.GetInputJSONContent())
+	r, err := http.NewRequest(http.MethodPost, a.GetBootstrapURL(), body)
+	if err != nil {
+		panic(err)
+	}
+
+	r.SetBasicAuth(a.GetSerialNumber(), a.GetDevicePassword())
+	r.Header.Add("Content-Type", a.GetContentTypeReq())
+
+	caCert, _ := ioutil.ReadFile(a.GetBootstrapTrustAnchorCert())
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      caCertPool,
+				Certificates: []tls.Certificate{cert},
+			},
+		},
+	}
+
+	res, err := client.Do(r)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	post := &BootstrapServerPostOutput{}
+	derr := json.NewDecoder(res.Body).Decode(post)
+	if derr != nil {
+		return nil, derr
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusCreated))
+	}
+	return post, nil
 }

@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/cobaugh/osrelease v0.0.0-20211111170140-20e410975bc3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 )
