@@ -13,9 +13,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
-//Auxiliar function to get lines from file matching with the substr
+// Auxiliar function to get lines from file matching with the substr
 func linesInFileContains(file string, substr string) string {
 	f, _ := os.Open(file)
 	scanner := bufio.NewScanner(f)
@@ -39,7 +40,7 @@ func (a *Agent) doTLSRequestToBootstrap() (*BootstrapServerPostOutput, error) {
 	log.Println(a.GetInputJSONContent())
 	r, err := http.NewRequest(http.MethodPost, a.GetBootstrapURL(), body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	log.Println(a.GetSerialNumber(), a.GetDevicePassword())
@@ -60,10 +61,8 @@ func (a *Agent) doTLSRequestToBootstrap() (*BootstrapServerPostOutput, error) {
 		},
 	}
 	log.Println(r)
+	time.Sleep(20 * time.Second)
 	res, err := client.Do(r)
-	if err != nil {
-		return nil, err
-	}
 	defer res.Body.Close()
 
 	post := &BootstrapServerPostOutput{}

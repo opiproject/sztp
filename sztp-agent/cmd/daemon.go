@@ -36,8 +36,8 @@ func NewDaemonCommand() *cobra.Command {
 	//Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
 	flags.StringVar(&serialNumber, "serial-number", "my-serial", "Device's serial number")
 	flags.StringVar(&devicePassword, "device-password", "mysecret", "Device's password")
-	flags.StringVar(&devicePrivateKey, "device-private-key", "client/end-entity/private_key.pem", "Device's private key")
-	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "client/end-entity/my_cert.pem", "Device's End Entity cert")
+	flags.StringVar(&devicePrivateKey, "device-private-key", "/private_key.pem", "Device's private key")
+	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/my_cert.pem", "Device's End Entity cert")
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/opi.pem", "Bootstrap server trust anchor Cert")
 
 	return cmd
