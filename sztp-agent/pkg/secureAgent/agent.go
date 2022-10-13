@@ -7,10 +7,6 @@ Copyright (C) 2022 Red Hat.
 
 package secureAgent
 
-import (
-	"log"
-)
-
 const (
 	CONTENT_TYPE_YANG = "Content-Type:application/yang-data+json"
 	OS_RELEASE_FILE   = "/etc/os-release"
@@ -53,7 +49,7 @@ func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, devi
 		DeviceEndEntityCert:      deviceEndEntityCert,
 		BootstrapTrustAnchorCert: bootstrapTrustAnchorCert,
 		ContentTypeReq:           CONTENT_TYPE_YANG,
-		InputJSONContent:         GenerateInputJSONContent(),
+		InputJSONContent:         generateInputJSONContent(),
 	}
 }
 
@@ -115,10 +111,4 @@ func (a *Agent) SetBootstrapTrustAnchorCert(cacert string) {
 
 func (a *Agent) SetContentTypeReq(ct string) {
 	a.ContentTypeReq = ct
-}
-
-func GenerateInputJSONContent() string {
-	name := extractfromLine(linesInFileContains(OS_RELEASE_FILE, "NAME"), `(?m)VERSION=([^"]*)`, 0)
-	log.Println("-------->" + name)
-	return name
 }

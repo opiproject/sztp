@@ -39,6 +39,11 @@ func (a *Agent) runDaemon() error {
 	}
 	log.Println("[INFO] Bootstrap URL retrieved successfully.")
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
-
+	res, err := a.doTLSRequestToBootstrap()
+	if err != nil {
+		log.Println("[ERROR] ", err.Error())
+		return err
+	}
+	log.Println(res)
 	return nil
 }
