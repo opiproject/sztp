@@ -10,6 +10,9 @@ command -v docker-compose || { shopt -s expand_aliases && alias docker-compose='
 # let everything start
 sleep 5
 
+# print for debug
+docker-compose ps
+
 # test dhcp server
 docker-compose exec -T dhcp cat /var/lib/dhcpd/dhcpd.leases
 
@@ -59,5 +62,8 @@ docker-compose exec -T agent curl --output "/tmp/${BASENAME}" --fail "${URL}"
 # Validate signature
 SIGNATURE=$(docker-compose exec -T agent bash -c "openssl dgst -sha256 -c \"/tmp/${BASENAME}\" | awk '{print \$2}'")
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json | grep "${SIGNATURE}"
+
+# print for debug
+docker-compose ps
 
 echo "DONE"
