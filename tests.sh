@@ -28,8 +28,7 @@ BOOTSTRAP=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases 
 docker-compose exec -T bootstrap curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would)
-# TODO: replace bootstrap container with agent container here
-docker-compose exec -T bootstrap curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key client/end-entity/private_key.pem --cert client/end-entity/my_cert.pem --cacert /opi.pem "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
+docker-compose exec -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
 
 # parse the reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json

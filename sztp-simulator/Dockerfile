@@ -1,14 +1,13 @@
 FROM docker.io/library/python:3.10.7-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends libyang-tools libxml2-utils make curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
-# certificates
-SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
-RUN curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf - -C /tmp/
-WORKDIR /tmp/sztpd-simulator/pki
-RUN sed -i "s/localhost/bootstrap/g" sztpd1/sbi/end-entity/openssl.cnf && \
-    make pki && \
-    echo # create trust chain && \
-    cat sztpd1/sbi/root-ca/my_cert.pem sztpd1/sbi/intermediate1/my_cert.pem > /opi.pem
+# hadolint ignore=DL3022
+COPY --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /opi.pem
+# hadolint ignore=DL3022
+COPY --from=ghcr.io/opiproject/opi-sztp-server:main /tmp/sztpd-simulator/pki/client/end-entity/my_cert.pem /my_cert.pem
+# hadolint ignore=DL3022
+COPY --from=ghcr.io/opiproject/opi-sztp-server:main /tmp/sztpd-simulator/pki/client/end-entity/private_key.pem /private_key.pem
+# TODO: consider generating iDevID certificates using https://github.com/usnistgov/iDevIDCerts
 
 CMD ["/bin/sh", "-c", "sleep infinity"]
