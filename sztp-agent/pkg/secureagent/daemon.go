@@ -69,7 +69,7 @@ func (a *Agent) RunCommandDaemon() error {
 	if err != nil {
 		return err
 	}
-	_ = a.doReportProgress(ProgressTypeBootstrapComplete, true)
+	_ = a.doReportProgress(ProgressTypeBootstrapComplete)
 	return nil
 }
 
@@ -92,7 +92,7 @@ func (a *Agent) getBootstrapURL() error {
 	return nil
 }
 
-func (a *Agent) doReportProgress(s ProgressType, needssh bool) error {
+func (a *Agent) doReportProgress(s ProgressType) error {
 	log.Println("[INFO] Starting the Report Progress request.")
 	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
 	p := ProgressJSON{
@@ -110,7 +110,7 @@ func (a *Agent) doReportProgress(s ProgressType, needssh bool) error {
 			Message:      "message sent via JSON",
 		},
 	}
-	if needssh {
+	if s == ProgressTypeBootstrapComplete {
 		// TODO: generate real key here
 		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
 		p.IetfSztpBootstrapServerInput.SSHHostKeys = struct {
@@ -175,7 +175,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
-	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, false)
+	_ = a.doReportProgress(ProgressTypeBootstrapInitiated)
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {
@@ -215,7 +215,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 //nolint:funlen
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
-	_ = a.doReportProgress(ProgressTypeBootImageInitiated, false)
+	_ = a.doReportProgress(ProgressTypeBootImageInitiated)
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -300,7 +300,7 @@ func (a *Agent) downloadAndValidateImage() error {
 				return errors.New("Checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
-			_ = a.doReportProgress(ProgressTypeBootImageComplete, false)
+			_ = a.doReportProgress(ProgressTypeBootImageComplete)
 			return nil
 		default:
 			return errors.New("Unsupported hash algorithm")
@@ -311,7 +311,7 @@ func (a *Agent) downloadAndValidateImage() error {
 
 func (a *Agent) copyConfigurationFile() error {
 	log.Println("[INFO] Starting the Copy Configuration.")
-	_ = a.doReportProgress(ProgressTypeConfigInitiated, false)
+	_ = a.doReportProgress(ProgressTypeConfigInitiated)
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -336,7 +336,7 @@ func (a *Agent) copyConfigurationFile() error {
 		return err
 	}
 	log.Println("[INFO] Configuration file copied successfully")
-	_ = a.doReportProgress(ProgressTypeConfigComplete, false)
+	_ = a.doReportProgress(ProgressTypeConfigComplete)
 	return nil
 }
 
@@ -356,7 +356,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		reportEnd = ProgressTypePreScriptComplete
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
-	_ = a.doReportProgress(reportStart, false)
+	_ = a.doReportProgress(reportStart)
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
 		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
@@ -387,7 +387,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		return err
 	}
 	log.Println(string(out)) // remove it
-	_ = a.doReportProgress(reportEnd, false)
+	_ = a.doReportProgress(reportEnd)
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }
