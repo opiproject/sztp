@@ -53,7 +53,7 @@ services:
       context: web
     networks:
       - opi
-    command: python3 -m http.server 8082
+    command: python3 /opt/https-simple-server.py
 
   client:
     image: ghcr.io/opiproject/opi-dhcp-client:main
