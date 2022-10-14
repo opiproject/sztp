@@ -76,12 +76,13 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-s
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
 
-docker-compose run -T agent curl --fail --output /tmp/my-boot-image.tst http://web:80/my-boot-image.img
+# TODO: remove --insecure
+docker-compose run -T agent curl --insecure --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem --output /tmp/my-boot-image.tst https://web:443/my-boot-image.img
 
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
 BASENAME=$(basename "${URL}")
-docker-compose run -T agent curl --output "/tmp/${BASENAME}" --fail "${URL}"
+docker-compose run -T agent curl --insecure --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem --output "/tmp/${BASENAME}" "${URL}"
 
 # Validate signature
 SIGNATURE=$(docker-compose run -T agent ash -c "openssl dgst -sha256 -c \"/tmp/${BASENAME}\" | awk '{print \$2}'")

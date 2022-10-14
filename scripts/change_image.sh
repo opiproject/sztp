@@ -27,8 +27,8 @@ cat << EOM > /tmp/boot-images.json
             {
                 "name": "my-boot-image.img",
                 "download-uri": [
-                    "http://web:80/${BOOT_IMG_PATH}",
-                    "ftp://web:82/${BOOT_IMG_PATH}"
+                    "https://web:443/${BOOT_IMG_PATH}",
+                    "ftps://web:990/${BOOT_IMG_PATH}"
                 ],
                 "image-verification": [
                     {

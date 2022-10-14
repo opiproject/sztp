@@ -182,8 +182,8 @@ $ jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/pos
   "ietf-sztp-conveyed-info:onboarding-information": {
     "boot-image": {
       "download-uri": [
-        "http://web:80/my-boot-image.img",
-        "ftp://web:82/my-boot-image.img"
+        "https://web:443/my-boot-image.img",
+        "ftps://web:990/my-boot-image.img"
       ],
       "image-verification": [
         {
@@ -292,7 +292,8 @@ $ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration
 echo "inside the post-configuration-script..."
 
 $ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json
-http://web:80/my-boot-image.img
+https://web:443/my-boot-image.img
+ftps://web:990/my-boot-image.img
 
 $ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
 {
@@ -412,11 +413,11 @@ docker-compose up --build web
 ## Test HTTP server from agent
 
 ```text
-docker-compose run --rm -T agent curl --fail http://web:80/
+docker-compose run --rm -T agent curl --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem https://web:443/var/lib/
 ```
 
 OR
 
 ```text
-docker run --network=sztp_opi --security-opt seccomp=unconfined -it --rm fedora:36 curl --fail http://web:80/
+docker run --network=sztp_opi --security-opt seccomp=unconfined -it --rm fedora:36 curl --fail https://web:443/
 ```
