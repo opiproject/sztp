@@ -79,14 +79,46 @@ services:
       - opi
     command: --script=dns-service-discovery -p 5353 avahi
 
+  # TODO: remove this and use sztp keys and certificates
+  setup-cert:
+    image: ghcr.io/opiproject/opi-sztp-server:main
+    volumes:
+      - certs:/certs
+    user: "0"
+    entrypoint: /bin/bash
+    command: >
+      -c '
+        set -e
+        openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 365 \
+          -subj "/C=GB/ST=London/L=London/O=Alros/OU=IT Department/CN=localhost"
+        cp key.pem cert.pem /certs/
+        echo "Certificates created succcessfully."
+      '
+
   web:
     image: docker.io/library/httpd:2.4.57-alpine3.17
+    depends_on:
+      setup-cert:
+        condition: service_completed_successfully
     volumes:
+      - certs:/certs
       - ./sztp-server/images:/usr/local/apache2/htdocs
     ports:
-      - 80:80
+      - 443:443
     networks:
       - opi
+    entrypoint: /bin/ash
+    command: |
+        -x -e -c '
+        sed -i \
+        -e "s/^#\(Include .*httpd-ssl.conf\)/\1/" \
+        -e "s/^#\(LoadModule .*mod_ssl.so\)/\1/" \
+        -e "s/^#\(LoadModule .*mod_socache_shmcb.so\)/\1/" \
+        conf/httpd.conf
+        cp /certs/cert.pem conf/server.crt
+        cp /certs/key.pem conf/server.key
+        httpd-foreground
+        '
 
   client:
     image: docker.io/modularitycontainers/dhcp-client:latest
@@ -108,8 +140,9 @@ services:
         condition: service_healthy
       redirecter:
         condition: service_healthy
-    volumes_from:
-      - client
+    volumes:
+      - dhcp-leases-folder:/var/lib/dhclient/
+      - /etc/os-release:/etc/os-release
     networks:
       - opi
     command: ['/opi-sztp-agent', 'daemon']
@@ -122,6 +155,7 @@ services:
       - opi
 
 volumes:
+  certs:
   dhcp-leases-folder:
 
 networks:
