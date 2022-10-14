@@ -8,6 +8,7 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 import (
+	"encoding/base64"
 	"errors"
 	"log"
 	"os"
@@ -44,6 +45,12 @@ func (a *Agent) runDaemon() error {
 		log.Println("[ERROR] ", err.Error())
 		return err
 	}
+	crypted := res.IetfSztpBootstrapServerOutput.ConveyedInformation
+	newVal, err := base64.StdEncoding.DecodeString(crypted)
+	if err != nil {
+		return err
+	}
+	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(newVal)
 	log.Println(res)
 	return nil
 }

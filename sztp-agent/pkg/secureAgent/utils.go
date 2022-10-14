@@ -36,14 +36,14 @@ func extractfromLine(line, regex string, index int) string {
 
 func (a *Agent) doTLSRequestToBootstrap() (*BootstrapServerPostOutput, error) {
 
+	var postResponse BootstrapServerPostOutput
+
 	body := strings.NewReader(a.GetInputJSONContent())
-	log.Println(a.GetInputJSONContent())
 	r, err := http.NewRequest(http.MethodPost, a.GetBootstrapURL(), body)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println(a.GetSerialNumber(), a.GetDevicePassword())
 	r.SetBasicAuth(a.GetSerialNumber(), a.GetDevicePassword())
 	r.Header.Add("Content-Type", a.GetContentTypeReq())
 
@@ -60,21 +60,24 @@ func (a *Agent) doTLSRequestToBootstrap() (*BootstrapServerPostOutput, error) {
 			},
 		},
 	}
-	log.Println(r)
+	//TODO remove sleep later
 	time.Sleep(20 * time.Second)
 	res, err := client.Do(r)
-	defer res.Body.Close()
+	if err != nil {
+		log.Println("Error doing the request", err.Error())
+		return nil, err
+	}
 
-	post := &BootstrapServerPostOutput{}
-	derr := json.NewDecoder(res.Body).Decode(post)
+	derr := json.NewDecoder(res.Body).Decode(&postResponse)
 	if derr != nil {
 		return nil, derr
 	}
-	log.Println(res.Status)
-	if res.StatusCode != http.StatusCreated {
-		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusCreated))
+	log.Println(postResponse)
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusOK))
 	}
-	return post, nil
+	defer res.Body.Close()
+	return &postResponse, nil
 }
 
 func generateInputJSONContent() string {
@@ -85,17 +88,15 @@ func generateInputJSONContent() string {
 
 	input := &InputJSON{
 		IetfSztpBootstrapServerInput: struct {
-			HwModel             string        `json:"hw-model"`
-			OsName              string        `json:"os-name"`
-			OsVersion           string        `json:"os-version"`
-			SignedDataPreferred []interface{} `json:"signed-data-preferred"`
-			Nonce               string        `json:"nonce"`
+			HwModel   string `json:"hw-model"`
+			OsName    string `json:"os-name"`
+			OsVersion string `json:"os-version"`
+			Nonce     string `json:"nonce"`
 		}{
-			HwModel:             "hardwared-model-TBD",
-			OsName:              osName,
-			OsVersion:           osVersion,
-			SignedDataPreferred: nil,
-			Nonce:               "",
+			HwModel:   "hardwared-model-TBD",
+			OsName:    osName,
+			OsVersion: osVersion,
+			Nonce:     "",
 		},
 	}
 	inputJson, _ := json.Marshal(input)

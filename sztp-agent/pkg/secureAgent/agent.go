@@ -8,17 +8,16 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 const (
-	CONTENT_TYPE_YANG = "Content-Type:application/yang-data+json"
+	CONTENT_TYPE_YANG = "application/yang-data+json"
 	OS_RELEASE_FILE   = "/etc/os-release"
 )
 
 type InputJSON struct {
 	IetfSztpBootstrapServerInput struct {
-		HwModel             string        `json:"hw-model"`
-		OsName              string        `json:"os-name"`
-		OsVersion           string        `json:"os-version"`
-		SignedDataPreferred []interface{} `json:"signed-data-preferred"`
-		Nonce               string        `json:"nonce"`
+		HwModel   string `json:"hw-model"`
+		OsName    string `json:"os-name"`
+		OsVersion string `json:"os-version"`
+		Nonce     string `json:"nonce"`
 	} `json:"ietf-sztp-bootstrap-server:input"`
 }
 
@@ -28,7 +27,7 @@ type BootstrapServerPostOutput struct {
 	} `json:"ietf-sztp-bootstrap-server:output"`
 }
 
-//Agent is the basic structure to define an agent instance
+// Agent is the basic structure to define an agent instance
 type Agent struct {
 	BootstrapURL             string //Bootstrap complete URL
 	SerialNumber             string //Device's Serial Number
