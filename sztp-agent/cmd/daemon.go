@@ -34,11 +34,11 @@ func NewDaemonCommand() *cobra.Command {
 	flags := cmd.Flags()
 	//TODO this options should be retrieved automatically instead of requests in the agent
 	//Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
-	flags.StringVar(&serialNumber, "serial-number", "", "Device's serial number")
-	flags.StringVar(&devicePassword, "device-password", "", "Device's password")
-	flags.StringVar(&devicePrivateKey, "device-private-key", "", "Device's private key")
-	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "", "Device's End Entity cert")
-	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "", "Bootstrap server trust anchor Cert")
+	flags.StringVar(&serialNumber, "serial-number", "my-serial-number", "Device's serial number")
+	flags.StringVar(&devicePassword, "device-password", "my-secret", "Device's password")
+	flags.StringVar(&devicePrivateKey, "device-private-key", "/private_key.pem", "Device's private key")
+	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/my_cert.pem", "Device's End Entity cert")
+	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/opi.pem", "Bootstrap server trust anchor Cert")
 
 	return cmd
 }

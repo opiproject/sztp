@@ -8,6 +8,7 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 import (
+	"encoding/base64"
 	"errors"
 	"log"
 	"os"
@@ -32,12 +33,24 @@ func (a *Agent) runDaemon() error {
 				break
 			}
 		}
-		a.BootstrapURL = extractURLfromLine(line, `(?m)[^"]*`)
-		log.Println(a)
+		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
 	} else {
 		log.Printf(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
 		return errors.New(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
 	}
-	log.Println("[INFO] Bootstrap URL retrieved successfully")
+	log.Println("[INFO] Bootstrap URL retrieved successfully.")
+	log.Println("[INFO] Starting the Request to get On-boarding Information.")
+	res, err := a.doTLSRequestToBootstrap()
+	if err != nil {
+		log.Println("[ERROR] ", err.Error())
+		return err
+	}
+	crypted := res.IetfSztpBootstrapServerOutput.ConveyedInformation
+	newVal, err := base64.StdEncoding.DecodeString(crypted)
+	if err != nil {
+		return err
+	}
+	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(newVal)
+	log.Println(res)
 	return nil
 }
