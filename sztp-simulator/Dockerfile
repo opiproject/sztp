@@ -2,6 +2,8 @@ FROM docker.io/library/python:3.10.8-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
+COPY ./input.json /tmp/
+
 # hadolint ignore=DL3022
 COPY --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /opi.pem
 # hadolint ignore=DL3022
