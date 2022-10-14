@@ -27,7 +27,7 @@ jobs:
       - uses: hadolint/hadolint-action@v2.1.0
         with:
           recursive: true
-          ignore: DL3041,DL3008
+          ignore: DL3041,DL3008,DL3018
 
   shellcheck:
     runs-on: ubuntu-latest
