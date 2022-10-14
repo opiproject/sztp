@@ -71,8 +71,6 @@ services:
     image: ghcr.io/opiproject/opi-sztp-simulator:main
     build:
       context: sztp-simulator
-    volumes:
-      - ./sztp-server/config/input.json:/tmp/input.json:Z,ro
     networks:
       - opi
     command: ['/bin/sh', '-c', 'sleep infinity']
