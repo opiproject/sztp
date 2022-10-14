@@ -48,7 +48,7 @@ services:
     command: --script broadcast-dhcp-discover
 
   web:
-    image: python:3.10.7-slim
+    image: python:3.10.8-slim
     volumes:
       - ./sztp-server/config/my-boot-image.img:/var/lib/misc/my-boot-image.img:Z,ro
     networks:
