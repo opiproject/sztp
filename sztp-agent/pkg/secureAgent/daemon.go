@@ -12,6 +12,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"github.com/github/smimesign/ietf-cms/protocol"
 )
 
 func (a *Agent) RunCommandDaemon() error {
@@ -58,7 +59,11 @@ func (a *Agent) doRequestBootstrapServer() error {
 	if err != nil {
 		return err
 	}
-	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(newVal)
+	ci, err := protocol.ParseContentInfo(newVal)
+	if err != nil {
+		return err
+	}
+	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(ci.Content.Bytes)
 	log.Println(res)
 	return nil
 }
