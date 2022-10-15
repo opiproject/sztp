@@ -830,6 +830,7 @@ func TestNewAgent(t *testing.T) {
 				BootstrapTrustAnchorCert: "TestBootstrapTrustCert",
 				ContentTypeReq:           "application/yang-data+json",
 				InputJSONContent:         generateInputJSONContent(),
+				DhcpLeaseFile:            DHCLIENT_LEASE_FILE,
 			},
 		},
 	}

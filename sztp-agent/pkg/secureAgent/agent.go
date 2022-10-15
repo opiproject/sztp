@@ -8,8 +8,10 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 const (
-	CONTENT_TYPE_YANG = "application/yang-data+json"
-	OS_RELEASE_FILE   = "/etc/os-release"
+	CONTENT_TYPE_YANG   = "application/yang-data+json"
+	OS_RELEASE_FILE     = "/etc/os-release"
+	DHCLIENT_LEASE_FILE = "/var/lib/dhclient/dhclient.leases" //By now default, but could be passed by params to get from os
+	SZTP_REDIRECT_URL   = "sztp-redirect-urls"
 )
 
 type InputJSON struct {
@@ -37,6 +39,7 @@ type Agent struct {
 	BootstrapTrustAnchorCert string //the trusted bootstrap server's trust-anchor certificate (PEM)
 	ContentTypeReq           string // The content type for the request to the Server
 	InputJSONContent         string //The input.json file serialized
+	DhcpLeaseFile            string //The dhcpfile
 }
 
 func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
@@ -49,6 +52,7 @@ func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, devi
 		BootstrapTrustAnchorCert: bootstrapTrustAnchorCert,
 		ContentTypeReq:           CONTENT_TYPE_YANG,
 		InputJSONContent:         generateInputJSONContent(),
+		DhcpLeaseFile:            DHCLIENT_LEASE_FILE,
 	}
 }
 

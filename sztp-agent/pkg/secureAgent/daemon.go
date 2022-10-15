@@ -14,39 +14,47 @@ import (
 	"os"
 )
 
-const (
-	DHCLIENT_LEASE_FILE = "/var/lib/dhclient/dhclient.leases"
-	SZTP_REDIRECT_URL   = "sztp-redirect-urls"
-)
-
 func (a *Agent) RunCommandDaemon() error {
-	return a.runDaemon()
+	err := a.getBootstrapURL()
+	if err != nil {
+		return err
+	}
+	err = a.doRequestBootstrapServer()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (a *Agent) runDaemon() error {
+func (a *Agent) getBootstrapURL() error {
 	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
 	var line string
-	if _, err := os.Stat(DHCLIENT_LEASE_FILE); err == nil {
+	if _, err := os.Stat(a.DhcpLeaseFile); err == nil {
 		for {
-			line = linesInFileContains(DHCLIENT_LEASE_FILE, SZTP_REDIRECT_URL)
+			line = linesInFileContains(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
 			if line != "" {
 				break
 			}
 		}
 		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
 	} else {
-		log.Printf(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
-		return errors.New(" File " + DHCLIENT_LEASE_FILE + " does not exist\n")
+		log.Printf(" File " + a.DhcpLeaseFile + " does not exist\n")
+		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
 	}
 	log.Println("[INFO] Bootstrap URL retrieved successfully.")
+	return nil
+}
+func (a *Agent) doRequestBootstrapServer() error {
+
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
 	res, err := a.doTLSRequestToBootstrap()
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
 	}
-	crypted := res.IetfSztpBootstrapServerOutput.ConveyedInformation
-	newVal, err := base64.StdEncoding.DecodeString(crypted)
+	log.Println("[INFO] Response retrieved successfully")
+	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
+	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {
 		return err
 	}
