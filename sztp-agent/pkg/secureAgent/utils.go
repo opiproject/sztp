@@ -31,6 +31,10 @@ func linesInFileContains(file string, substr string) string {
 
 func extractfromLine(line, regex string, index int) string {
 	re := regexp.MustCompile(regex)
+	res := re.FindAllString(line, -1)
+	if len(res) == 1 {
+		return ""
+	}
 	return re.FindAllString(line, -1)[index]
 }
 
