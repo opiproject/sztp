@@ -23,6 +23,22 @@ type InputJSON struct {
 	} `json:"ietf-sztp-bootstrap-server:input"`
 }
 
+type BootstrapServerOnboardingInfo struct {
+	IetfSztpConveyedInfoOnboardingInformation struct {
+		BootImage struct {
+			DownloadURI       []string `json:"download-uri"`
+			ImageVerification []struct {
+				HashAlgorithm string `json:"hash-algorithm"`
+				HashValue     string `json:"hash-value"`
+			} `json:"image-verification"`
+		} `json:"boot-image"`
+		PreConfigurationScript  string `json:"pre-configuration-script"`
+		ConfigurationHandling   string `json:"configuration-handling"`
+		Configuration           string `json:"configuration"`
+		PostConfigurationScript string `json:"post-configuration-script"`
+	} `json:"ietf-sztp-conveyed-info:onboarding-information"`
+}
+
 type BootstrapServerPostOutput struct {
 	IetfSztpBootstrapServerOutput struct {
 		ConveyedInformation string `json:"conveyed-information"`

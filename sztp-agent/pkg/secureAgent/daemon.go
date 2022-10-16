@@ -9,6 +9,8 @@ package secureAgent
 
 import (
 	"encoding/base64"
+	"encoding/json"
+	"encoding/asn1"
 	"errors"
 	"log"
 	"os"
@@ -63,7 +65,19 @@ func (a *Agent) doRequestBootstrapServer() error {
 	if err != nil {
 		return err
 	}
-	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(ci.Content.Bytes)
+	var data asn1.RawValue
+	_, kerr := asn1.Unmarshal(ci.Content.Bytes, &data)
+	if kerr != nil {
+		return kerr
+	}
+	var oi BootstrapServerOnboardingInfo
+	derr := json.Unmarshal(data.Bytes, &oi)
+	if derr != nil {
+		return derr
+	}
+	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(data.Bytes)
 	log.Println(res)
+	// TODO: download and verify OS image
+	log.Println(oi.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
 	return nil
 }
