@@ -4,7 +4,7 @@ USER root
 RUN apk add --no-cache openssl && rm -rf /var/cache/apk/*
 USER curl_user:curl_group
 
-COPY ./input.json /tmp/
+COPY ./*.json /tmp/
 
 # hadolint ignore=DL3022
 COPY --chown=curl_user:curl_group --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /opi.pem
