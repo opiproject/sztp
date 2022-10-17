@@ -70,6 +70,8 @@ func (a *Agent) doRequestBootstrapServer() error {
 	if kerr != nil {
 		return kerr
 	}
+	// TODO: conveyed-info can be either redirect-information or onboarding-information
+	//		 so decode using BootstrapServerRedirectInfo or BootstrapServerOnboardingInfo
 	var oi BootstrapServerOnboardingInfo
 	derr := json.Unmarshal(data.Bytes, &oi)
 	if derr != nil {

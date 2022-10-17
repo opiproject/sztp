@@ -23,6 +23,16 @@ type InputJSON struct {
 	} `json:"ietf-sztp-bootstrap-server:input"`
 }
 
+type BootstrapServerRedirectInfo struct {
+	IetfSztpConveyedInfoRedirectInformation struct {
+		BootstrapServer []struct {
+			Address     string `json:"address"`
+			Port        int    `json:"port"`
+			TrustAnchor string `json:"trust-anchor"`
+		} `json:"bootstrap-server"`
+	} `json:"ietf-sztp-conveyed-info:redirect-information"`
+}
+
 type BootstrapServerOnboardingInfo struct {
 	IetfSztpConveyedInfoOnboardingInformation struct {
 		BootImage struct {
