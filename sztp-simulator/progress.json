@@ -1,0 +1,6 @@
+{
+    "ietf-sztp-bootstrap-server:input" : {
+        "progress-type" : "bootstrap-initiated",
+        "message" : "message sent via JSON"
+    }
+}
