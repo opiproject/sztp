@@ -57,7 +57,7 @@ func (a *Agent) doReportProgress() error {
 			ProgressType string `json:"progress-type"`
 			Message      string `json:"message"`
 		}{
-			ProgressType: "bootstrap-initiated",
+			ProgressType: ProgressTypeBootstrapInitiated.String(),
 			Message: "message sent via JSON",
 		},
 	}
