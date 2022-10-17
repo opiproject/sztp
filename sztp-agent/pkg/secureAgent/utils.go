@@ -38,12 +38,12 @@ func extractfromLine(line, regex string, index int) string {
 	return re.FindAllString(line, -1)[index]
 }
 
-func (a *Agent) doTLSRequestToBootstrap() (*BootstrapServerPostOutput, error) {
+func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutput, error) {
 
 	var postResponse BootstrapServerPostOutput
 
-	body := strings.NewReader(a.GetInputJSONContent())
-	r, err := http.NewRequest(http.MethodPost, a.GetBootstrapURL(), body)
+	body := strings.NewReader(input)
+	r, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		return nil, err
 	}

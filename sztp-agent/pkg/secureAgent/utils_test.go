@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAgent_doTLSRequestToBootstrap(t *testing.T) {
+func TestAgent_doTLSRequest(t *testing.T) {
 	type fields struct {
 		BootstrapURL             string
 		SerialNumber             string
@@ -39,13 +39,13 @@ func TestAgent_doTLSRequestToBootstrap(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 			}
-			got, err := a.doTLSRequestToBootstrap()
+			got, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL())
 			if (err != nil) != tt.wantErr {
-				t.Errorf("doTLSRequestToBootstrap() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("doTLSRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("doTLSRequestToBootstrap() got = %v, want %v", got, tt.want)
+				t.Errorf("doTLSRequest() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

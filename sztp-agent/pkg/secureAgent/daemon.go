@@ -14,6 +14,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strings"
 	"github.com/github/smimesign/ietf-cms/protocol"
 )
 
@@ -47,10 +48,34 @@ func (a *Agent) getBootstrapURL() error {
 	log.Println("[INFO] Bootstrap URL retrieved successfully.")
 	return nil
 }
+
+func (a *Agent) doReportProgress() error {
+	log.Println("[INFO] Starting the Report Progress request.")
+	url := strings.Replace(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress", -1)
+	input := &ProgressJSON{
+        IetfSztpBootstrapServerInput: struct {
+			ProgressType string `json:"progress-type"`
+			Message      string `json:"message"`
+		}{
+			ProgressType: "bootstrap-initiated",
+			Message: "message sent via JSON",
+		},
+	}
+	inputJson, _ := json.Marshal(input)
+	res, err := a.doTLSRequest(string(inputJson), url)
+	if err != nil {
+		log.Println("[ERROR] ", err.Error())
+		return err
+	}
+	log.Println(res)
+	log.Println("[INFO] Response retrieved successfully")
+	return nil
+}
+
 func (a *Agent) doRequestBootstrapServer() error {
 
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
-	res, err := a.doTLSRequestToBootstrap()
+	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL())
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
