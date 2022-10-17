@@ -14,6 +14,13 @@ const (
 	SZTP_REDIRECT_URL   = "sztp-redirect-urls"
 )
 
+type ProgressJSON struct {
+	IetfSztpBootstrapServerInput struct {
+		ProgressType string `json:"progress-type"`
+		Message      string `json:"message"`
+	} `json:"ietf-sztp-bootstrap-server:input"`
+}
+
 type InputJSON struct {
 	IetfSztpBootstrapServerInput struct {
 		HwModel   string `json:"hw-model"`
