@@ -842,3 +842,153 @@ func TestNewAgent(t *testing.T) {
 		})
 	}
 }
+
+func TestAgent_GetProgressJson(t *testing.T) {
+	type fields struct {
+		BootstrapURL             string
+		SerialNumber             string
+		DevicePassword           string
+		DevicePrivateKey         string
+		DeviceEndEntityCert      string
+		BootstrapTrustAnchorCert string
+		ContentTypeReq           string
+		InputJSONContent         string
+		DhcpLeaseFile            string
+		ProgressJSON             ProgressJSON
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   ProgressJSON
+	}{
+		{
+			name: "Test GetProgressJson",
+			fields: fields{
+				BootstrapURL:             "test",
+				SerialNumber:             "test",
+				DevicePassword:           "test",
+				DevicePrivateKey:         "test",
+				DeviceEndEntityCert:      "test",
+				BootstrapTrustAnchorCert: "test",
+				ContentTypeReq:           "test",
+				InputJSONContent:         "test",
+				DhcpLeaseFile:            "test",
+				ProgressJSON: ProgressJSON{
+					IetfSztpBootstrapServerInput: struct {
+						ProgressType string `json:"progress-type"`
+						Message      string `json:"message"`
+					}{
+						ProgressType: "test",
+						Message:      "test",
+					},
+				},
+			},
+			want: ProgressJSON{
+				IetfSztpBootstrapServerInput: struct {
+					ProgressType string `json:"progress-type"`
+					Message      string `json:"message"`
+				}{
+					ProgressType: "test",
+					Message:      "test",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &Agent{
+				BootstrapURL:             tt.fields.BootstrapURL,
+				SerialNumber:             tt.fields.SerialNumber,
+				DevicePassword:           tt.fields.DevicePassword,
+				DevicePrivateKey:         tt.fields.DevicePrivateKey,
+				DeviceEndEntityCert:      tt.fields.DeviceEndEntityCert,
+				BootstrapTrustAnchorCert: tt.fields.BootstrapTrustAnchorCert,
+				ContentTypeReq:           tt.fields.ContentTypeReq,
+				InputJSONContent:         tt.fields.InputJSONContent,
+				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
+				ProgressJSON:             tt.fields.ProgressJSON,
+			}
+			if got := a.GetProgressJson(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetProgressJson() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAgent_SetProgressJson(t *testing.T) {
+	type fields struct {
+		BootstrapURL             string
+		SerialNumber             string
+		DevicePassword           string
+		DevicePrivateKey         string
+		DeviceEndEntityCert      string
+		BootstrapTrustAnchorCert string
+		ContentTypeReq           string
+		InputJSONContent         string
+		DhcpLeaseFile            string
+		ProgressJSON             ProgressJSON
+	}
+	type args struct {
+		p ProgressJSON
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{
+			name: "Test SetProgressJson",
+			fields: fields{
+				BootstrapURL:             "test",
+				SerialNumber:             "test",
+				DevicePassword:           "test",
+				DevicePrivateKey:         "test",
+				DeviceEndEntityCert:      "test",
+				BootstrapTrustAnchorCert: "test",
+				ContentTypeReq:           "test",
+				InputJSONContent:         "test",
+				DhcpLeaseFile:            "test",
+				ProgressJSON: ProgressJSON{
+					IetfSztpBootstrapServerInput: struct {
+						ProgressType string `json:"progress-type"`
+						Message      string `json:"message"`
+					}{
+						ProgressType: "test",
+						Message:      "test",
+					},
+				},
+			},
+			args: args{
+				p: ProgressJSON{
+					IetfSztpBootstrapServerInput: struct {
+						ProgressType string `json:"progress-type"`
+						Message      string `json:"message"`
+					}{
+						ProgressType: "testNew",
+						Message:      "testNew",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &Agent{
+				BootstrapURL:             tt.fields.BootstrapURL,
+				SerialNumber:             tt.fields.SerialNumber,
+				DevicePassword:           tt.fields.DevicePassword,
+				DevicePrivateKey:         tt.fields.DevicePrivateKey,
+				DeviceEndEntityCert:      tt.fields.DeviceEndEntityCert,
+				BootstrapTrustAnchorCert: tt.fields.BootstrapTrustAnchorCert,
+				ContentTypeReq:           tt.fields.ContentTypeReq,
+				InputJSONContent:         tt.fields.InputJSONContent,
+				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
+				ProgressJSON:             tt.fields.ProgressJSON,
+			}
+			a.SetProgressJson(tt.args.p)
+			if a.GetProgressJson() != tt.args.p {
+				t.Errorf("SetProgressJson = %v, want %v", a.GetProgressJson(), tt.args.p)
+			}
+		})
+	}
+}

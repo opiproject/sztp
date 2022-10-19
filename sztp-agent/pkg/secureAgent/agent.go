@@ -165,6 +165,7 @@ type Agent struct {
 	ContentTypeReq           string // The content type for the request to the Server
 	InputJSONContent         string //The input.json file serialized
 	DhcpLeaseFile            string //The dhcpfile
+	ProgressJSON             ProgressJSON
 }
 
 func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
@@ -178,6 +179,7 @@ func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, devi
 		ContentTypeReq:           CONTENT_TYPE_YANG,
 		InputJSONContent:         generateInputJSONContent(),
 		DhcpLeaseFile:            DHCLIENT_LEASE_FILE,
+		ProgressJSON:             ProgressJSON{},
 	}
 }
 
@@ -213,6 +215,10 @@ func (a *Agent) GetInputJSONContent() string {
 	return a.InputJSONContent
 }
 
+func (a *Agent) GetProgressJson() ProgressJSON {
+	return a.ProgressJSON
+}
+
 func (a *Agent) SetBootstrapURL(url string) {
 	a.BootstrapURL = url
 }
@@ -239,4 +245,8 @@ func (a *Agent) SetBootstrapTrustAnchorCert(cacert string) {
 
 func (a *Agent) SetContentTypeReq(ct string) {
 	a.ContentTypeReq = ct
+}
+
+func (a *Agent) SetProgressJson(p ProgressJSON) {
+	a.ProgressJSON = p
 }
