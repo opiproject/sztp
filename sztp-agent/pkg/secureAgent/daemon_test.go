@@ -282,7 +282,7 @@ func TestAgent_doRequestBootstrapServer(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 			}
-			if err := a.doRequestBootstrapServer(); (err != nil) != tt.wantErr {
+			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
