@@ -121,41 +121,45 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
 	// Download the image from DownloadURI and save it to a file
-	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%+8d", time.Now().Unix())
-
+	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
 
-		response, err := http.Get(item)
-		if err != nil {
-			return err
-		}
-		defer response.Body.Close()
-
-		if response.StatusCode != 200 {
-			return errors.New("Received non 200 response code")
-		}
 		//Create a empty file
 		file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
 		if err != nil {
 			return err
 		}
 
+		response, err := http.Get(item)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		defer response.Body.Close()
+
+		if response.StatusCode != 200 {
+			return errors.New("Received non 200 response code")
+		}
+		defer response.Body.Close()
+
 		size, err := io.Copy(file, response.Body)
+		if err != nil {
+			return err
+		}
 		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
 		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
 		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
 		case "ietf-sztp-conveyed-info:sha-256":
-			f, err := os.Open(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
-			if err != nil {
-				return err
-			}
 
 			h := sha256.New()
-			if _, err := io.Copy(h, f); err != nil {
+			if _, err := io.Copy(h, file); err != nil {
 				return err
 			}
-
-			if string(h.Sum(nil)) != a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue {
+			sum := fmt.Sprintf("%x", h.Sum(nil))
+			log.Println(sum)
+			log.Println(strings.Replace(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "", -1))
+			original := strings.Replace(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "", -1)
+			if sum != original {
 				return errors.New("Checksum mismatch")
 			}
 			return nil
