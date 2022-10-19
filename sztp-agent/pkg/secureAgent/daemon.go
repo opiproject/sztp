@@ -12,10 +12,16 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/github/smimesign/ietf-cms/protocol"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 )
 
 func (a *Agent) RunCommandDaemon() error {
@@ -23,7 +29,11 @@ func (a *Agent) RunCommandDaemon() error {
 	if err != nil {
 		return err
 	}
-	err = a.doRequestBootstrapServer()
+	err = a.doRequestBootstrapServerOnboardingInfo()
+	if err != nil {
+		return err
+	}
+	err = a.downloadAndValidateImage()
 	if err != nil {
 		return err
 	}
@@ -72,7 +82,7 @@ func (a *Agent) doReportProgress() error {
 	return nil
 }
 
-func (a *Agent) doRequestBootstrapServer() error {
+func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
 	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL())
@@ -103,8 +113,47 @@ func (a *Agent) doRequestBootstrapServer() error {
 		return derr
 	}
 	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(data.Bytes)
+	a.BootstrapServerOnboardingInfo = oi
 	log.Println(res)
-	// TODO: download and verify OS image
-	log.Println(oi.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
+	return nil
+}
+
+func (a *Agent) downloadAndValidateImage() error {
+	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
+	// Download the image from DownloadURI and save it to a file
+	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%+8d", time.Now().Unix())
+	var wg sync.WaitGroup
+	wg.Add(len(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI))
+	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
+		//goroutine to make the download concurrent
+		go func(i int, url, name, prefix string) error {
+			defer wg.Done()
+			response, err := http.Get(url)
+			if err != nil {
+				return err
+			}
+			defer response.Body.Close()
+
+			if response.StatusCode != 200 {
+				return errors.New("Received non 200 response code")
+			}
+			//Create a empty file
+			file, err := os.Create(ARTIFACTS_PATH + prefix + name)
+			if err != nil {
+				return err
+			}
+
+			size, err := io.Copy(file, response.Body)
+			log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+prefix+name, size)
+			log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+prefix+name)
+			//switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
+			//case "sha256":
+			//}
+
+			return nil
+		}(i, item, filepath.Base(item), a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference)
+
+	}
+	wg.Wait()
 	return nil
 }

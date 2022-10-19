@@ -12,6 +12,7 @@ const (
 	OS_RELEASE_FILE     = "/etc/os-release"
 	DHCLIENT_LEASE_FILE = "/var/lib/dhclient/dhclient.leases" //By now default, but could be passed by params to get from os
 	SZTP_REDIRECT_URL   = "sztp-redirect-urls"
+	ARTIFACTS_PATH      = "/tmp/"
 )
 
 type ProgressType int64
@@ -134,7 +135,8 @@ type BootstrapServerRedirectInfo struct {
 
 type BootstrapServerOnboardingInfo struct {
 	IetfSztpConveyedInfoOnboardingInformation struct {
-		BootImage struct {
+		InfoTimestampReference string //[not received in json] This is the reference to know exactly the time file downloaded and reference to the artifacts of a specific request
+		BootImage              struct {
 			DownloadURI       []string `json:"download-uri"`
 			ImageVerification []struct {
 				HashAlgorithm string `json:"hash-algorithm"`
@@ -156,30 +158,33 @@ type BootstrapServerPostOutput struct {
 
 // Agent is the basic structure to define an agent instance
 type Agent struct {
-	BootstrapURL             string //Bootstrap complete URL
-	SerialNumber             string //Device's Serial Number
-	DevicePassword           string //Device's Password
-	DevicePrivateKey         string //Device's private key
-	DeviceEndEntityCert      string //Device's end-entity cert
-	BootstrapTrustAnchorCert string //the trusted bootstrap server's trust-anchor certificate (PEM)
-	ContentTypeReq           string // The content type for the request to the Server
-	InputJSONContent         string //The input.json file serialized
-	DhcpLeaseFile            string //The dhcpfile
-	ProgressJSON             ProgressJSON
+	BootstrapURL                  string                        //Bootstrap complete URL
+	SerialNumber                  string                        //Device's Serial Number
+	DevicePassword                string                        //Device's Password
+	DevicePrivateKey              string                        //Device's private key
+	DeviceEndEntityCert           string                        //Device's end-entity cert
+	BootstrapTrustAnchorCert      string                        //the trusted bootstrap server's trust-anchor certificate (PEM)
+	ContentTypeReq                string                        // The content type for the request to the Server
+	InputJSONContent              string                        //The input.json file serialized
+	DhcpLeaseFile                 string                        //The dhcpfile
+	ProgressJSON                  ProgressJSON                  //ProgressJson structure
+	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo //BootstrapServerOnboardingInfo structure
+
 }
 
 func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
 	return &Agent{
-		BootstrapURL:             bootstrapURL,
-		SerialNumber:             serialNumber,
-		DevicePassword:           devicePassword,
-		DevicePrivateKey:         devicePrivateKey,
-		DeviceEndEntityCert:      deviceEndEntityCert,
-		BootstrapTrustAnchorCert: bootstrapTrustAnchorCert,
-		ContentTypeReq:           CONTENT_TYPE_YANG,
-		InputJSONContent:         generateInputJSONContent(),
-		DhcpLeaseFile:            DHCLIENT_LEASE_FILE,
-		ProgressJSON:             ProgressJSON{},
+		BootstrapURL:                  bootstrapURL,
+		SerialNumber:                  serialNumber,
+		DevicePassword:                devicePassword,
+		DevicePrivateKey:              devicePrivateKey,
+		DeviceEndEntityCert:           deviceEndEntityCert,
+		BootstrapTrustAnchorCert:      bootstrapTrustAnchorCert,
+		ContentTypeReq:                CONTENT_TYPE_YANG,
+		InputJSONContent:              generateInputJSONContent(),
+		DhcpLeaseFile:                 DHCLIENT_LEASE_FILE,
+		ProgressJSON:                  ProgressJSON{},
+		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 	}
 }
 
