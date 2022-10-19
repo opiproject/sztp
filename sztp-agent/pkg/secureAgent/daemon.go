@@ -8,14 +8,14 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 import (
+	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
-	"encoding/asn1"
 	"errors"
+	"github.com/github/smimesign/ietf-cms/protocol"
 	"log"
 	"os"
 	"strings"
-	"github.com/github/smimesign/ietf-cms/protocol"
 )
 
 func (a *Agent) RunCommandDaemon() error {
@@ -52,16 +52,16 @@ func (a *Agent) getBootstrapURL() error {
 func (a *Agent) doReportProgress() error {
 	log.Println("[INFO] Starting the Report Progress request.")
 	url := strings.Replace(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress", -1)
-	input := &ProgressJSON{
-        IetfSztpBootstrapServerInput: struct {
+	a.SetProgressJson(ProgressJSON{
+		IetfSztpBootstrapServerInput: struct {
 			ProgressType string `json:"progress-type"`
 			Message      string `json:"message"`
 		}{
 			ProgressType: ProgressTypeBootstrapInitiated.String(),
-			Message: "message sent via JSON",
+			Message:      "message sent via JSON",
 		},
-	}
-	inputJson, _ := json.Marshal(input)
+	})
+	inputJson, _ := json.Marshal(a.GetProgressJson())
 	res, err := a.doTLSRequest(string(inputJson), url)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
