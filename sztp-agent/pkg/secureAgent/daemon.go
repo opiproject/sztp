@@ -8,6 +8,7 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 import (
+	"crypto/sha256"
 	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
@@ -20,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -122,38 +122,46 @@ func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%+8d", time.Now().Unix())
-	var wg sync.WaitGroup
-	wg.Add(len(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI))
+
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
-		//goroutine to make the download concurrent
-		go func(i int, url, name, prefix string) error {
-			defer wg.Done()
-			response, err := http.Get(url)
+
+		response, err := http.Get(item)
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+
+		if response.StatusCode != 200 {
+			return errors.New("Received non 200 response code")
+		}
+		//Create a empty file
+		file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
+		if err != nil {
+			return err
+		}
+
+		size, err := io.Copy(file, response.Body)
+		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
+		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
+		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
+		case "ietf-sztp-conveyed-info:sha-256":
+			f, err := os.Open(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
 			if err != nil {
 				return err
 			}
-			defer response.Body.Close()
 
-			if response.StatusCode != 200 {
-				return errors.New("Received non 200 response code")
-			}
-			//Create a empty file
-			file, err := os.Create(ARTIFACTS_PATH + prefix + name)
-			if err != nil {
+			h := sha256.New()
+			if _, err := io.Copy(h, f); err != nil {
 				return err
 			}
 
-			size, err := io.Copy(file, response.Body)
-			log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+prefix+name, size)
-			log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+prefix+name)
-			//switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
-			//case "sha256":
-			//}
-
+			if string(h.Sum(nil)) != a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue {
+				return errors.New("Checksum mismatch")
+			}
 			return nil
-		}(i, item, filepath.Base(item), a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference)
-
+		default:
+			return errors.New("Unsupported hash algorithm")
+		}
 	}
-	wg.Wait()
 	return nil
 }
