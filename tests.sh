@@ -69,10 +69,8 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image
 docker-compose ps
 
 # test go-code
-sleep 30
-docker-compose logs opi-sztp-go-agent
 name=$(docker-compose ps | grep opi-sztp-go-agent | awk '{print $1}')
-rc=$(docker inspect --format '{{.State.ExitCode}}' "${name}")
+rc=$(docker wait "${name}")
 if [ "${rc}" != "0" ]; then
     echo "opi-sztp-go-agent failed:"
     docker logs "${name}"
