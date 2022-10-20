@@ -161,9 +161,13 @@ func (a *Agent) downloadAndValidateImage() error {
 		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
 		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
 		case "ietf-sztp-conveyed-info:sha-256":
-
+			f, err := os.Open(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer f.Close()
 			h := sha256.New()
-			if _, err := io.Copy(h, file); err != nil {
+			if _, err := io.Copy(h, f); err != nil {
 				return err
 			}
 			sum := fmt.Sprintf("%x", h.Sum(nil))
