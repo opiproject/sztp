@@ -164,6 +164,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			f, err := os.Open(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
 			if err != nil {
 				log.Fatal(err)
+				return err
 			}
 			defer f.Close()
 			h := sha256.New()
@@ -177,6 +178,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			if sum != original {
 				return errors.New("Checksum mismatch")
 			}
+			log.Println("[INFO] Checksum verified successfully")
 			return nil
 		default:
 			return errors.New("Unsupported hash algorithm")
