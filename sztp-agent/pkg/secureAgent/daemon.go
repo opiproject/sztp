@@ -145,15 +145,8 @@ func (a *Agent) downloadAndValidateImage() error {
 
 		sizeorigin, _ := strconv.Atoi(response.Header.Get("Content-Length"))
 		downloadSize := int64(sizeorigin)
-		log.Printf("[INFO] Downloading the image: %v", downloadSize)
+		log.Printf("[INFO] Downloading the image with size: %v", downloadSize)
 
-		b, err := io.ReadAll(response.Body)
-		// b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		log.Println(string(b))
 		if response.StatusCode != 200 {
 			return errors.New("Received non 200 response code")
 		}
