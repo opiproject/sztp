@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -35,6 +36,10 @@ func (a *Agent) RunCommandDaemon() error {
 		return err
 	}
 	err = a.downloadAndValidateImage()
+	if err != nil {
+		return err
+	}
+	err = a.launchPreConfiguration()
 	if err != nil {
 		return err
 	}
@@ -115,7 +120,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	}
 	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(data.Bytes)
 	a.BootstrapServerOnboardingInfo = oi
-	log.Println(res)
+	log.Printf("[INFO] The BootstrapServerOnBoardingInfo object retrieved is: %v", a.BootstrapServerOnboardingInfo)
 	return nil
 }
 
@@ -184,5 +189,35 @@ func (a *Agent) downloadAndValidateImage() error {
 			return errors.New("Unsupported hash algorithm")
 		}
 	}
+	return nil
+}
+
+func (a *Agent) launchPreConfiguration() error {
+	log.Println("[INFO] Starting the Pre-Configuration.")
+	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "preconfiguration.sh")
+	if err != nil {
+		log.Println("[ERROR] creating the  pre-configuration script", err.Error())
+		return err
+	}
+	defer file.Close()
+	plainTest, err := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript)
+	_, err = file.WriteString(string(plainTest))
+	if err != nil {
+		log.Println("[ERROR] writing the  pre-configuration script", err.Error())
+		return err
+	}
+	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"preconfiguration.sh", 0755)
+	if err != nil {
+		log.Println("[ERROR] changing the  pre-configuration script permission", err.Error())
+		log.Fatal(err)
+	}
+	log.Println("[INFO] Pre-Configuration script created successfully")
+	cmd := exec.Command("/bin/bash", "-c", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript)
+	err = cmd.Run()
+	if err != nil {
+		log.Println("[ERROR] running the  pre-configuration script", err.Error())
+		return err
+	}
+	log.Println("[INFO] Pre-Configuration script executed successfully")
 	return nil
 }
