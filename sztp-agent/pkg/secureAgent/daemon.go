@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -123,29 +124,46 @@ func (a *Agent) downloadAndValidateImage() error {
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
-
+		log.Printf("[INFO] Downloading Image %v", item)
 		//Create a empty file
 		file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
 		if err != nil {
 			return err
 		}
 
-		response, err := http.Get(item)
+		check := http.Client{
+			CheckRedirect: func(r *http.Request, via []*http.Request) error {
+				r.URL.Opaque = r.URL.Path
+				return nil
+			},
+		}
+
+		response, err := check.Get(item + "/")
+		if err != nil {
+			return err
+		}
+
+		sizeorigin, _ := strconv.Atoi(response.Header.Get("Content-Length"))
+		downloadSize := int64(sizeorigin)
+		log.Printf("[INFO] Downloading the image: %v", downloadSize)
+
+		b, err := io.ReadAll(response.Body)
+		// b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println(string(b))
+		if response.StatusCode != 200 {
+			return errors.New("Received non 200 response code")
+		}
+		size, err := io.Copy(file, response.Body)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 		defer response.Body.Close()
 
-		if response.StatusCode != 200 {
-			return errors.New("Received non 200 response code")
-		}
-		defer response.Body.Close()
-
-		size, err := io.Copy(file, response.Body)
-		if err != nil {
-			return err
-		}
 		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
 		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
 		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
