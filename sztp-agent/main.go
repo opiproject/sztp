@@ -20,6 +20,7 @@ func main() {
 	command := newCommand()
 	if err := command.Execute(); err != nil {
 		log.Fatalf(color.InRed("[ERROR]")+"%s", err.Error())
+		os.Exit(-1)
 	}
 }
 
