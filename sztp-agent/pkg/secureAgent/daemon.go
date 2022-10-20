@@ -43,6 +43,10 @@ func (a *Agent) RunCommandDaemon() error {
 	if err != nil {
 		return err
 	}
+	err = a.launchPostConfiguration()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -209,15 +213,47 @@ func (a *Agent) launchPreConfiguration() error {
 	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"preconfiguration.sh", 0755)
 	if err != nil {
 		log.Println("[ERROR] changing the  pre-configuration script permission", err.Error())
-		log.Fatal(err)
+		return err
 	}
 	log.Println("[INFO] Pre-Configuration script created successfully")
-	cmd := exec.Command("/bin/bash", "-c", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript)
-	err = cmd.Run()
+	cmd := exec.Command("/bin/sh", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"preconfiguration.sh")
+	out, err := cmd.Output()
 	if err != nil {
 		log.Println("[ERROR] running the  pre-configuration script", err.Error())
 		return err
 	}
+	log.Println(string(out)) //remove it
 	log.Println("[INFO] Pre-Configuration script executed successfully")
+	return nil
+}
+
+func (a *Agent) launchPostConfiguration() error {
+	log.Println("[INFO] Starting the Post-Configuration.")
+	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "postconfiguration.sh")
+	if err != nil {
+		log.Println("[ERROR] creating the  post-configuration script", err.Error())
+		return err
+	}
+	defer file.Close()
+	plainTest, err := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PostConfigurationScript)
+	_, err = file.WriteString(string(plainTest))
+	if err != nil {
+		log.Println("[ERROR] writing the  post-configuration script", err.Error())
+		return err
+	}
+	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"postconfiguration.sh", 0755)
+	if err != nil {
+		log.Println("[ERROR] changing the  post-configuration script permission", err.Error())
+		return err
+	}
+	log.Println("[INFO] Post-Configuration script created successfully")
+	cmd := exec.Command("/bin/sh", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"postconfiguration.sh")
+	out, err := cmd.Output()
+	if err != nil {
+		log.Println("[ERROR] running the  post-configuration script", err.Error())
+		return err
+	}
+	log.Println(string(out)) //remove it
+	log.Println("[INFO] Post-Configuration script executed successfully")
 	return nil
 }
