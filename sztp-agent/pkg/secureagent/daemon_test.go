@@ -161,11 +161,18 @@ func deleteTempTestFile(file string) {
 //nolint:funlen
 func TestAgent_doReqBootstrap(t *testing.T) {
 	var output []byte
-	expected := BootstrapServerPostOutput{
+	expectedOnboarding := BootstrapServerPostOutput{
 		IetfSztpBootstrapServerOutput: struct {
 			ConveyedInformation string `json:"conveyed-information"`
 		}{
 			ConveyedInformation: "MIIDfwYLKoZIhvcNAQkQASugggNuBIIDansKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwOi8vd2ViOjgwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIiwKICAgICAgICAiZnRwOi8vd2ViOjMwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIgogICAgICBdLAogICAgICAiaW1hZ2UtdmVyaWZpY2F0aW9uIjogWwogICAgICAgIHsKICAgICAgICAgICJoYXNoLWFsZ29yaXRobSI6ICJpZXRmLXN6dHAtY29udmV5ZWQtaW5mbzpzaGEtMjU2IiwKICAgICAgICAgICJoYXNoLXZhbHVlIjogIjdiOmNhOmU2OmFjOjIzOjA2OmQ4Ojc5OjA2OjhjOmFjOjAzOjgwOmUyOjE2OjQ0OjdlOjQwOjZhOjY1OmZhOmQ0OjY5OjYxOjZlOjA1OmNlOmY1Ojg3OmRjOjJiOjk3IgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgICJwcmUtY29uZmlndXJhdGlvbi1zY3JpcHQiOiAiSXlFdlltbHVMMkpoYzJnS1pXTm9ieUFpYVc1emFXUmxJSFJvWlNCd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0J3YjNOMExXTnZibVpwWjNWeVlYUnBiMjR0YzJOeWFYQjBMaTR1SWdvPSIKICB9Cn0=",
+		},
+	}
+	expectedRedirect := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIHlgYLKoZIhvcNAQkQASugggeFBIIHgXsKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86cmVkaXJlY3QtaW5mb3JtYXRpb24iOiB7CiAgICAiYm9vdHN0cmFwLXNlcnZlciI6IFsKICAgICAgewogICAgICAgICJhZGRyZXNzIjogIjEyNy4wLjAuMSIsCiAgICAgICAgInBvcnQiOiAzODQ0MywKICAgICAgICAidHJ1c3QtYW5jaG9yIjogIk1JSUZEd1lKS29aSWh2Y05BUWNDb0lJRkFEQ0NCUHdDQVFFeEFEQUxCZ2txaGtpRzl3MEJCd0dnZ2dUa01JSUNXVENDQWYrZ0F3SUJBZ0lCQVRBS0JnZ3Foa2pPUFFRREFqQjFNUXN3Q1FZRFZRUUdFd0pZV0RFZE1Cc0dBMVVFQ0F3VVRYa2dVM1JoZEdVZ2IzSWdVSEp2ZG1sdVkyVXhHREFXQmdOVkJBb01EMDE1SUU5eVoyRnVhWHBoZEdsdmJqRVFNQTRHQTFVRUN3d0hUWGtnVlc1cGRERWJNQmtHQTFVRUF3d1NjMkpwTDNObGNuWmxjaTl5YjI5MExXTmhNQ0FYRFRJeU1UQXhOekV5TVRZeE5Gb1lEems1T1RreE1qTXhNak0xT1RVNVdqQjFNUXN3Q1FZRFZRUUdFd0pZV0RFZE1Cc0dBMVVFQ0F3VVRYa2dVM1JoZEdVZ2IzSWdVSEp2ZG1sdVkyVXhHREFXQmdOVkJBb01EMDE1SUU5eVoyRnVhWHBoZEdsdmJqRVFNQTRHQTFVRUN3d0hUWGtnVlc1cGRERWJNQmtHQTFVRUF3d1NjMkpwTDNObGNuWmxjaTl5YjI5MExXTmhNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVQOFhDSEJzYkQwS3lQWk9DdjI3clI5cDhTd2FDK3R0U1Q1cGpKMmtOUUF2UFVyWXZKT2RGWkJCd20xTmtLU3ducjZQdmFNdGgxdi92VmxRV0U3b0dBNk4rTUh3d0hRWURWUjBPQkJZRUZNNTBPVmp2WW5Ed1NTZ3dNNnB1bEN4aXhJQ1hNQXdHQTFVZEV3UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0VHTUQwR0ExVWRId1EyTURRd01xQXdvQzZHTEdoMGRIQTZMeTlqY213dVpYaGhiWEJzWlM1amIyMC9ZMkU5YzJKcE9uTmxjblpsY2pweWIyOTBMV05oTUFvR0NDcUdTTTQ5QkFNQ0EwZ0FNRVVDSUJHRHdFcXBVaFNaQUs0bjh1K1BhUUZyU2VHa2QvQkJaT3F6cXZBYTlkNjBBaUVBcEVYdWRSY0xwRkV5SHBOeldrMlFoV1IycDNrMCtuaHRGMHpROFZ1VTdHY3dnZ0tETUlJQ0tLQURBZ0VDQWdFQ01Bb0dDQ3FHU000OUJBTUNNSFV4Q3pBSkJnTlZCQVlUQWxoWU1SMHdHd1lEVlFRSURCUk5lU0JUZEdGMFpTQnZjaUJRY205MmFXNWpaVEVZTUJZR0ExVUVDZ3dQVFhrZ1QzSm5ZVzVwZW1GMGFXOXVNUkF3RGdZRFZRUUxEQWROZVNCVmJtbDBNUnN3R1FZRFZRUUREQkp6WW1rdmMyVnlkbVZ5TDNKdmIzUXRZMkV3SUJjTk1qSXhNREUzTVRJeE5qRTBXaGdQT1RrNU9URXlNekV5TXpVNU5UbGFNSHN4Q3pBSkJnTlZCQVlUQWxoWU1SMHdHd1lEVlFRSURCUk5lU0JUZEdGMFpTQnZjaUJRY205MmFXNWpaVEVZTUJZR0ExVUVDZ3dQVFhrZ1QzSm5ZVzVwZW1GMGFXOXVNUkF3RGdZRFZRUUxEQWROZVNCVmJtbDBNU0V3SHdZRFZRUUREQmh6WW1rdmMyVnlkbVZ5TDJsdWRHVnliV1ZrYVdGMFpURXdXVEFUQmdjcWhrak9QUUlCQmdncWhrak9QUU1CQndOQ0FBU0xYQVBGNFo5Skw4OTQxbllRU3VoWFMrWTJxbjlPdGp5cG9leXJPVkl4ZDc1dngyN1dYRWtWcmk3Q2NnQURlenFpK2RvZjRLd2pzRWljdDJCNlp0aDdvNEdnTUlHZE1CMEdBMVVkRGdRV0JCUUQ3L1FEazhrL2hiWHltY28zRElBdWV0dnV4ekFmQmdOVkhTTUVHREFXZ0JUT2REbFk3Mkp3OEVrb01ET3FicFFzWXNTQWx6QU1CZ05WSFJNRUJUQURBUUgvTUE0R0ExVWREd0VCL3dRRUF3SUJCakE5QmdOVkhSOEVOakEwTURLZ01LQXVoaXhvZEhSd09pOHZZM0pzTG1WNFlXMXdiR1V1WTI5dFAyTmhQWE5pYVRwelpYSjJaWEk2Y205dmRDMWpZVEFLQmdncWhrak9QUVFEQWdOSkFEQkdBaUVBa0lKOG9HMjhsWmhWejNGWGRsNFgwWExwZlY3T3k5ZFdlTGVHMUhtRmwzTUNJUUNURFZRQ3lQTXNhOXNLdFBzcGNOQXlYazBOUVIrRVdpQjBzcldrVzYyd0J6RUEiCiAgICAgIH0KICAgIF0KICB9Cn0=",
 		},
 	}
 	expectedFailedBase64 := BootstrapServerPostOutput{
@@ -182,13 +189,16 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		switch {
 		case (user + ":" + pass) == "USER:PASS":
 			w.WriteHeader(200)
-			output, _ = json.Marshal(expected)
+			output, _ = json.Marshal(expectedOnboarding)
+		case (user + ":" + pass) == "REDIRECT:PASS":
+			w.WriteHeader(200)
+			output, _ = json.Marshal(expectedRedirect)
 		case (user + ":" + pass) == "KOBASE64:KO":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedFailedBase64)
 		default:
 			w.WriteHeader(400)
-			output, _ = json.Marshal(expected)
+			output, _ = json.Marshal(expectedOnboarding)
 		}
 		_, err := fmt.Fprint(w, string(output))
 		if err != nil {
@@ -214,10 +224,25 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test OK passing all the information",
+			name: "Test OK passing all the Onboarding information",
 			fields: fields{
 				BootstrapURL:             svr.URL,
 				SerialNumber:             "USER",
+				DevicePassword:           "PASS",
+				DevicePrivateKey:         "",
+				DeviceEndEntityCert:      "",
+				BootstrapTrustAnchorCert: "",
+				ContentTypeReq:           "",
+				InputJSONContent:         "",
+				DhcpLeaseFile:            "",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test OK passing all the Redirect information",
+			fields: fields{
+				BootstrapURL:             svr.URL,
+				SerialNumber:             "REDIRECT",
 				DevicePassword:           "PASS",
 				DevicePrivateKey:         "",
 				DeviceEndEntityCert:      "",
