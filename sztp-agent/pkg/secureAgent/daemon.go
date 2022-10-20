@@ -138,7 +138,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			},
 		}
 
-		response, err := check.Get(item + "/")
+		response, err := check.Get(item)
 		if err != nil {
 			return err
 		}
