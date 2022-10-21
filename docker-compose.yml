@@ -23,6 +23,8 @@ services:
         curl -i -X PUT --user my-admin@example.com:my-secret --data @/tmp/running.json -H 'Content-Type:application/yang-data+json' http:/127.0.0.1:$$SZTPD_INIT_PORT/restconf/ds/ietf-datastores:running && \
         echo wait 5s... && sleep 5s && \
         wait"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_INIT_PORT/.well-known/host-meta || exit 1"]
 
   dhcp:
     image: ghcr.io/opiproject/opi-dhcp-server:main
@@ -71,6 +73,9 @@ services:
     image: ghcr.io/opiproject/opi-sztp-simulator:main
     build:
       context: sztp-simulator
+    depends_on:
+      bootstrap:
+        condition: service_healthy
     networks:
       - opi
     command: ['/bin/sh', '-c', 'sleep infinity']
@@ -79,6 +84,9 @@ services:
     image: ghcr.io/opiproject/opi-sztp-agent:main
     build:
       context: sztp-agent
+    depends_on:
+      bootstrap:
+        condition: service_healthy
     volumes_from:
       - client:ro
     networks:
