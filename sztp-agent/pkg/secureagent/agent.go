@@ -170,6 +170,7 @@ type Agent struct {
 	DhcpLeaseFile                 string                        // The dhcpfile
 	ProgressJSON                  ProgressJSON                  // ProgressJson structure
 	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo // BootstrapServerOnboardingInfo structure
+	BootstrapServerRedirectInfo   BootstrapServerRedirectInfo   // BootstrapServerRedirectInfo structure
 
 }
 
@@ -185,6 +186,7 @@ func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, devi
 		InputJSONContent:              generateInputJSONContent(),
 		DhcpLeaseFile:                 DHCLIENT_LEASE_FILE,
 		ProgressJSON:                  ProgressJSON{},
+		BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 	}
 }
