@@ -43,3 +43,12 @@ jobs:
         with:
           file_or_dir: docker-compose.yml
           config_data: "{extends: default, rules: {line-length: disable}}"
+
+  golangci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: sztp-agent
