@@ -13,7 +13,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // Auxiliar function to get lines from file matching with the substr
@@ -64,8 +63,6 @@ func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutp
 			},
 		},
 	}
-	//TODO remove sleep later
-	time.Sleep(20 * time.Second)
 	res, err := client.Do(r)
 	if err != nil {
 		log.Println("Error doing the request", err.Error())
