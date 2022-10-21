@@ -48,7 +48,7 @@ func TestAgent_RunCommandDaemon(t *testing.T) {
 }
 
 func TestAgent_getBootstrapURL(t *testing.T) {
-	dhcpTestFileOK := "./test.dhcp"
+	dhcpTestFileOK := "/tmp/test.dhcp"
 	createTempTestFile(dhcpTestFileOK, true)
 
 	type fields struct {

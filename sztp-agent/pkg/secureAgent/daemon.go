@@ -8,6 +8,7 @@ Copyright (C) 2022 Red Hat.
 package secureAgent
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/asn1"
 	"encoding/base64"
@@ -127,9 +128,11 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	// TODO: conveyed-info can be either redirect-information or onboarding-information
 	//		 so decode using BootstrapServerRedirectInfo or BootstrapServerOnboardingInfo
 	var oi BootstrapServerOnboardingInfo
-	derr := json.Unmarshal(data.Bytes, &oi)
-	if derr != nil {
-		return derr
+
+	decoder := json.NewDecoder(bytes.NewReader(data.Bytes))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&oi); err != nil {
+		return err
 	}
 	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(data.Bytes)
 	a.BootstrapServerOnboardingInfo = oi

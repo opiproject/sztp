@@ -91,7 +91,7 @@ func Test_extractfromLine(t *testing.T) {
 }
 
 func Test_linesInFileContains(t *testing.T) {
-	dhcpTestFileOK := "./test.dhcp"
+	dhcpTestFileOK := "/tmp/test.dhcp"
 	createTempTestFile(dhcpTestFileOK, true)
 	type args struct {
 		file   string
