@@ -13,7 +13,7 @@ RUN go mod download
 
 # build an app
 COPY . .
-RUN go build -o /opi-sztp-agent && CGO_ENABLED=0 go test -v ./...
+RUN go build -v -o /opi-sztp-agent && CGO_ENABLED=0 go test -v ./...
 
 # hadolint ignore=DL3022
 COPY --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /opi.pem

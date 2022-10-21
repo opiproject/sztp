@@ -32,6 +32,10 @@ const (
 )
 
 func (a *Agent) RunCommandDaemon() error {
+
+	//TODO remove sleep later
+	time.Sleep(20 * time.Second)
+
 	err := a.getBootstrapURL()
 	if err != nil {
 		return err
