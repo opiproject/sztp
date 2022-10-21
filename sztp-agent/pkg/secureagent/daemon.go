@@ -42,6 +42,7 @@ func (a *Agent) RunCommandDaemon() error {
 	if err != nil {
 		return err
 	}
+	// TODO: conveyed-info can be either redirect-information or onboarding-information
 	err = a.downloadAndValidateImage()
 	if err != nil {
 		return err
@@ -124,19 +125,26 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	if kerr != nil {
 		return kerr
 	}
-	// TODO: conveyed-info can be either redirect-information or onboarding-information
-	//		 so decode using BootstrapServerRedirectInfo or BootstrapServerOnboardingInfo
-	var oi BootstrapServerOnboardingInfo
-
-	decoder := json.NewDecoder(bytes.NewReader(data.Bytes))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&oi); err != nil {
-		return err
-	}
 	res.IetfSztpBootstrapServerOutput.ConveyedInformation = string(data.Bytes)
-	a.BootstrapServerOnboardingInfo = oi
-	log.Printf("[INFO] The BootstrapServerOnBoardingInfo object retrieved is: %v", a.BootstrapServerOnboardingInfo)
-	return nil
+	decoderoi := json.NewDecoder(bytes.NewReader(data.Bytes))
+	decoderoi.DisallowUnknownFields()
+	var oi BootstrapServerOnboardingInfo
+	erroi := decoderoi.Decode(&oi)
+	if erroi == nil {
+		a.BootstrapServerOnboardingInfo = oi
+		log.Printf("[INFO] The BootstrapServerOnBoardingInfo object retrieved is: %v", a.BootstrapServerOnboardingInfo)
+		return nil
+	}
+	decoderri := json.NewDecoder(bytes.NewReader(data.Bytes))
+	decoderri.DisallowUnknownFields()
+	var ri BootstrapServerRedirectInfo
+	errri := decoderri.Decode(&ri)
+	if errri == nil {
+		a.BootstrapServerRedirectInfo = ri
+		log.Printf("[INFO] The BootstrapServerRedirectInfo object retrieved is: %v", a.BootstrapServerRedirectInfo)
+		return nil
+	}
+	return errri
 }
 
 //nolint:funlen
