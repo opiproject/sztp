@@ -85,13 +85,7 @@ func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutp
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusOK))
 	}
-	defer func() error {
-		err = res.Body.Close()
-		if err != nil {
-			return err
-		}
-		return nil
-	}()
+	defer res.Body.Close()
 	return &postResponse, nil
 }
 

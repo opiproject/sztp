@@ -15,6 +15,7 @@ func (a *Agent) RunCommandEnable() error {
 	return nil
 }
 
+/*
 func (a *Agent) prepareEnvEnable() error {
 	log.Println("prepareEnvEnable")
 	return nil
@@ -27,3 +28,4 @@ func (a *Agent) runEnable() error {
 	log.Println("runEnable")
 	return nil
 }
+*/

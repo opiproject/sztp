@@ -15,6 +15,7 @@ func (a *Agent) RunCommandStatus() error {
 	return nil
 }
 
+/*
 func (a *Agent) prepareEnvStatus() error {
 	log.Println("prepareEnvStatus")
 	return nil
@@ -27,3 +28,4 @@ func (a *Agent) runStatus() error {
 	log.Println("runStatus")
 	return nil
 }
+*/

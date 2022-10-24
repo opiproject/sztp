@@ -190,7 +190,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 			w.WriteHeader(400)
 			output, _ = json.Marshal(expected)
 		}
-		_, err := fmt.Fprintf(w, string(output))
+		_, err := fmt.Fprint(w, string(output))
 		if err != nil {
 			return
 		}
@@ -325,11 +325,10 @@ func TestAgent_doReportProgress(t *testing.T) {
 			w.WriteHeader(400)
 			output, _ = json.Marshal(expected)
 		}
-		_, err := fmt.Fprintf(w, string(output))
+		_, err := fmt.Fprint(w, string(output))
 		if err != nil {
 			return
 		}
-
 	}))
 	defer svr.Close()
 	type fields struct {
