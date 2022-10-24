@@ -39,7 +39,7 @@ func TestAgent_doTLSRequest(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 			}
-			got, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL())
+			got, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL(), false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("doTLSRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
