@@ -915,7 +915,7 @@ func TestAgent_GetProgressJson(t *testing.T) {
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
-			if got := a.GetProgressJson(); !reflect.DeepEqual(got, tt.want) {
+			if got := a.GetProgressJSON(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetProgressJson() = %v, want %v", got, tt.want)
 			}
 		})
@@ -993,8 +993,8 @@ func TestAgent_SetProgressJson(t *testing.T) {
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
 			a.SetProgressJSON(tt.args.p)
-			if a.GetProgressJson() != tt.args.p {
-				t.Errorf("SetProgressJson = %v, want %v", a.GetProgressJson(), tt.args.p)
+			if a.GetProgressJSON() != tt.args.p {
+				t.Errorf("SetProgressJson = %v, want %v", a.GetProgressJSON(), tt.args.p)
 			}
 		})
 	}

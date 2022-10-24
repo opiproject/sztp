@@ -48,6 +48,7 @@ func TestAgent_RunCommandDaemon(t *testing.T) {
 	}
 }
 
+//nolint:funlen
 func TestAgent_getBootstrapURL(t *testing.T) {
 	dhcpTestFileOK := "/tmp/test.dhcp"
 	createTempTestFile(dhcpTestFileOK, true)
@@ -149,7 +150,6 @@ func createTempTestFile(file string, ok bool) {
 }
 
 func deleteTempTestFile(file string) {
-
 	err := os.RemoveAll(file)
 
 	if err != nil {
@@ -158,6 +158,7 @@ func deleteTempTestFile(file string) {
 	}
 }
 
+//nolint:funlen
 func TestAgent_doReqBootstrap(t *testing.T) {
 	var output []byte
 	expected := BootstrapServerPostOutput{
@@ -178,18 +179,21 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		user, pass, _ := r.BasicAuth()
 		log.Println(user, pass)
 
-		if (user + ":" + pass) == "USER:PASS" {
+		switch {
+		case (user + ":" + pass) == "USER:PASS":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expected)
-		} else if (user + ":" + pass) == "KOBASE64:KO" {
+		case (user + ":" + pass) == "KOBASE64:KO":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedFailedBase64)
-		} else {
+		default:
 			w.WriteHeader(400)
 			output, _ = json.Marshal(expected)
 		}
-		fmt.Fprintf(w, string(output))
-
+		_, err := fmt.Fprintf(w, string(output))
+		if err != nil {
+			return
+		}
 	}))
 	defer svr.Close()
 
@@ -290,6 +294,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 	}
 }
 
+//nolint:funlen
 func TestAgent_doReportProgress(t *testing.T) {
 	var output []byte
 	expected := BootstrapServerPostOutput{
@@ -320,7 +325,10 @@ func TestAgent_doReportProgress(t *testing.T) {
 			w.WriteHeader(400)
 			output, _ = json.Marshal(expected)
 		}
-		fmt.Fprintf(w, string(output))
+		_, err := fmt.Fprintf(w, string(output))
+		if err != nil {
+			return
+		}
 
 	}))
 	defer svr.Close()
