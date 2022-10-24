@@ -5,7 +5,7 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 import (
 	"reflect"
@@ -992,7 +992,7 @@ func TestAgent_SetProgressJson(t *testing.T) {
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
-			a.SetProgressJson(tt.args.p)
+			a.SetProgressJSON(tt.args.p)
 			if a.GetProgressJson() != tt.args.p {
 				t.Errorf("SetProgressJson = %v, want %v", a.GetProgressJson(), tt.args.p)
 			}

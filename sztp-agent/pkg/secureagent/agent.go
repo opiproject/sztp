@@ -5,7 +5,7 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 const (
 	CONTENT_TYPE_YANG   = "application/yang-data+json"
@@ -135,7 +135,7 @@ type BootstrapServerRedirectInfo struct {
 
 type BootstrapServerOnboardingInfo struct {
 	IetfSztpConveyedInfoOnboardingInformation struct {
-		InfoTimestampReference string //[not received in json] This is the reference to know exactly the time file downloaded and reference to the artifacts of a specific request
+		InfoTimestampReference string // [not received in json] This is the reference to know exactly the time file downloaded and reference to the artifacts of a specific request
 		BootImage              struct {
 			DownloadURI       []string `json:"download-uri"`
 			ImageVerification []struct {
@@ -158,17 +158,17 @@ type BootstrapServerPostOutput struct {
 
 // Agent is the basic structure to define an agent instance
 type Agent struct {
-	BootstrapURL                  string                        //Bootstrap complete URL
-	SerialNumber                  string                        //Device's Serial Number
-	DevicePassword                string                        //Device's Password
-	DevicePrivateKey              string                        //Device's private key
-	DeviceEndEntityCert           string                        //Device's end-entity cert
-	BootstrapTrustAnchorCert      string                        //the trusted bootstrap server's trust-anchor certificate (PEM)
+	BootstrapURL                  string                        // Bootstrap complete URL
+	SerialNumber                  string                        // Device's Serial Number
+	DevicePassword                string                        // Device's Password
+	DevicePrivateKey              string                        // Device's private key
+	DeviceEndEntityCert           string                        // Device's end-entity cert
+	BootstrapTrustAnchorCert      string                        // the trusted bootstrap server's trust-anchor certificate (PEM)
 	ContentTypeReq                string                        // The content type for the request to the Server
-	InputJSONContent              string                        //The input.json file serialized
-	DhcpLeaseFile                 string                        //The dhcpfile
-	ProgressJSON                  ProgressJSON                  //ProgressJson structure
-	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo //BootstrapServerOnboardingInfo structure
+	InputJSONContent              string                        // The input.json file serialized
+	DhcpLeaseFile                 string                        // The dhcpfile
+	ProgressJSON                  ProgressJSON                  // ProgressJson structure
+	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo // BootstrapServerOnboardingInfo structure
 
 }
 
@@ -252,6 +252,6 @@ func (a *Agent) SetContentTypeReq(ct string) {
 	a.ContentTypeReq = ct
 }
 
-func (a *Agent) SetProgressJson(p ProgressJSON) {
+func (a *Agent) SetProgressJSON(p ProgressJSON) {
 	a.ProgressJSON = p
 }

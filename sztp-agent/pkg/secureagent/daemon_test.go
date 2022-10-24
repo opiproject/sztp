@@ -1,5 +1,5 @@
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 import (
 	"encoding/json"

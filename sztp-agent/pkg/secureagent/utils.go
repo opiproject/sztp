@@ -5,7 +5,7 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 import (
 	"bufio"
@@ -45,7 +45,6 @@ func extractfromLine(line, regex string, index int) string {
 }
 
 func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutput, error) {
-
 	var postResponse BootstrapServerPostOutput
 
 	body := strings.NewReader(input)
@@ -64,7 +63,7 @@ func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutp
 
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
+			TLSClientConfig: &tls.Config{ //nolint:gosec
 				RootCAs:      caCertPool,
 				Certificates: []tls.Certificate{cert},
 			},
@@ -98,7 +97,7 @@ func generateInputJSONContent() string {
 	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
 	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
 
-	//dmidecode.Dmidecode(true))  // This is one possibility to get hw information
+	// dmidecode.Dmidecode(true))  // This is one possibility to get hw information
 
 	input := &InputJSON{
 		IetfSztpBootstrapServerInput: struct {
@@ -113,8 +112,8 @@ func generateInputJSONContent() string {
 			Nonce:     "",
 		},
 	}
-	inputJson, _ := json.Marshal(input)
-	return string(inputJson)
+	inputJSON, _ := json.Marshal(input)
+	return string(inputJSON)
 }
 
 func replaceQuotes(input string) string {

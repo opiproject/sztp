@@ -5,15 +5,11 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 // RunCommandStatus runs the command in the background
 func (a *Agent) RunCommandStatus() error {
-
-	err := a.prepareEnvStatus()
-	err = a.configureStatus()
-	err = a.runStatus()
-	return err
+	return nil
 }
 
 func (a *Agent) prepareEnvStatus() error {
