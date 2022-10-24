@@ -81,7 +81,7 @@ func (a *Agent) getBootstrapURL() error {
 	return nil
 }
 
-func (a *Agent) doReportProgress() error {
+func (a *Agent) doReportProgress(s ProgressType) error {
 	log.Println("[INFO] Starting the Report Progress request.")
 	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
 	a.SetProgressJSON(ProgressJSON{
@@ -89,7 +89,7 @@ func (a *Agent) doReportProgress() error {
 			ProgressType string `json:"progress-type"`
 			Message      string `json:"message"`
 		}{
-			ProgressType: ProgressTypeBootstrapInitiated.String(),
+			ProgressType: s.String(),
 			Message:      "message sent via JSON",
 		},
 	})
@@ -111,6 +111,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
+	// TODO: a.doReportProgress(ProgressTypeBootstrapInitiated)
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {

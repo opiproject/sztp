@@ -420,7 +420,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
-			if err := a.doReportProgress(); (err != nil) != tt.wantErr {
+			if err := a.doReportProgress(ProgressTypeBootstrapInitiated); (err != nil) != tt.wantErr {
 				t.Errorf("doReportProgress() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
