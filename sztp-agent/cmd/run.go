@@ -4,7 +4,7 @@ Copyright (C) 2022 Intel Corporation
 Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
-
+// Package cmd implements the CLI commands
 package cmd
 
 import (
@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewRunCommand returns the run command
 func NewRunCommand() *cobra.Command {
 	var (
 		bootstrapURL             string
@@ -32,8 +33,8 @@ func NewRunCommand() *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	//TODO this options should be retrieved automatically instead of requests in the agent
-	//Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
+	// TODO this options should be retrieved automatically instead of requests in the agent
+	// Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
 	flags.StringVar(&bootstrapURL, "bootstrap-url", "", "Bootstrap server URL")
 	flags.StringVar(&serialNumber, "serial-number", "", "Device's serial number")
 	flags.StringVar(&devicePassword, "device-password", "", "Device's password")

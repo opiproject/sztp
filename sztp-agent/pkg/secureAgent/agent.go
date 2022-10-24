@@ -4,13 +4,13 @@ Copyright (C) 2022 Intel Corporation
 Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
-
+// Package secureAgent implements the secure agent
 package secureAgent
 
 const (
 	CONTENT_TYPE_YANG   = "application/yang-data+json"
 	OS_RELEASE_FILE     = "/etc/os-release"
-	DHCLIENT_LEASE_FILE = "/var/lib/dhclient/dhclient.leases" //By now default, but could be passed by params to get from os
+	DHCLIENT_LEASE_FILE = "/var/lib/dhclient/dhclient.leases" // By now default, but could be passed by params to get from os
 	SZTP_REDIRECT_URL   = "sztp-redirect-urls"
 	ARTIFACTS_PATH      = "/tmp/"
 )

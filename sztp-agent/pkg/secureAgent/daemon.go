@@ -4,7 +4,7 @@ Copyright (C) 2022 Intel Corporation
 Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
-
+// Package secureAgent implements the secure agent
 package secureAgent
 
 import (
@@ -32,6 +32,7 @@ const (
 	POST = "post"
 )
 
+// RunCommandDaemon runs the command in the background
 func (a *Agent) RunCommandDaemon() error {
 	err := a.getBootstrapURL()
 	if err != nil {
@@ -146,7 +147,7 @@ func (a *Agent) downloadAndValidateImage() error {
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
 		log.Printf("[INFO] Downloading Image %v", item)
-		//Create a empty file
+		// Create a empty file
 		file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
 		if err != nil {
 			return err
@@ -175,8 +176,20 @@ func (a *Agent) downloadAndValidateImage() error {
 		if err != nil {
 			return err
 		}
-		defer file.Close()
-		defer response.Body.Close()
+		defer func() error {
+			err = file.Close()
+			if err != nil {
+				return err
+			}
+			return nil
+		}()
+		defer func() error {
+			err = response.Body.Close()
+			if err != nil {
+				return err
+			}
+			return nil
+		}()
 
 		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
 		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
@@ -187,7 +200,13 @@ func (a *Agent) downloadAndValidateImage() error {
 				log.Fatal(err)
 				return err
 			}
-			defer f.Close()
+			defer func() error {
+				err = f.Close()
+				if err != nil {
+					return err
+				}
+				return nil
+			}()
 			h := sha256.New()
 			if _, err := io.Copy(h, f); err != nil {
 				return err
@@ -216,7 +235,13 @@ func (a *Agent) copyConfigurationFile() error {
 		log.Println("[ERROR] creating the configuration file", err.Error())
 		return err
 	}
-	defer file.Close()
+	defer func() error {
+		err = file.Close()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
 	plainTest, err := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.Configuration)
 	_, err = file.WriteString(string(plainTest))
 	if err != nil {
@@ -249,7 +274,13 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
 		return err
 	}
-	defer file.Close()
+	defer func() error {
+		err = file.Close()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
 	plainTest, err := base64.StdEncoding.DecodeString(script)
 	_, err = file.WriteString(string(plainTest))
 	if err != nil {
@@ -268,7 +299,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		log.Println("[ERROR] running the "+scriptName+"-configuration script", err.Error())
 		return err
 	}
-	log.Println(string(out)) //remove it
+	log.Println(string(out)) // remove it
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }
