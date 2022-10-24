@@ -47,6 +47,7 @@ const (
 	ProgressTypeInformational
 )
 
+//nolint:funlen
 func (s ProgressType) String() string {
 	switch s {
 	case ProgressTypeBootstrapInitiated:
@@ -220,7 +221,7 @@ func (a *Agent) GetInputJSONContent() string {
 	return a.InputJSONContent
 }
 
-func (a *Agent) GetProgressJson() ProgressJSON {
+func (a *Agent) GetProgressJSON() ProgressJSON {
 	return a.ProgressJSON
 }
 

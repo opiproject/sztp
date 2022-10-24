@@ -92,7 +92,7 @@ func (a *Agent) doReportProgress() error {
 			Message:      "message sent via JSON",
 		},
 	})
-	inputJSON, _ := json.Marshal(a.GetProgressJson())
+	inputJSON, _ := json.Marshal(a.GetProgressJSON())
 	res, err := a.doTLSRequest(string(inputJSON), url)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
@@ -102,9 +102,7 @@ func (a *Agent) doReportProgress() error {
 	log.Println("[INFO] Response retrieved successfully")
 	return nil
 }
-
 func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
-
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
 	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL())
 	if err != nil {
@@ -141,6 +139,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	return nil
 }
 
+//nolint:funlen
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
 	// Download the image from DownloadURI and save it to a file
@@ -219,7 +218,7 @@ func (a *Agent) copyConfigurationFile() error {
 	}
 	defer file.Close()
 
-	plainTest, err := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.Configuration)
+	plainTest, _ := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.Configuration)
 	_, err = file.WriteString(string(plainTest))
 	if err != nil {
 		log.Println("[ERROR] writing the configuration file", err.Error())
@@ -264,7 +263,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		return err
 	}
 	log.Println("[INFO] " + scriptName + "-configuration script created successfully")
-	cmd := exec.Command("/bin/sh", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+scriptName+"configuration.sh")
+	cmd := exec.Command("/bin/sh", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+scriptName+"configuration.sh") //nolint:gosec
 	out, err := cmd.Output()
 	if err != nil {
 		log.Println("[ERROR] running the "+scriptName+"-configuration script", err.Error())
