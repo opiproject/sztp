@@ -75,7 +75,9 @@ func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutp
 		return nil, err
 	}
 
-	derr := json.NewDecoder(res.Body).Decode(&postResponse)
+	decoder := json.NewDecoder(res.Body)
+	decoder.DisallowUnknownFields()
+	derr := decoder.Decode(&postResponse)
 	if derr != nil {
 		return nil, derr
 	}
