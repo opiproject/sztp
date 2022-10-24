@@ -44,7 +44,7 @@ func extractfromLine(line, regex string, index int) string {
 	return re.FindAllString(line, -1)[index]
 }
 
-func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutput, error) {
+func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapServerPostOutput, error) {
 	var postResponse BootstrapServerPostOutput
 
 	body := strings.NewReader(input)
@@ -77,11 +77,13 @@ func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutp
 
 	decoder := json.NewDecoder(res.Body)
 	decoder.DisallowUnknownFields()
-	derr := decoder.Decode(&postResponse)
-	if derr != nil {
-		return nil, derr
+	if !empty {
+		derr := decoder.Decode(&postResponse)
+		if derr != nil {
+			return nil, derr
+		}
+		log.Println(postResponse)
 	}
-	log.Println(postResponse)
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusOK))
 	}

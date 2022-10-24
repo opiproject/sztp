@@ -94,7 +94,7 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 		},
 	})
 	inputJSON, _ := json.Marshal(a.GetProgressJSON())
-	res, err := a.doTLSRequest(string(inputJSON), url)
+	res, err := a.doTLSRequest(string(inputJSON), url, true)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
@@ -105,13 +105,13 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 }
 func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
-	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL())
+	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL(), false)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
-	// TODO: a.doReportProgress(ProgressTypeBootstrapInitiated)
+	_ = a.doReportProgress(ProgressTypeBootstrapInitiated)
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {
@@ -151,6 +151,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 //nolint:funlen
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
+	_ = a.doReportProgress(ProgressTypeBootImageInitiated)
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -246,15 +247,19 @@ func (a *Agent) copyConfigurationFile() error {
 
 func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	var script, scriptName string
+	var report ProgressType
 	switch typeOf {
 	case "post":
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PostConfigurationScript
 		scriptName = "post"
+		report = ProgressTypePostScriptInitiated
 	case "pre":
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript
 		scriptName = "pre"
+		report = ProgressTypePreScriptInitiated
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
+	_ = a.doReportProgress(report)
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
 		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
