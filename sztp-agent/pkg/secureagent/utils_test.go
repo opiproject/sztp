@@ -1,4 +1,4 @@
-package secureAgent
+package secureagent
 
 import (
 	"reflect"

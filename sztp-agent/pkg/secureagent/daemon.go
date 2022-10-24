@@ -5,7 +5,7 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 import (
 	"bytes"
@@ -82,8 +82,8 @@ func (a *Agent) getBootstrapURL() error {
 
 func (a *Agent) doReportProgress() error {
 	log.Println("[INFO] Starting the Report Progress request.")
-	url := strings.Replace(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress", -1)
-	a.SetProgressJson(ProgressJSON{
+	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
+	a.SetProgressJSON(ProgressJSON{
 		IetfSztpBootstrapServerInput: struct {
 			ProgressType string `json:"progress-type"`
 			Message      string `json:"message"`
@@ -92,8 +92,8 @@ func (a *Agent) doReportProgress() error {
 			Message:      "message sent via JSON",
 		},
 	})
-	inputJson, _ := json.Marshal(a.GetProgressJson())
-	res, err := a.doTLSRequest(string(inputJson), url)
+	inputJSON, _ := json.Marshal(a.GetProgressJson())
+	res, err := a.doTLSRequest(string(inputJSON), url)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
@@ -176,20 +176,8 @@ func (a *Agent) downloadAndValidateImage() error {
 		if err != nil {
 			return err
 		}
-		defer func() error {
-			err = file.Close()
-			if err != nil {
-				return err
-			}
-			return nil
-		}()
-		defer func() error {
-			err = response.Body.Close()
-			if err != nil {
-				return err
-			}
-			return nil
-		}()
+		defer file.Close()
+		defer response.Body.Close()
 
 		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
 		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
@@ -197,24 +185,18 @@ func (a *Agent) downloadAndValidateImage() error {
 		case "ietf-sztp-conveyed-info:sha-256":
 			f, err := os.Open(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
 			if err != nil {
-				log.Fatal(err)
+				log.Panic(err)
 				return err
 			}
-			defer func() error {
-				err = f.Close()
-				if err != nil {
-					return err
-				}
-				return nil
-			}()
+			defer f.Close()
 			h := sha256.New()
 			if _, err := io.Copy(h, f); err != nil {
 				return err
 			}
 			sum := fmt.Sprintf("%x", h.Sum(nil))
 			log.Println(sum)
-			log.Println(strings.Replace(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "", -1))
-			original := strings.Replace(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "", -1)
+			log.Println(strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", ""))
+			original := strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "")
 			if sum != original {
 				return errors.New("Checksum mismatch")
 			}
@@ -235,13 +217,8 @@ func (a *Agent) copyConfigurationFile() error {
 		log.Println("[ERROR] creating the configuration file", err.Error())
 		return err
 	}
-	defer func() error {
-		err = file.Close()
-		if err != nil {
-			return err
-		}
-		return nil
-	}()
+	defer file.Close()
+
 	plainTest, err := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.Configuration)
 	_, err = file.WriteString(string(plainTest))
 	if err != nil {
@@ -263,7 +240,6 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	case "post":
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PostConfigurationScript
 		scriptName = "post"
-		break
 	case "pre":
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript
 		scriptName = "pre"
@@ -274,14 +250,9 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
 		return err
 	}
-	defer func() error {
-		err = file.Close()
-		if err != nil {
-			return err
-		}
-		return nil
-	}()
-	plainTest, err := base64.StdEncoding.DecodeString(script)
+	defer file.Close()
+
+	plainTest, _ := base64.StdEncoding.DecodeString(script)
 	_, err = file.WriteString(string(plainTest))
 	if err != nil {
 		log.Println("[ERROR] writing the "+scriptName+"-configuration script", err.Error())

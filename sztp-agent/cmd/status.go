@@ -8,7 +8,7 @@ Copyright (C) 2022 Red Hat.
 package cmd
 
 import (
-	"github.com/opiproject/sztp/sztp-agent/pkg/secureAgent"
+	"github.com/opiproject/sztp/sztp-agent/pkg/secureagent"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func NewStatusCommand() *cobra.Command {
 		Use:   "status",
 		Short: "Run the status command",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			a := secureAgent.NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommandStatus()
 		},
 	}

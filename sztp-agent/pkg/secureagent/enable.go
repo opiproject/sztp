@@ -5,15 +5,11 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 // Package secureAgent implements the secure agent
-package secureAgent
+package secureagent
 
 // RunCommandEnable runs the command in the background
 func (a *Agent) RunCommandEnable() error {
-
-	err := a.prepareEnvEnable()
-	err = a.configureEnable()
-	err = a.runEnable()
-	return err
+	return nil
 }
 
 func (a *Agent) prepareEnvEnable() error {
