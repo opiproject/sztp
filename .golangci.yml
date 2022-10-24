@@ -23,7 +23,6 @@ linters:
     - bodyclose
     - depguard
     - dogsled
-    - errcheck
     - exportloopref
     - funlen
     - gochecknoinits
@@ -46,6 +45,8 @@ linters:
     - unconvert
     - unparam
     - whitespace
+disable:
+    - errcheck
 
 issues:
   # Independently from option `exclude` we use default exclude patterns,
