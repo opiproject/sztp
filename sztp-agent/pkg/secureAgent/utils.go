@@ -1,3 +1,10 @@
+/*
+SPDX-License-Identifier: Apache-2.0
+Copyright (C) 2022 Intel Corporation
+Copyright (c) 2022 Dell Inc, or its subsidiaries.
+Copyright (C) 2022 Red Hat.
+*/
+// Package secureAgent implements the secure agent
 package secureAgent
 
 import (
@@ -77,7 +84,13 @@ func (a *Agent) doTLSRequest(input string, url string) (*BootstrapServerPostOutp
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusOK))
 	}
-	defer res.Body.Close()
+	defer func() error {
+		err = res.Body.Close()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
 	return &postResponse, nil
 }
 
@@ -85,7 +98,7 @@ func generateInputJSONContent() string {
 	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
 	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
 
-	//dmidecode.Dmidecode(true))  //This is one possibility to get hw information
+	//dmidecode.Dmidecode(true))  // This is one possibility to get hw information
 
 	input := &InputJSON{
 		IetfSztpBootstrapServerInput: struct {

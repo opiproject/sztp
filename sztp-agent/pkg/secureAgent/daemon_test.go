@@ -1,3 +1,4 @@
+// Package secureAgent implements the secure agent
 package secureAgent
 
 import (
@@ -157,7 +158,7 @@ func deleteTempTestFile(file string) {
 	}
 }
 
-func TestAgent_doRequestBootstrapServer(t *testing.T) {
+func TestAgent_doReqBootstrap(t *testing.T) {
 	var output []byte
 	expected := BootstrapServerPostOutput{
 		IetfSztpBootstrapServerOutput: struct {

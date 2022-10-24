@@ -29,7 +29,11 @@ func newCommand() *cobra.Command {
 		Use:   "opi-sztp-agent",
 		Short: "opi-sztp-agent is the agent command line interface to work with the sztp workflow",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			err := cmd.Help()
+			if err != nil {
+				log.Fatalf(color.InRed("[ERROR]")+"%s", err.Error())
+				os.Exit(1)
+			}
 			os.Exit(1)
 		},
 	}
