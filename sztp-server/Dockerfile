@@ -35,4 +35,7 @@ RUN \
     CLIENT_CERT_TA_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
     envsubst '$BOOT_IMG_HASH_VAL,$PRE_SCRIPT_B64,$POST_SCRIPT_B64,$CONFIG_B64,$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64' < /tmp/sztpd.running.json.template > /tmp/running.json.static
 
-CMD ["sztpd", "sqlite:///:memory:"]
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+HEALTHCHECK CMD curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$SZTPD_INIT_PORT/.well-known/host-meta || exit 1
