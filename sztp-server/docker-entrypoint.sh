@@ -1,5 +1,19 @@
-#!/usr/bin/env sh
+#!/bin/sh
 set -e -u -x
+
+wait_curl () {
+    for i in $(seq 1 10)
+    do
+        echo "Attempt $i"
+        if curl --fail -H Accept:application/yang-data+json http://127.0.0.1:"${SZTPD_INIT_PORT}"/.well-known/host-meta
+        then
+            return 0
+        else
+            sleep 1
+        fi
+    done
+    return 1
+}
 
 env
 
@@ -11,30 +25,12 @@ echo "starting server in the background"
 sztpd sqlite:///:memory: 2>&1 &
 
 echo "waiting for server to start"
-for i in $(seq 1 10)
-do
-    echo "Attempt $i"
-    if curl --fail -H Accept:application/yang-data+json http://127.0.0.1:"${SZTPD_INIT_PORT}"/.well-known/host-meta
-    then
-        break
-    else
-        sleep 1
-    fi
-done
+wait_curl
 
 echo "sending configuration file to server"
 curl -i -X PUT --user my-admin@example.com:my-secret --data @/tmp/running.json -H 'Content-Type:application/yang-data+json' http://127.0.0.1:"${SZTPD_INIT_PORT}"/restconf/ds/ietf-datastores:running
 
 echo "waiting for server to re-start"
-for i in $(seq 1 10)
-do
-    echo "Attempt $i"
-    if curl --fail -H Accept:application/yang-data+json http://127.0.0.1:"${SZTPD_INIT_PORT}"/.well-known/host-meta
-    then
-        break
-    else
-        sleep 1
-    fi
-done
+wait_curl
 
 wait
