@@ -42,9 +42,9 @@ services:
     command: --script broadcast-dhcp-discover
 
   web:
-    image: docker.io/library/python:3.10.8-slim
-    volumes:
-      - ./sztp-server/config/my-boot-image.img:/var/lib/misc/my-boot-image.img:Z,ro
+    image: ghcr.io/opiproject/opi-web:main
+    build:
+      context: web
     networks:
       - opi
     command: python3 -m http.server 8082
