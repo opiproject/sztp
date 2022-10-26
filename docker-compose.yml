@@ -16,11 +16,11 @@ services:
     networks:
       - opi
     command: |
-      sh -e -u -x -c "env &&
+      sh -e -u -x -c "env && \
         envsubst '$$SZTPD_INIT_PORT,$$SZTPD_SBI_PORT,$$SZTPD_INIT_ADDR' < /tmp/running.json.static > /tmp/running.json && \
-        sztpd sqlite:///:memory 2>&1 & \
+        sztpd sqlite:///:memory: 2>&1 & \
         echo wait 5s... && sleep 5s && \
-        curl -i -X PUT --user my-admin@example.com:my-secret --data @/tmp/running.json -H 'Content-Type:application/yang-data+json' http:/127.0.0.1:$$SZTPD_INIT_PORT/restconf/ds/ietf-datastores:running && \
+        curl -i -X PUT --user my-admin@example.com:my-secret --data @/tmp/running.json -H 'Content-Type:application/yang-data+json' http://127.0.0.1:$$SZTPD_INIT_PORT/restconf/ds/ietf-datastores:running && \
         echo wait 5s... && sleep 5s && \
         wait"
     healthcheck:
