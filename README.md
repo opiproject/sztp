@@ -344,6 +344,22 @@ lease {
 }
 ```
 
+## Test mDNS server with NMAP
+
+```text
+$ docker-compose run --rm -T nmapmdnsclient
+Starting Nmap 7.93 ( https://nmap.org ) at 2022-10-27 21:14 UTC
+Nmap scan report for avahi (10.127.127.4)
+Host is up (0.000082s latency).
+rDNS record for 10.127.127.4: sztp-avahi-1.sztp_opi
+
+PORT     STATE  SERVICE
+5353/tcp closed mdns
+MAC Address: 02:42:0A:7F:7F:04 (Unknown)
+
+Nmap done: 1 IP address (1 host up) scanned in 0.34 seconds
+```
+
 ## Run HTTP server only
 
 ```text
