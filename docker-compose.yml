@@ -41,6 +41,12 @@ services:
       - opi
     command: --script broadcast-dhcp-discover
 
+  nmapmdnsclient:
+    image: instrumentisto/nmap:7.93
+    networks:
+      - opi
+    command: --script=dns-service-discovery -p 5353 avahi
+
   web:
     image: ghcr.io/opiproject/opi-web:main
     build:
@@ -85,7 +91,7 @@ services:
       - opi
     command: ['/opi-sztp-agent', 'daemon']
 
-  mdns:
+  avahi:
     image: docker.io/flungo/avahi:latest
     environment:
       SERVER_HOST_NAME: "opi"
