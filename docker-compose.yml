@@ -85,6 +85,13 @@ services:
       - opi
     command: ['/opi-sztp-agent', 'daemon']
 
+  mdns:
+    image: docker.io/flungo/avahi:latest
+    environment:
+      SERVER_HOST_NAME: "opi"
+    networks:
+      - opi
+
 volumes:
   dhcp-leases-folder:
 
