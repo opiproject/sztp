@@ -7,7 +7,8 @@ RUN pip install --no-cache-dir sztpd==0.0.11
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf - -C /tmp/
 WORKDIR /tmp/sztpd-simulator/pki
-RUN sed -i 's/localhost/bootstrap/g' sztpd1/sbi/end-entity/openssl.cnf && \
+RUN echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf && \
+    echo "DNS.3 = web" >> sztpd1/sbi/end-entity/openssl.cnf && \
     make pki && \
     echo SBI Port certificates && \
     cat sztpd1/sbi/end-entity/my_cert.pem sztpd1/sbi/intermediate2/my_cert.pem > /tmp/cert_chain.pem && \
