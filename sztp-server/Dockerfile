@@ -9,6 +9,7 @@ RUN curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf -
 WORKDIR /tmp/sztpd-simulator/pki
 RUN echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf && \
     echo "DNS.3 = web" >> sztpd1/sbi/end-entity/openssl.cnf && \
+    echo "DNS.4 = redirecter" >> sztpd1/sbi/end-entity/openssl.cnf && \
     make pki && \
     echo SBI Port certificates && \
     cat sztpd1/sbi/end-entity/my_cert.pem sztpd1/sbi/intermediate2/my_cert.pem > /tmp/cert_chain.pem && \
@@ -26,6 +27,12 @@ COPY config/ /tmp/
 
 # hadolint ignore=SC2016
 RUN \
+    SBI_PRI_KEY_B64=`openssl enc -base64 -A -in sztpd1/sbi/end-entity/private_key.der` \
+    SBI_PUB_KEY_B64=`openssl enc -base64 -A -in sztpd1/sbi/end-entity/public_key.der` \
+    SBI_EE_CERT_B64=`openssl enc -base64 -A -in /tmp/cert_chain.cms` \
+    BOOTSVR_TA_CERT_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
+    CLIENT_CERT_TA_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
+    envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64,$BOOTSVR_TA_CERT_B64' < /tmp/sztpd.redirect.json.template > /tmp/redirect.json.static && \
     BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /tmp/my-boot-image.img | awk '{print $2}'` \
     PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-pre-configuration-script.sh` \
     POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-post-configuration-script.sh` \

@@ -18,8 +18,8 @@ wait_curl () {
 env
 
 # shellcheck disable=SC2016
-envsubst '$SZTPD_INIT_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR' < /tmp/running.json.static > /tmp/running.json
-diff /tmp/running.json.static /tmp/running.json || true
+envsubst '$SZTPD_INIT_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR,$BOOTSVR_PORT,$BOOTSVR_ADDR' < /tmp/"${SZTPD_OPI_MODE}".json.static > /tmp/running.json
+diff /tmp/"${SZTPD_OPI_MODE}".json.static /tmp/running.json || true
 
 echo "starting server in the background"
 sztpd sqlite:///:memory: 2>&1 &
