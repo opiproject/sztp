@@ -3,6 +3,7 @@
 [![Linters](https://github.com/opiproject/sztp/actions/workflows/linters.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/linters.yml)
 [![Sztp](https://github.com/opiproject/sztp/actions/workflows/sztp.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/go.yml)
 [![License](https://img.shields.io/github/license/opiproject/sztp?style=flat-square&color=blue&label=License)](https://github.com/opiproject/sztp/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/opiproject/sztp/branch/main/graph/badge.svg)](https://codecov.io/gh/opiproject/sztp)
 [![Last Release](https://img.shields.io/github/v/release/opiproject/sztp?label=Latest&style=flat-square&logo=go)](https://github.com/opiproject/sztp/releases)
 
 ## I Want To Contribute
