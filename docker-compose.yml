@@ -13,6 +13,25 @@ services:
       SZTPD_INIT_MODE: 1
       SZTPD_ACCEPT_CONTRACT: "Yes"
       SZTPD_INIT_ADDR: 0.0.0.0
+      SZTPD_OPI_MODE: "running"
+    networks:
+      - opi
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_INIT_PORT/.well-known/host-meta || exit 1"]
+
+  redirecter:
+    image: ghcr.io/opiproject/opi-sztp-server:main
+    build:
+      context: sztp-server
+    environment:
+      SZTPD_INIT_PORT: 1080
+      SZTPD_SBI_PORT: 8080
+      SZTPD_INIT_MODE: 1
+      SZTPD_ACCEPT_CONTRACT: "Yes"
+      SZTPD_INIT_ADDR: 0.0.0.0
+      BOOTSVR_PORT: 9090
+      BOOTSVR_ADDR: "bootstrap"
+      SZTPD_OPI_MODE: "redirect"
     networks:
       - opi
     healthcheck:
