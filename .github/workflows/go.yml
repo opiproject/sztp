@@ -29,11 +29,7 @@ jobs:
       working-directory: sztp-agent
 
     - name: Test
-      run: go test -v ./...
-      working-directory: sztp-agent
-
-    - name: Run coverage
-      run: go test -race -coverprofile=coverage.out -covermode=atomic
+      run: go test -race -coverprofile=coverage.out -covermode=atomic -v ./...
       working-directory: sztp-agent
 
     - name: Upload coverage to Codecov
