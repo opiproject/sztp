@@ -19,9 +19,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -42,7 +44,10 @@ func (a *Agent) RunCommandDaemon() error {
 	if err != nil {
 		return err
 	}
-	// TODO: conveyed-info can be either redirect-information or onboarding-information
+	err = a.doHandleBootstrapRedirect()
+	if err != nil {
+		return err
+	}
 	err = a.downloadAndValidateImage()
 	if err != nil {
 		return err
@@ -77,7 +82,7 @@ func (a *Agent) getBootstrapURL() error {
 		log.Printf(" File " + a.DhcpLeaseFile + " does not exist\n")
 		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
 	}
-	log.Println("[INFO] Bootstrap URL retrieved successfully.")
+	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
 	return nil
 }
 
@@ -103,6 +108,32 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 	log.Println("[INFO] Response retrieved successfully")
 	return nil
 }
+
+func (a *Agent) doHandleBootstrapRedirect() error {
+
+	if reflect.ValueOf(a.BootstrapServerRedirectInfo).IsZero() {
+		return nil
+	}
+
+	log.Println("[INFO] Go Re-direct instead of On-boarding, processing...")
+
+	// TODO: BootstrapServer can be an array
+	// TODO: do not ignore BootstrapServer[0].TrustAnchor
+	addr := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Address
+	port := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Port
+
+	// Change URL to point to new redirect IP and PORT
+	u, err := url.Parse(a.GetBootstrapURL())
+	if err != nil {
+		return err
+	}
+	u.Host = fmt.Sprintf("%s:%d", addr, port)
+	a.SetBootstrapURL(u.String())
+
+	// Request onboard ino again (with new URL now)
+	return a.doRequestBootstrapServerOnboardingInfo()
+}
+
 func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
 	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL(), false)
