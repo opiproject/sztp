@@ -253,7 +253,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PostConfigurationScript
 		scriptName = "post"
 		report = ProgressTypePostScriptInitiated
-	case "pre":
+	default: // pre or default
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript
 		scriptName = "pre"
 		report = ProgressTypePreScriptInitiated
