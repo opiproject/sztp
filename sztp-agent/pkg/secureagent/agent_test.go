@@ -999,3 +999,159 @@ func TestAgent_SetProgressJson(t *testing.T) {
 		})
 	}
 }
+
+func TestProgressType_String(t *testing.T) {
+	tests := []struct {
+		name string
+		s    ProgressType
+		want string
+	}{
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(0),
+			want: "bootstrap-initiated",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(1),
+			want: "parsing-initiated",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(2),
+			want: "parsing-warning",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(3),
+			want: "parsing-error",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(4),
+			want: "parsing-complete",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(5),
+			want: "boot-image-initiated",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(6),
+			want: "boot-image-warning",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(7),
+			want: "boot-image-error",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(8),
+			want: "boot-image-mismatch",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(9),
+			want: "boot-image-installed-rebooting",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(10),
+			want: "boot-image-complete",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(11),
+			want: "pre-script-initiated",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(12),
+			want: "pre-script-warning",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(13),
+			want: "pre-script-error",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(14),
+			want: "pre-script-complete",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(15),
+			want: "config-initiated",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(16),
+			want: "config-warning",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(17),
+			want: "config-error",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(18),
+			want: "config-complete",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(19),
+			want: "post-script-initiated",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(20),
+			want: "post-script-warning",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(21),
+			want: "post-script-error",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(22),
+			want: "post-script-complete",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(23),
+			want: "bootstrap-warning",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(24),
+			want: "bootstrap-error",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(25),
+			want: "bootstrap-complete",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(26),
+			want: "informational",
+		},
+		{
+			name: "Test ProgressType String",
+			s:    ProgressType(27),
+			want: "unknown",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
