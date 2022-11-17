@@ -20,6 +20,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"github.com/jaypipes/ghw"
 )
 
 // Auxiliar function to get lines from file matching with the substr
@@ -94,8 +95,10 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 func generateInputJSONContent() string {
 	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
 	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
-
-	// dmidecode.Dmidecode(true))  // This is one possibility to get hw information
+	baseboard, err := ghw.Baseboard()
+	if err != nil {
+		log.Printf("Error getting baseboard info: %v", err)
+	}
 
 	input := &InputJSON{
 		IetfSztpBootstrapServerInput: struct {
@@ -104,7 +107,7 @@ func generateInputJSONContent() string {
 			OsVersion string `json:"os-version"`
 			Nonce     string `json:"nonce"`
 		}{
-			HwModel:   "hardwared-model-TBD",
+			HwModel:   baseboard.Product,
 			OsName:    osName,
 			OsVersion: osVersion,
 			Nonce:     "",
