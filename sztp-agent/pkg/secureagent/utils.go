@@ -95,9 +95,12 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 func generateInputJSONContent() string {
 	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
 	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
+	hwModel := ""
 	baseboard, err := ghw.Baseboard()
 	if err != nil {
 		log.Printf("Error getting baseboard info: %v", err)
+	} else {
+		hwModel = baseboard.Product
 	}
 
 	input := &InputJSON{
@@ -107,7 +110,7 @@ func generateInputJSONContent() string {
 			OsVersion string `json:"os-version"`
 			Nonce     string `json:"nonce"`
 		}{
-			HwModel:   baseboard.Product,
+			HwModel:   hwModel,
 			OsName:    osName,
 			OsVersion: osVersion,
 			Nonce:     "",
