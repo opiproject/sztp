@@ -371,7 +371,7 @@ docker-compose up --build web
 ## Test HTTP server from agent
 
 ```text
-docker-compose run --rm -T agent curl --fail http://web:8082/var/lib/
+docker-compose run --rm -T agent curl --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem https://web:443/var/lib/
 ```
 
 OR
