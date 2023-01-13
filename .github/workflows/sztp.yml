@@ -52,7 +52,7 @@ jobs:
 
     - name: Build and push Docker image
       id: build-and-push
-      uses: docker/build-push-action@6afac853c9cffda7a22e6c3b59553f3c4a4d3585
+      uses: docker/build-push-action@2a168352239e71061d0e86de1b39d4c78f829a3d
       with:
         context: ${{ matrix.package }}
         platforms: linux/amd64,linux/arm64
