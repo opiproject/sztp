@@ -1,8 +1,7 @@
-# syntax=docker/dockerfile:1
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2022 Dell Inc, or its subsidiaries.
 
-# Alpine is chosen for its small footprint
-# compared to Ubuntu
-FROM docker.io/library/golang:1.19.5-alpine
+FROM docker.io/library/golang:1.19.5-alpine as builder
 
 WORKDIR /app
 
@@ -15,6 +14,11 @@ RUN go mod download
 COPY . .
 RUN go build -v -o /opi-sztp-agent && CGO_ENABLED=0 go test -v ./...
 
+# second stage to reduce image size
+FROM alpine:3.17
+
+# hadolint ignore=DL3022
+COPY --from=builder /opi-sztp-agent /
 # hadolint ignore=DL3022
 COPY --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /opi.pem
 # hadolint ignore=DL3022
