@@ -95,6 +95,8 @@ services:
     depends_on:
       bootstrap:
         condition: service_healthy
+      redirecter:
+        condition: service_healthy
     networks:
       - opi
     command: ['/bin/sh', '-c', 'sleep infinity']
@@ -105,6 +107,8 @@ services:
       context: sztp-agent
     depends_on:
       bootstrap:
+        condition: service_healthy
+      redirecter:
         condition: service_healthy
     volumes_from:
       - client:ro
