@@ -2,7 +2,7 @@
 set -e -u -x
 
 wait_curl () {
-    for i in $(seq 1 10)
+    for i in $(seq 1 "${SZTPD_RETRY_ATTEMPTS:-10}")
     do
         echo "Attempt $i"
         if curl --fail -H Accept:application/yang-data+json http://127.0.0.1:"${SZTPD_INIT_PORT}"/.well-known/host-meta
