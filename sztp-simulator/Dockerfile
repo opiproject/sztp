@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2022 Dell Inc, or its subsidiaries.
+
 FROM docker.io/curlimages/curl:7.87.0
 
 USER root
