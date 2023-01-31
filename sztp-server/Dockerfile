@@ -4,7 +4,7 @@
 FROM docker.io/library/python:3.10.8-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends gettext libsqlite3-dev make curl gcc && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir sztpd==0.0.11
+RUN pip install --no-cache-dir "sqlalchemy<2.0.0" sztpd==0.0.11
 
 # certificates
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
