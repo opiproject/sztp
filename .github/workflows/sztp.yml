@@ -64,7 +64,6 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - dhcp-client
           - sztp-agent
           - sztp-simulator
           - web

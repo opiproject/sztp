@@ -59,13 +59,13 @@ services:
     command: sh -e -u -x -c 'touch /var/lib/dhcp/dhcpd.leases && eval "echo \"$$(cat /opt/dhcpd.conf.template)\"" > /etc/dhcp/dhcpd.conf && dhcpd -d'
 
   nmap:
-    image: instrumentisto/nmap:7.93
+    image: docker.io/instrumentisto/nmap:7.93
     networks:
       - opi
     command: --script broadcast-dhcp-discover
 
   nmapmdnsclient:
-    image: instrumentisto/nmap:7.93
+    image: docker.io/instrumentisto/nmap:7.93
     networks:
       - opi
     command: --script=dns-service-discovery -p 5353 avahi
@@ -79,13 +79,12 @@ services:
     command: python3 -m http.server 8082
 
   client:
-    image: ghcr.io/opiproject/opi-dhcp-client:main
-    build:
-      context: dhcp-client
+    image: docker.io/modularitycontainers/dhcp-client:latest
     cap_add:
       - CAP_NET_RAW
     volumes:
       - dhcp-leases-folder:/var/lib/dhclient/
+      - ./dhcp-client:/etc/dhcp/dhclient.d
     networks:
       - opi
     command: dhclient -d -v
