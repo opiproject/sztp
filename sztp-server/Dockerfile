@@ -49,4 +49,4 @@ RUN \
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-HEALTHCHECK CMD curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$SZTPD_INIT_PORT/.well-known/host-meta || exit 1
+HEALTHCHECK CMD curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$SZTPD_NBI_PORT/.well-known/host-meta || exit 1
