@@ -8,7 +8,7 @@
           "http": {
             "tcp-server-parameters": {
               "local-address": "$SZTPD_INIT_ADDR",
-              "local-port": $SZTPD_INIT_PORT
+              "local-port": $SZTPD_NBI_PORT
             }
           }
         },

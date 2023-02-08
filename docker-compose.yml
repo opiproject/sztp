@@ -8,7 +8,8 @@ services:
     build:
       context: sztp-server
     environment:
-      SZTPD_INIT_PORT: 1080
+      SZTPD_INIT_PORT: 6080
+      SZTPD_NBI_PORT: 7080
       SZTPD_SBI_PORT: 9090
       SZTPD_INIT_MODE: 1
       SZTPD_ACCEPT_CONTRACT: "Yes"
@@ -18,14 +19,15 @@ services:
     networks:
       - opi
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_INIT_PORT/.well-known/host-meta || exit 1"]
+      test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_NBI_PORT/.well-known/host-meta || exit 1"]
 
   redirecter:
     image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
     environment:
-      SZTPD_INIT_PORT: 1080
+      SZTPD_INIT_PORT: 6080
+      SZTPD_NBI_PORT: 7080
       SZTPD_SBI_PORT: 8080
       SZTPD_INIT_MODE: 1
       SZTPD_ACCEPT_CONTRACT: "Yes"
@@ -37,7 +39,7 @@ services:
     networks:
       - opi
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_INIT_PORT/.well-known/host-meta || exit 1"]
+      test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_NBI_PORT/.well-known/host-meta || exit 1"]
 
   dhcp:
     image: ghcr.io/opiproject/opi-dhcp-server:main
