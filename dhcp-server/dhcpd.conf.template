@@ -16,15 +16,15 @@ subnet  ${NODE_IP_SUBNET} netmask  ${NODE_IP_NETMASK} {
     max-lease-time 7200;
 
     #option 66
-    option tftp-server-name "w.x.y.z";
+    option tftp-server-name \"w.x.y.z\";
 
     #option 67
-    option bootfile-name "test.cfg";
+    option bootfile-name \"test.cfg\";
 
     # option 143 (sZTP RFC-8572) or 136 for ipv6
-    option sztp-redirect-urls "https://redirecter:8080/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data";
+    option sztp-redirect-urls \"https://redirecter:8080/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data\";
 
     # IP of PXE Server
     next-server ${NODE_IP_ADDRESS};
-    filename "grubx64.efi";
+    filename \"grubx64.efi\";
 }
