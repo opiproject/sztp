@@ -65,7 +65,6 @@ jobs:
       matrix:
         package:
           - dhcp-client
-          - dhcp-server
           - sztp-agent
           - sztp-simulator
           - web
