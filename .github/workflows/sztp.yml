@@ -67,7 +67,6 @@ jobs:
           - dhcp-client
           - sztp-agent
           - sztp-simulator
-          - web
     steps:
     - uses: actions/checkout@v3
     - uses: docker/setup-qemu-action@v2

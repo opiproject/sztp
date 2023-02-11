@@ -76,7 +76,7 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-s
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
 
-docker-compose exec -T agent curl --fail http://web:8082/var/lib/misc/
+docker-compose exec -T agent curl --fail --output /tmp/my-boot-image.tst http://web:80/my-boot-image.img
 
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
