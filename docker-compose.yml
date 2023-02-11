@@ -71,12 +71,11 @@ services:
     command: --script=dns-service-discovery -p 5353 avahi
 
   web:
-    image: ghcr.io/opiproject/opi-web:main
-    build:
-      context: web
+    image: docker.io/library/httpd:2.4.55-alpine3.17
+    volumes:
+      - ./sztp-server/config/my-boot-image.img:/usr/local/apache2/htdocs/my-boot-image.img
     networks:
       - opi
-    command: python3 -m http.server 8082
 
   client:
     image: ghcr.io/opiproject/opi-dhcp-client:main

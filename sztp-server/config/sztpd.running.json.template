@@ -132,8 +132,8 @@
       {
         "name": "my-boot-image.img",
         "download-uri": [
-          "http://web:8082/var/lib/misc/my-boot-image.img",
-          "ftp://web:3082/var/lib/misc/my-boot-image.img"
+          "http://web:80/my-boot-image.img",
+          "ftp://web:82/my-boot-image.img"
         ],
         "image-verification": [
           {
