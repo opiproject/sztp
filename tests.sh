@@ -14,7 +14,7 @@ sleep 5
 docker-compose ps
 
 # test dhcp server
-docker-compose exec -T dhcp cat /var/lib/dhcpd/dhcpd.leases
+docker-compose exec -T dhcp cat /var/lib/dhcp/dhcpd.leases
 
 # let server respond
 sleep 5
