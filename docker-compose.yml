@@ -78,13 +78,12 @@ services:
       - opi
 
   client:
-    image: ghcr.io/opiproject/opi-dhcp-client:main
-    build:
-      context: dhcp-client
+    image: docker.io/modularitycontainers/dhcp-client:latest
     cap_add:
       - CAP_NET_RAW
     volumes:
       - dhcp-leases-folder:/var/lib/dhclient/
+      - ./dhcp-client/dhclient.conf:/etc/dhcp/dhclient.conf
     networks:
       - opi
     command: dhclient -d -v
