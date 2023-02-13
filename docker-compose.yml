@@ -50,7 +50,7 @@ services:
       NODE_IP_RANGE_MAX: 10.127.127.253
       NODE_IP_ADDRESS: 10.127.127.3
     volumes:
-      - ./dhcp-server:/opt
+      - ./dhcp:/opt
     cap_add:
       - CAP_NET_BIND_SERVICE
       - CAP_NET_RAW
@@ -59,13 +59,13 @@ services:
     command: sh -e -u -x -c 'touch /var/lib/dhcp/dhcpd.leases && eval "echo \"$$(cat /opt/dhcpd.conf.template)\"" > /etc/dhcp/dhcpd.conf && dhcpd -d'
 
   nmap:
-    image: instrumentisto/nmap:7.93
+    image: docker.io/instrumentisto/nmap:7.93
     networks:
       - opi
     command: --script broadcast-dhcp-discover
 
   nmapmdnsclient:
-    image: instrumentisto/nmap:7.93
+    image: docker.io/instrumentisto/nmap:7.93
     networks:
       - opi
     command: --script=dns-service-discovery -p 5353 avahi
@@ -83,7 +83,7 @@ services:
       - CAP_NET_RAW
     volumes:
       - dhcp-leases-folder:/var/lib/dhclient/
-      - ./dhcp-client/dhclient.conf:/etc/dhcp/dhclient.conf
+      - ./dhcp/dhclient.conf:/etc/dhcp/dhclient.conf
     networks:
       - opi
     command: dhclient -d -v
