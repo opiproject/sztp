@@ -55,7 +55,7 @@ docker-compose up --build bootstrap
 Fetching Host-meta
 
 ```text
-$ docker-compose run --rm -T agent curl -i --fail -H Accept:application/yang-data+json http://bootstrap:1080/.well-known/host-meta
+$ docker-compose run --rm -T simulator curl -i --fail -H Accept:application/yang-data+json http://bootstrap:1080/.well-known/host-meta
 HTTP/1.1 200 OK
 Content-Type: application/xrd+xml; charset=utf-8
 Content-Length: 104
@@ -70,7 +70,7 @@ Server: <redacted>
 Fetching the RESTCONF Root Resource
 
 ```text
-$ docker-compose run --rm -T agent curl -i --fail -H Accept:application/yang-data+json http://bootstrap:1080/restconf/
+$ docker-compose run --rm -T simulator curl -i --fail -H Accept:application/yang-data+json http://bootstrap:1080/restconf/
 HTTP/1.1 200 OK
 Content-Type: application/yang-data+json; charset=utf-8
 Content-Length: 137
@@ -89,7 +89,7 @@ Server: <redacted>
 Get the Current (Default) Configuration
 
 ```text
-$ docker-compose run --rm -T agent curl -i -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:running
+$ docker-compose run --rm -T simulator curl -i -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:running
 HTTP/1.1 200 OK
 Content-Type: application/yang-data+json; charset=utf-8
 Content-Length: 318
@@ -126,7 +126,7 @@ docker-compose exec bootstrap curl -i --user my-admin@example.com:my-secret -H "
 Get onboarding info (from device perspective)
 
 ```text
-$ docker-compose exec -T agent curl -X POST --data @/tmp/input.json -H Content-Type:application/yang-data+json --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem https://bootstrap:9090/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data  | tee /tmp/post_rpc_input.json
+$ docker-compose exec -T simulator curl -X POST --data @/tmp/input.json -H Content-Type:application/yang-data+json --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem https://bootstrap:9090/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data  | tee /tmp/post_rpc_input.json
 {
   "ietf-sztp-bootstrap-server:output": {
     "conveyed-information": "MIIDfwYLKoZIhvcNAQkQASugggNuBIIDansKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwOi8vd2ViOjgwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIiwKICAgICAgICAiZnRwOi8vd2ViOjMwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIgogICAgICBdLAogICAgICAiaW1hZ2UtdmVyaWZpY2F0aW9uIjogWwogICAgICAgIHsKICAgICAgICAgICJoYXNoLWFsZ29yaXRobSI6ICJpZXRmLXN6dHAtY29udmV5ZWQtaW5mbzpzaGEtMjU2IiwKICAgICAgICAgICJoYXNoLXZhbHVlIjogIjdiOmNhOmU2OmFjOjIzOjA2OmQ4Ojc5OjA2OjhjOmFjOjAzOjgwOmUyOjE2OjQ0OjdlOjQwOjZhOjY1OmZhOmQ0OjY5OjYxOjZlOjA1OmNlOmY1Ojg3OmRjOjJiOjk3IgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgICJwcmUtY29uZmlndXJhdGlvbi1zY3JpcHQiOiAiSXlFdlltbHVMMkpoYzJnS1pXTm9ieUFpYVc1emFXUmxJSFJvWlNCd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0J3YjNOMExXTnZibVpwWjNWeVlYUnBiMjR0YzJOeWFYQjBMaTR1SWdvPSIKICB9Cn0="
@@ -261,8 +261,8 @@ $ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"ima
 }
 
 $ URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json)
-$ docker-compose run --rm -v /tmp:/tmp agent curl --output /tmp/$(basename ${URL}) --fail ${URL}
-Creating sztp_agent_run ... done
+$ docker-compose run --rm -v /tmp:/tmp simulator curl --output /tmp/$(basename ${URL}) --fail ${URL}
+Creating sztp_simulator_run ... done
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100 65536  100 65536    0     0  31.2M      0 --:--:-- --:--:-- --:--:-- 31.2M
@@ -372,7 +372,7 @@ docker-compose up --build web
 ## Test HTTP server from agent
 
 ```text
-docker-compose run --rm -T agent curl --fail http://web:80/
+docker-compose run --rm -T simulator curl --fail http://web:80/
 ```
 
 OR
