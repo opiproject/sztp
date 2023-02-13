@@ -32,7 +32,7 @@ REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases |
 docker-compose exec -T bootstrap curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would) and see it is redirect
-docker-compose exec -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${REDIRECT}" | tee /tmp/post_rpc_input.json
+docker-compose exec -T simulator curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${REDIRECT}" | tee /tmp/post_rpc_input.json
 
 # parse the redirect reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json
@@ -47,13 +47,13 @@ BOOTSTRAP="${REDIRECT//redirecter:8080/$addr:$port}"
 docker-compose exec -T bootstrap curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would)
-docker-compose exec -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
+docker-compose exec -T simulator curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
 
 # parse the reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json
 
 # send progress
-docker-compose exec -T agent curl -X POST --data @/tmp/progress.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
+docker-compose exec -T simulator curl -X POST --data @/tmp/progress.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
 
 # check audit log
 docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
@@ -76,15 +76,15 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-s
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
 
-docker-compose exec -T agent curl --fail --output /tmp/my-boot-image.tst http://web:80/my-boot-image.img
+docker-compose exec -T simulator curl --fail --output /tmp/my-boot-image.tst http://web:80/my-boot-image.img
 
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
 BASENAME=$(basename "${URL}")
-docker-compose exec -T agent curl --output "/tmp/${BASENAME}" --fail "${URL}"
+docker-compose exec -T simulator curl --output "/tmp/${BASENAME}" --fail "${URL}"
 
 # Validate signature
-SIGNATURE=$(docker-compose exec -T agent ash -c "openssl dgst -sha256 -c \"/tmp/${BASENAME}\" | awk '{print \$2}'")
+SIGNATURE=$(docker-compose exec -T simulator ash -c "openssl dgst -sha256 -c \"/tmp/${BASENAME}\" | awk '{print \$2}'")
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json | grep "${SIGNATURE}"
 
 # print for debug
