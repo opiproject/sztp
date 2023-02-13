@@ -65,7 +65,6 @@ jobs:
       matrix:
         package:
           - sztp-agent
-          - sztp-simulator
     steps:
     - uses: actions/checkout@v3
     - uses: docker/setup-qemu-action@v2
