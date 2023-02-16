@@ -4,7 +4,7 @@ version: '3.7'
 services:
 
   bootstrap:
-    image: ghcr.io/opiproject/sztpd:main
+    image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
     environment:
@@ -22,7 +22,7 @@ services:
       test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_NBI_PORT/.well-known/host-meta || exit 1"]
 
   redirecter:
-    image: ghcr.io/opiproject/sztpd:main
+    image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
     environment:
