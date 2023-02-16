@@ -88,8 +88,8 @@ services:
       - opi
     command: dhclient -d -v
 
-  opi-sztp-go-agent:
-    image: ghcr.io/opiproject/sztp:main
+  agent:
+    image: ghcr.io/opiproject/opi-sztp-client:main
     build:
       context: sztp-agent
     depends_on:
