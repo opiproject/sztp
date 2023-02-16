@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2022 Dell Inc, or its subsidiaries.
 
-FROM docker.io/library/python:3.10.8-slim
+FROM ghcr.io/opiproject/sztpd:main@sha256:abb539956e7259c488c211aff4c296acb5bdead0306753442effc8de4e9b8eba
 
-RUN apt-get update && apt-get install -y --no-install-recommends gettext libsqlite3-dev make curl gcc && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir "sqlalchemy<2.0.0" sztpd==0.0.11
+RUN apt-get update && apt-get install -y --no-install-recommends make && rm -rf /var/lib/apt/lists/*
 
 # certificates
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
