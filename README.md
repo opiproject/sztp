@@ -1,4 +1,4 @@
-# sZTP and DHCP and HTTP
+# Secure Zero Touch Provisioning (sZTP)
 
 [![Linters](https://github.com/opiproject/sztp/actions/workflows/linters.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/linters.yml)
 [![Sztp](https://github.com/opiproject/sztp/actions/workflows/sztp.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/go.yml)
