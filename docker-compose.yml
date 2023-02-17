@@ -15,7 +15,7 @@ services:
       SZTPD_ACCEPT_CONTRACT: "Yes"
       SZTPD_INIT_ADDR: 0.0.0.0
       SZTPD_OPI_MODE: "running"
-      SZTPD_RETRY_ATTEMPTS: 20
+      SZTPD_RETRY_ATTEMPTS: 30
     networks:
       - opi
     healthcheck:
@@ -35,7 +35,7 @@ services:
       BOOTSVR_PORT: 9090
       BOOTSVR_ADDR: "bootstrap"
       SZTPD_OPI_MODE: "redirect"
-      SZTPD_RETRY_ATTEMPTS: 20
+      SZTPD_RETRY_ATTEMPTS: 30
     networks:
       - opi
     healthcheck:
