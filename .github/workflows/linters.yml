@@ -1,54 +1,13 @@
 name: Linters
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-  workflow_dispatch:
-
 jobs:
-  markdown-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run tests
-        run: docker run -v $PWD:/workdir ghcr.io/igorshubovych/markdownlint-cli:latest --ignore=minutes --disable=MD013 "**/*.md"
-
-      # - uses: avto-dev/markdown-lint@v1.5.0
-      #   with:
-      #     args: './*.md'
-
-  docker-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: hadolint/hadolint-action@v3.1.0
-        with:
-          recursive: true
-          ignore: DL3041,DL3008,DL3018
-
-  shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: azohra/shell-linter@v0.6.0
-
-  YAMLlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ibiqlik/action-yamllint@v3
-        with:
-          file_or_dir: docker-compose.yml
-          config_data: "{extends: default, rules: {line-length: disable}}"
-
-  golangci:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-      - uses: golangci/golangci-lint-action@v3
-        with:
-          working-directory: sztp-agent
+  call:
+    uses: opiproject/opi-smbios-bridge/.github/workflows/linters.yml@main
+    secrets: inherit
