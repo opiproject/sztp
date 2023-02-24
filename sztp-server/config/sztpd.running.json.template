@@ -4,7 +4,7 @@
       "endpoint": [
         {
           "name": "default startup endpoint",
-          "use-for": "native-interface",
+          "use-for": "wn-app:native-interface",
           "http": {
             "tcp-server-parameters": {
               "local-address": "$SZTPD_INIT_ADDR",
@@ -14,7 +14,7 @@
         },
         {
           "name": "rfc8572-interface",
-          "use-for": "rfc8572-interface",
+          "use-for": "wn-sztpd-0:rfc8572-interface",
           "https": {
             "tcp-server-parameters": {
               "local-address": "$SZTPD_INIT_ADDR",
