@@ -1,0 +1,11 @@
+name: Update copyright year(s) in license file
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 1 1 *'
+
+jobs:
+  call:
+    uses: opiproject/opi-smbios-bridge/.github/workflows/update-copyright-years-in-license-file.yml@main
+    secrets: inherit
