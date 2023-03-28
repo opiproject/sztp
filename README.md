@@ -7,6 +7,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/opiproject/sztp/sztp-agent)](https://goreportcard.com/report/github.com/opiproject/sztp/sztp-agent)
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/opiproject/sztp/sztp-agent)
 [![Last Release](https://img.shields.io/github/v/release/opiproject/sztp?label=Latest&style=flat-square&logo=go)](https://github.com/opiproject/sztp/releases)
+[![GitHub stars](https://img.shields.io/github/stars/opiproject/sztp.svg?style=flat-square&label=github%20stars)](https://github.com/opiproject/sztp)
+[![GitHub Contributors](https://img.shields.io/github/contributors/opiproject/sztp.svg?style=flat-square)](https://github.com/opiproject/sztp/graphs/contributors)
 
 ## I Want To Contribute
 
