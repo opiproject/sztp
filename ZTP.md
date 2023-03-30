@@ -111,6 +111,7 @@ sequenceDiagram
     participant LOG as Log Server
     Host->>DPU: Power On
     loop Discovery
+       DPU->>DPU: Choose port/interface for onboarding
        DPU->>DHCP: DHCP broadcast request
        DHCP->>DPU: DHCP response with CUSTOM option for BOOTSTRAP server
     end
