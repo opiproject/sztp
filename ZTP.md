@@ -99,7 +99,52 @@ Those steps will also help to understand the sZTP process from the network/syste
 
 ## sZTP process
 
-![Provisioning Sequence](doc/sZTP-sequence.png)
+```mermaid
+sequenceDiagram
+    participant Host
+    participant DPU
+    participant DHCP as DHCP Server
+    participant SZTP as sZTP Bootstrap Server
+    participant HTTP as File HTTPs Server
+    participant Voucher as Voucher Server
+    participant CA as CA Server
+    participant LOG as Log Server
+    Host->>DPU: Power On
+    loop Discovery
+       DPU->>DHCP: DHCP broadcast request
+       DHCP->>DPU: DHCP response with CUSTOM option for BOOTSTRAP server
+    end
+    loop DPU joins the network
+       DPU->>SZTP: Request to join the network sending IDevID
+       SZTP->>SZTP: Extract Voucher Server URL from IDevID
+       SZTP->>Voucher: Get the Voucher
+       Voucher->>SZTP: Voucher
+       SZTP->>SZTP: Validate Voucher
+       SZTP->>DPU: DPU is accepted to the network
+    end
+    loop DPU trusts the network
+       DPU->>SZTP: Get the Voucher
+       SZTP->>DPU: Voucher
+       DPU->>DPU: Verify IDevID
+       DPU->>DPU: Verify TLS cert vs Voucher cert
+    end
+    loop LDevID
+       DPU->>SZTP: Get CA server URL
+       SZTP->>DPU: CA server URL
+       DPU->>CA: Send CSR (SCEP protocol)
+       CA->>DPU: New certificate
+       DPU->>DPU: LDevID
+    end
+    loop FW and OS images
+       DPU->>SZTP: Get File server URL
+       SZTP->>DPU: File server URL
+       DPU->>HTTP: Download Config, OS, FW images and installation scripts
+       HTTP->>DPU: images and files
+       DPU->>DPU: Run installation scripts
+       DPU->>DPU: Reboot
+    end
+    
+```
 
 ### Discovery
 
