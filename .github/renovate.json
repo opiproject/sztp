@@ -3,6 +3,9 @@
   "extends": [
     "config:base"
   ],
+  "schedule": [
+    "every weekend"
+  ],
   "packageRules": [
     {
         "matchUpdateTypes": ["digest"],
