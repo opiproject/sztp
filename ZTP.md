@@ -116,7 +116,7 @@ sequenceDiagram
        DHCP->>DPU: DHCP response with CUSTOM option for BOOTSTRAP server
     end
     loop DPU joins the network
-       DPU->>SZTP: Request to join the network sending IDevID
+       DPU->>SZTP: TLS/HTTPs request to join the network sending IDevID
        SZTP->>SZTP: Extract Voucher Server URL from IDevID
        SZTP->>Voucher: Get the Voucher
        Voucher->>SZTP: Voucher
