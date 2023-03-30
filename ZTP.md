@@ -65,6 +65,16 @@ graph LR;
 - DNS server (optional): maps domain names to IP addresses (for example bootstrap server and Deployment file server IPs).
 - Syslog server (optional): holds/collects logs during the sZTP process.
 
+## Infrastructure Components
+
+- Trusted Platform Module (TPM) 2.0
+- Digital Device IDs (DevIDs)
+- DevID Certificates
+- X.509 Pinned Domain Certificates (PDCs)
+- Owner Certificates
+- DevID Trust Anchors
+- Vouchers
+
 ## Requirements
 
 - Both IPv4 and IPv6 DHCP discovery and ZTP provisioning should be supported.
