@@ -137,8 +137,9 @@ sequenceDiagram
        DPU->>DPU: LDevID
     end
     loop FW and OS images
-       DPU->>SZTP: Get File server URL
-       SZTP->>DPU: File server URL
+       DPU->>SZTP: Get conveyed information file
+       SZTP->>DPU: conveyed information file
+       DPU->>DPU: Check conveyed information file for redirect
        DPU->>HTTP: Download Config, OS, FW images and installation scripts
        HTTP->>DPU: images and files
        DPU->>DPU: Run installation scripts
