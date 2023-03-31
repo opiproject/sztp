@@ -100,10 +100,13 @@ Those steps will also help to understand the sZTP process from the network/syste
 
 ## Device bootsraping before sZTP
 
+- OPI assumes sZTP agent is already present on DPUs
 - OPI is *not* mandating any specific method to bring the inital image on the DPU and IPU devices
+- OPI is *not* mandating where sZTP agent is running: DPU OS or DPU BMC
 - There are several options that can be utilized, as an example, to help define the scope:
   - Pre-installed image from the factory with sZTP agent present (can be old)
   - Network boot methods (for example HTTPs from UEFI) for the volatile image with sZTP agent present
+  - Pre-installed agent from the factory on the BMC of the DPU and not on the main OS cores
 - sZTP agent will always start running on device boot
 - In case sZTP process is disabled or already happened, sZTP agent will exit
 
