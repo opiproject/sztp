@@ -155,8 +155,12 @@ sequenceDiagram
        DPU->>DPU: Check conveyed information file for redirect
        DPU->>HTTP: TLS/HTTPs Download Config, OS, FW images and installation scripts
        HTTP->>DPU: images and files
-       DPU->>DPU: Run installation scripts
+       DPU->>DPU: Install OS image first in case version is different
        DPU->>DPU: Reboot
+       DPU->>DPU: Run pre-configuration scripts
+       DPU->>DPU: Save configuration file
+       DPU->>DPU: Run post-configuration scripts
+       DPU->>SZTP: Notify proccess completed
     end
     
 ```
