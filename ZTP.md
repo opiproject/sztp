@@ -48,7 +48,7 @@ Secure Zero Touch Provisioning (SZTP) adds a bootstrap server to DHCP-based ZTP 
 ```mermaid
 graph LR;
     DPU[DPU or IPU]
-    Proxy[DHCP Proxy or Relay]
+    Proxy[DHCP Proxy or Relay*]
     DPU-->Proxy;
     Proxy-->DHCPServer*;
     Proxy-->BootstrapServer;
