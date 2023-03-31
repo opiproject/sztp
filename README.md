@@ -28,9 +28,21 @@ See [CONTRIBUTING](https://github.com/opiproject/opi/blob/main/CONTRIBUTING.md) 
 
 * [Cisco Secure Zero-Touch with IOS XR](https://www.youtube.com/watch?v=rl2ucWoTqyg)
 
-## sZTP Diagram
+## How SZTP works
 
-![xPU sZTP provisioning participants](./doc/sZTP-components.png)
+[See all the details here](./ZTP.md)
+
+```mermaid
+graph LR;
+    DPU[DPU or IPU]
+    Proxy[DHCP Proxy or Relay*]
+    DPU-->Proxy;
+    Proxy-->DHCPServer*;
+    Proxy-->BootstrapServer;
+    Proxy-->FileServer*;
+    Proxy-->DNSServer*;
+    Proxy-->SyslogServer*;
+```
 
 ## sZTP on DPU Diagram
 
