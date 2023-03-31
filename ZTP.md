@@ -322,18 +322,13 @@ Question: OPI can produce an agent (container) that runs on DPU or IPU for examp
 
 will be tested part of [POC](https://github.com/opiproject/opi-poc/tree/main/integration/pxe)
 
-## What OPI produces?
+## What OPI produces
 
-- OPI can produce secure provisioning server/vm/container that follows some well defined SPEC
-- Any other implementation of the secure provisioning server/vm/container is also acceptable if follows same SPEC
-- xPU vendors will adopt their implementation to meet this secure provisioning server/vm/container
+- OPI implements and mantains vendor agnostic "SZTP AGENT" open source code based on the spec above to perform the onboarding of DPUs
+- OPI standardizes "SZTP AGENT" interactions with DPU environment (like TPM, SMBIOS, and so on)
+- OPI mandates DPU vendors to integrate "SZTP AGENT" in the factory into base OS or BMC image
+- OPI mandates DPU vendors to store IDevID into DPU's TPM
+- OPI can optionally produce secure provisioning server that follows the above spec
+  - Any other implementation of the secure provisioning server is also acceptable
+  - For example, <https://pypi.org/project/sztpd>
 - Provisioning companies/customers will use API defined to the secure provisioning server/vm/container to integrate in their existing provisioning methods
-- Another option would be to actually implement a generic *client* to consume this SPEC/protocol and facilitate provisioning. Obviously there will be parts of the provisioning process that are propiertary, but surely most of it can be vendor-agnostic, based on the spec.
-
-- OPI can also produce an agent (container/service) for Standard Inventory Query that everybody (existing provisioning systems) can query
-
-what is the adoption rate of UEFI on DPUs or IPUs? Should it be relied upon?
-
-## TBD
-
-tbd
