@@ -13,7 +13,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -57,7 +56,7 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 	r.SetBasicAuth(a.GetSerialNumber(), a.GetDevicePassword())
 	r.Header.Add("Content-Type", a.GetContentTypeReq())
 
-	caCert, _ := ioutil.ReadFile(a.GetBootstrapTrustAnchorCert())
+	caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 	cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
