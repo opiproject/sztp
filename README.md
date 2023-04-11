@@ -20,6 +20,7 @@ See [CONTRIBUTING](https://github.com/opiproject/opi/blob/main/CONTRIBUTING.md) 
 
 * [RFC 8572](https://www.rfc-editor.org/rfc/pdfrfc/rfc8572.txt.pdf)
 * [Watsen SZTPD](https://watsen.net/docs/sztpd/0.0.11/admin-guide/#simulator)
+* [cizsle | Cisco ZTP Server](https://pypi.org/project/cizsle)
 * [Juniper](https://www.juniper.net/documentation/us/en/software/junos/junos-install-upgrade/topics/concept/secure-ztp-understanding.html)
 * [Cisco](https://gestaltit.com/events/sulagna/secure-zero-touch-provisioning-with-ciscos-implementation-on-ios-xr)
 * [Nokia](https://infocenter.nokia.com/public/7750SR2110R1A/index.jsp?topic=%2Fcom.nokia.Basic_System_Configuration_Guide_21.10.R1%2Fsecure_ztp.html)
