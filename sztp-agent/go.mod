@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/TwiN/go-color v1.4.0
 	github.com/github/smimesign v0.2.0
-	github.com/jaypipes/ghw v0.10.0
+	github.com/jaypipes/ghw v0.11.0
 	github.com/spf13/cobra v1.7.0
 )
 
