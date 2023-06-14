@@ -1,0 +1,13 @@
+name: CodeQL
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  call:
+    uses: opiproject/opi-smbios-bridge/.github/workflows/codeql.yml@main
+    secrets: inherit
