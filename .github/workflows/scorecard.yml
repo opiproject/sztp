@@ -1,0 +1,22 @@
+name: OpenSSF
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    permissions:
+      # Keep in sync with opi-smbios-bridge, no direct way to inherit permissions
+      contents: read
+      security-events: write
+      id-token: write
+      actions: read
+    uses: opiproject/opi-smbios-bridge/.github/workflows/scorecard.yml@main
+    secrets: inherit
