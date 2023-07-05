@@ -1,6 +1,7 @@
 # Secure Zero Touch Provisioning (sZTP)
 
 [![Linters](https://github.com/opiproject/sztp/actions/workflows/linters.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/linters.yml)
+[![CodeQL](https://github.com/opiproject/sztp/actions/workflows/codeql.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/codeql.yml)
 [![Sztp](https://github.com/opiproject/sztp/actions/workflows/sztp.yml/badge.svg)](https://github.com/opiproject/sztp/actions/workflows/go.yml)
 [![License](https://img.shields.io/github/license/opiproject/sztp?style=flat-square&color=blue&label=License)](https://github.com/opiproject/sztp/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/opiproject/sztp/branch/main/graph/badge.svg)](https://codecov.io/gh/opiproject/sztp)
