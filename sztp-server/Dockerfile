@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2022 Dell Inc, or its subsidiaries.
 
-FROM ghcr.io/opiproject/sztpd:main@sha256:9426202143bdd4dfbaeb2303fff29f95e2f687f2f20f2256e9c4956e0f44fb83
+FROM ghcr.io/opiproject/sztpd:main@sha256:d5970a9f900bf1894c4d4e35fb201873e4d155f9f921d891cf335225592ae36b
 
 RUN apt-get update && apt-get install -y --no-install-recommends make && rm -rf /var/lib/apt/lists/*
 
