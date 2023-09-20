@@ -1,0 +1,60 @@
+# This file contains all available configuration options
+# with their default values.
+
+# options for analysis running
+run:
+
+# output configuration options
+output:
+  # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
+  format: colored-line-number
+
+linters-settings:
+  funlen:
+    lines: 150
+    statements: 120
+  dupl:
+    threshold: 200
+  gocognit:
+    min-complexity: 32
+
+linters:
+  enable:
+    - bodyclose
+    - dogsled
+    - errcheck
+    - exportloopref
+    - funlen
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - prealloc
+    - revive
+    - staticcheck
+    - stylecheck
+    - unconvert
+    - unparam
+    - whitespace
+
+issues:
+  # Independently from option `exclude` we use default exclude patterns,
+  # it can be disabled by this option. To list all
+  # excluded by default patterns execute `golangci-lint run --help`.
+  # Default value for this option is true.
+  exclude-use-default: false
+
+  # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
+  max-issues-per-linter: 0
+
+  # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
+  max-same-issues: 0
