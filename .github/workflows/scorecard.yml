@@ -9,5 +9,5 @@ on:
 
 jobs:
   call:
-    uses: opiproject/opi-smbios-bridge/.github/workflows/scorecard.yml@main
+    uses: opiproject/actions/.github/workflows/scorecard.yml@main
     secrets: inherit

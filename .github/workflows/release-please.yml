@@ -11,5 +11,5 @@ permissions:
 
 jobs:
   call:
-    uses: opiproject/opi-smbios-bridge/.github/workflows/release-please.yml@main
+    uses: opiproject/actions/.github/workflows/release-please.yml@main
     secrets: inherit

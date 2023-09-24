@@ -12,5 +12,5 @@ permissions:
 
 jobs:
   call:
-    uses: opiproject/opi-smbios-bridge/.github/workflows/commitlint.yml@main
+    uses: opiproject/actions/.github/workflows/commitlint.yml@main
     secrets: inherit
