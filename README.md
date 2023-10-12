@@ -53,6 +53,8 @@ graph LR;
 
 ## Aliases
 
+:exclamation: `docker-compose` is deprecated. For details, see [Migrate to Compose V2](https://docs.docker.com/compose/migrate/).
+
 ```text
 command -v docker-compose || { shopt -s expand_aliases && alias docker-compose='docker compose'; }
 ```
