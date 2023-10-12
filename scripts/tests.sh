@@ -29,7 +29,7 @@ docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases | grep sztp-
 REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases | grep sztp-redirect-urls | head -n 1 | awk '{print $3}' | tr -d '";')
 
 # read back to check configuration was set
-docker-compose exec -T bootstrap curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7080/restconf/ds/ietf-datastores:running
+docker-compose exec -T redirecter curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would) and see it is redirect
 docker-compose run -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${REDIRECT}" | tee /tmp/post_rpc_input.json

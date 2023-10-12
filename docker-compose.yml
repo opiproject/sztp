@@ -29,7 +29,7 @@ services:
       context: sztp-server
     environment:
       SZTPD_INIT_PORT: 6080
-      SZTPD_NBI_PORT: 7080
+      SZTPD_NBI_PORT: 7070
       SZTPD_SBI_PORT: 8080
       SZTPD_INIT_MODE: 1
       SZTPD_ACCEPT_CONTRACT: "Yes"
