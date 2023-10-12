@@ -17,6 +17,7 @@ func NewRunCommand() *cobra.Command {
 	var (
 		bootstrapURL             string
 		serialNumber             string
+		dhcpLeaseFile            string
 		devicePassword           string
 		devicePrivateKey         string
 		deviceEndEntityCert      string
@@ -27,7 +28,7 @@ func NewRunCommand() *cobra.Command {
 		Use:   "run",
 		Short: "Exec the run command",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommand()
 		},
 	}
@@ -37,6 +38,7 @@ func NewRunCommand() *cobra.Command {
 	// Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
 	flags.StringVar(&bootstrapURL, "bootstrap-url", "", "Bootstrap server URL")
 	flags.StringVar(&serialNumber, "serial-number", "", "Device's serial number")
+	flags.StringVar(&dhcpLeaseFile, "dhcp-lease-file", "/var/lib/dhclient/dhclient.leases", "Device's dhclient leases file")
 	flags.StringVar(&devicePassword, "device-password", "", "Device's password")
 	flags.StringVar(&devicePrivateKey, "device-private-key", "", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "", "Device's End Entity cert")

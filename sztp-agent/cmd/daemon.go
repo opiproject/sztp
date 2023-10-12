@@ -17,6 +17,7 @@ func NewDaemonCommand() *cobra.Command {
 	var (
 		bootstrapURL             string
 		serialNumber             string
+		dhcpLeaseFile            string
 		devicePassword           string
 		devicePrivateKey         string
 		deviceEndEntityCert      string
@@ -27,7 +28,7 @@ func NewDaemonCommand() *cobra.Command {
 		Use:   "daemon",
 		Short: "Run the daemon command",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommandDaemon()
 		},
 	}
@@ -36,6 +37,7 @@ func NewDaemonCommand() *cobra.Command {
 	// TODO this options should be retrieved automatically instead of requests in the agent
 	// Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
 	flags.StringVar(&serialNumber, "serial-number", "my-serial-number", "Device's serial number")
+	flags.StringVar(&dhcpLeaseFile, "dhcp-lease-file", "/var/lib/dhclient/dhclient.leases", "Device's dhclient leases file")
 	flags.StringVar(&devicePassword, "device-password", "my-secret", "Device's password")
 	flags.StringVar(&devicePrivateKey, "device-private-key", "/private_key.pem", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/my_cert.pem", "Device's End Entity cert")
