@@ -51,6 +51,12 @@ graph LR;
 
 ![xPU sZTP provisioning block](./doc/sZTP-provisioning-blocks.png)
 
+## Aliases
+
+```text
+command -v docker-compose || { shopt -s expand_aliases && alias docker-compose='docker compose'; }
+```
+
 ## Run everything
 
 ```text
