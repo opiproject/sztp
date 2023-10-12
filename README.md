@@ -69,7 +69,7 @@ docker-compose up --build
 ## Test everything
 
 ```text
-./tests.sh
+./scripts/tests.sh
 ```
 
 ## Run sZTP (Bootstrap) Server only
