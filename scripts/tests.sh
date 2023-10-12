@@ -21,7 +21,7 @@ sleep 5
 
 # tests mDNS client
 docker-compose run --rm -T nmapmdnsclient
-docker-compose run --rm -T nmapmdnsclient | grep sztp_avahi_1.sztp_opi
+docker-compose run --rm -T nmapmdnsclient | grep sztp_opi
 
 # tests dhcp client
 docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases
