@@ -8,11 +8,10 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 const (
-	CONTENT_TYPE_YANG   = "application/yang-data+json"
-	OS_RELEASE_FILE     = "/etc/os-release"
-	DHCLIENT_LEASE_FILE = "/var/lib/dhclient/dhclient.leases" // By now default, but could be passed by params to get from os
-	SZTP_REDIRECT_URL   = "sztp-redirect-urls"
-	ARTIFACTS_PATH      = "/tmp/"
+	CONTENT_TYPE_YANG = "application/yang-data+json"
+	OS_RELEASE_FILE   = "/etc/os-release"
+	SZTP_REDIRECT_URL = "sztp-redirect-urls"
+	ARTIFACTS_PATH    = "/tmp/"
 )
 
 type ProgressType int64
@@ -174,7 +173,7 @@ type Agent struct {
 
 }
 
-func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
+func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
 	return &Agent{
 		BootstrapURL:                  bootstrapURL,
 		SerialNumber:                  serialNumber,
@@ -184,7 +183,7 @@ func NewAgent(bootstrapURL, serialNumber, devicePassword, devicePrivateKey, devi
 		BootstrapTrustAnchorCert:      bootstrapTrustAnchorCert,
 		ContentTypeReq:                CONTENT_TYPE_YANG,
 		InputJSONContent:              generateInputJSONContent(),
-		DhcpLeaseFile:                 DHCLIENT_LEASE_FILE,
+		DhcpLeaseFile:                 dhcpLeaseFile,
 		ProgressJSON:                  ProgressJSON{},
 		BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},

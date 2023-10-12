@@ -35,7 +35,7 @@ func TestAgent_RunCommand(t *testing.T) {
 				BootstrapTrustAnchorCert:      "trustAnchorCert",
 				ContentTypeReq:                "application/json",
 				InputJSONContent:              generateInputJSONContent(),
-				DhcpLeaseFile:                 DHCLIENT_LEASE_FILE,
+				DhcpLeaseFile:                 "DHCPLEASEFILE",
 				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
