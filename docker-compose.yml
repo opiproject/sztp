@@ -18,6 +18,8 @@ services:
       SZTPD_INIT_ADDR: 0.0.0.0
       SZTPD_OPI_MODE: "running"
       SZTPD_RETRY_ATTEMPTS: 30
+    ports:
+      - 9090:9090
     networks:
       - opi
     healthcheck:
@@ -38,6 +40,8 @@ services:
       BOOTSVR_ADDR: "bootstrap"
       SZTPD_OPI_MODE: "redirect"
       SZTPD_RETRY_ATTEMPTS: 30
+    ports:
+      - 8080:8080
     networks:
       - opi
     healthcheck:
@@ -56,6 +60,8 @@ services:
     cap_add:
       - CAP_NET_BIND_SERVICE
       - CAP_NET_RAW
+    ports:
+      - 67:67/udp
     networks:
       - opi
     command: sh -e -u -x -c 'touch /var/lib/dhcp/dhcpd.leases && eval "echo \"$$(cat /opt/dhcpd.conf.template)\"" > /etc/dhcp/dhcpd.conf && dhcpd -d'
@@ -76,6 +82,8 @@ services:
     image: docker.io/library/httpd:2.4.57-alpine3.17
     volumes:
       - ./sztp-server/config/my-boot-image.img:/usr/local/apache2/htdocs/my-boot-image.img
+    ports:
+      - 80:80
     networks:
       - opi
 
