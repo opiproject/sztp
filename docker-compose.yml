@@ -19,6 +19,7 @@ services:
       SZTPD_OPI_MODE: "running"
       SZTPD_RETRY_ATTEMPTS: 30
     ports:
+      - 7080:7080
       - 9090:9090
     networks:
       - opi
