@@ -47,6 +47,9 @@ curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+j
 # change boot image from https://www.watsen.net/docs/sztpd/current/admin-guide/#example-put-ing-an-entry-before-another-entry
 curl -i -X PUT --user my-admin@example.com:my-secret --data @/tmp/boot-images.json -H 'Content-Type:application/yang-data+json' ${BOOTSTRAP_URL}/wn-sztpd-1:boot-images | tee /tmp/result.json
 
+# check for errors
+grep -v "error-message" /tmp/result.json
+
 # read back to check configuration was set
 curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" ${BOOTSTRAP_URL} > /tmp/running_after.json
 
