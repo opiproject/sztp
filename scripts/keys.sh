@@ -19,5 +19,9 @@ docker-compose cp bootstrap:/tmp/sztpd-simulator/pki/client/end-entity/my_cert.p
 docker-compose cp bootstrap:/tmp/sztpd-simulator/pki/client/end-entity/private_key.pem /tmp/opi_private_key.pem
 
 # you can scp them into DPU now...
+echo ==================================
+echo You can now SCP pem files to the real DPU
+echo sshpass -p dpupass ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=3 /tmp/opi*.pem dpuser@[dpu-ip]:~
+echo ==================================
 
 echo "DONE"
