@@ -24,6 +24,7 @@ RUN echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf && \
 
 # configurations, images, templates
 COPY config/ /tmp/
+COPY images/ /media/
 
 # generate static template
 
@@ -35,7 +36,7 @@ RUN \
     BOOTSVR_TA_CERT_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
     CLIENT_CERT_TA_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
     envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64,$BOOTSVR_TA_CERT_B64' < /tmp/sztpd.redirect.json.template > /tmp/redirect.json.static && \
-    BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /tmp/my-boot-image.img | awk '{print $2}'` \
+    BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /media/my-boot-image.img | awk '{print $2}'` \
     PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-pre-configuration-script.sh` \
     POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-post-configuration-script.sh` \
     CONFIG_B64=`openssl enc -base64 -A -in /tmp/my-configuration.xml` \

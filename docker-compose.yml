@@ -82,7 +82,7 @@ services:
   web:
     image: docker.io/library/httpd:2.4.57-alpine3.17
     volumes:
-      - ./sztp-server/config/my-boot-image.img:/usr/local/apache2/htdocs/my-boot-image.img
+      - ./sztp-server/images:/usr/local/apache2/htdocs
     ports:
       - 80:80
     networks:
