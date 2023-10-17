@@ -13,7 +13,9 @@ sleep 5
 # print for debug
 docker-compose ps
 
-# test dhcp server
+# TODO: start using https://github.com/usnistgov/iDevIDCerts to generate all keys and certificates
+
+# extract PEM files from the running docker image
 docker-compose cp bootstrap:/opi.pem /tmp/opi.pem
 docker-compose cp bootstrap:/tmp/sztpd-simulator/pki/client/end-entity/my_cert.pem /tmp/opi_cert.pem
 docker-compose cp bootstrap:/tmp/sztpd-simulator/pki/client/end-entity/private_key.pem /tmp/opi_private_key.pem
