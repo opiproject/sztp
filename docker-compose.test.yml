@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+---
+version: '3.7'
+
+services:
+
+  nmap:
+    image: docker.io/instrumentisto/nmap:7.94
+    networks:
+      - opi
+    command: --script broadcast-dhcp-discover
+
+  nmapmdnsclient:
+    image: docker.io/instrumentisto/nmap:7.94
+    networks:
+      - opi
+    command: --script=dns-service-discovery -p 5353 avahi
+
+  client:
+    image: docker.io/modularitycontainers/dhcp-client:latest
+    cap_add:
+      - CAP_NET_RAW
+    volumes:
+      - dhcp-leases-folder:/var/lib/dhclient/
+      - ./dhcp/dhclient.conf:/etc/dhcp/dhclient.conf
+    networks:
+      - opi
+    command: dhclient -d -v
+
+  agent:
+    image: ghcr.io/opiproject/opi-sztp-client:main
+    build:
+      context: sztp-agent
+    depends_on:
+      bootstrap:
+        condition: service_healthy
+      redirecter:
+        condition: service_healthy
+    volumes_from:
+      - client
+    networks:
+      - opi
+    command: ['/opi-sztp-agent', 'daemon']
+
+volumes:
+  dhcp-leases-folder:

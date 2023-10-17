@@ -67,18 +67,6 @@ services:
       - opi
     command: sh -e -u -x -c 'touch /var/lib/dhcp/dhcpd.leases && eval "echo \"$$(cat /opt/dhcpd.conf.template)\"" > /etc/dhcp/dhcpd.conf && dhcpd -d'
 
-  nmap:
-    image: docker.io/instrumentisto/nmap:7.94
-    networks:
-      - opi
-    command: --script broadcast-dhcp-discover
-
-  nmapmdnsclient:
-    image: docker.io/instrumentisto/nmap:7.94
-    networks:
-      - opi
-    command: --script=dns-service-discovery -p 5353 avahi
-
   web:
     image: docker.io/library/httpd:2.4.57-alpine3.17
     volumes:
@@ -88,41 +76,12 @@ services:
     networks:
       - opi
 
-  client:
-    image: docker.io/modularitycontainers/dhcp-client:latest
-    cap_add:
-      - CAP_NET_RAW
-    volumes:
-      - dhcp-leases-folder:/var/lib/dhclient/
-      - ./dhcp/dhclient.conf:/etc/dhcp/dhclient.conf
-    networks:
-      - opi
-    command: dhclient -d -v
-
-  agent:
-    image: ghcr.io/opiproject/opi-sztp-client:main
-    build:
-      context: sztp-agent
-    depends_on:
-      bootstrap:
-        condition: service_healthy
-      redirecter:
-        condition: service_healthy
-    volumes_from:
-      - client
-    networks:
-      - opi
-    command: ['/opi-sztp-agent', 'daemon']
-
   avahi:
     image: docker.io/flungo/avahi:latest
     environment:
       SERVER_HOST_NAME: "opi"
     networks:
       - opi
-
-volumes:
-  dhcp-leases-folder:
 
 networks:
   opi:
