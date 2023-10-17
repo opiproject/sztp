@@ -14,7 +14,7 @@ sleep 5
 docker-compose ps
 
 # define values
-BOOT_IMG_FULL_PATH=../sztp-server/conf/my-second-boot-image.img
+BOOT_IMG_FULL_PATH=../sztp-server/images/my-second-boot-image.img
 BOOTSTRAP_URL=http://localhost:7080/restconf/ds/ietf-datastores:running
 BOOT_IMG_PATH=$(basename ${BOOT_IMG_FULL_PATH})
 BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c ${BOOT_IMG_FULL_PATH} | awk '{print $2}'`
