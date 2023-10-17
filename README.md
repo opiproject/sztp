@@ -59,11 +59,23 @@ graph LR;
 command -v docker-compose || { shopt -s expand_aliases && alias docker-compose='docker compose'; }
 ```
 
+## Before start
+
+Change in `docker-compose.yml` file those settings per your lab:
+
+```text
+      NODE_IP_SUBNET: 10.127.127.0
+      NODE_IP_NETMASK: 255.255.255.0
+      NODE_IP_RANGE_MIN: 10.127.127.100
+      NODE_IP_RANGE_MAX: 10.127.127.253
+      NODE_IP_ADDRESS: 10.127.127.3
+```
+
 ## Run everything
 
 ```text
-docker-compose down --volumes
-docker-compose up --build
+docker-compose down --volumes --remove-orphans
+docker-compose up --build --force-recreate
 ```
 
 ## Test everything
