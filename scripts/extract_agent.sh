@@ -22,7 +22,7 @@ file /tmp/opi-sztp-agent
 # you can scp it into DPU now...
 echo ==================================
 echo You can now SCP pem files to the real DPU
-echo sshpass -p dpupass ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=3 /tmp/opi-sztp-agent dpuser@[dpu-ip]:~
+echo sshpass -p dpupass ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=3 /tmp/opi-sztp-agent dpuser@dpu-ip:~
 echo ==================================
 
 echo "DONE"
