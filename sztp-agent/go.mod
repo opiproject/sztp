@@ -6,7 +6,7 @@ require (
 	github.com/TwiN/go-color v1.4.1
 	github.com/github/smimesign v0.2.0
 	github.com/jaypipes/ghw v0.12.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 )
 
 require (
