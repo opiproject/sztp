@@ -148,6 +148,27 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 			ConveyedInformation: "{wrongBASE64}",
 		},
 	}
+	expectedError := BootstrapServerErrorOutput{
+		IetfRestconfErrors: struct {
+			Error []struct {
+				ErrorType    string `json:"error-type"`
+				ErrorTag     string `json:"error-tag"`
+				ErrorMessage string `json:"error-message"`
+			} `json:"error"`
+		}{
+			Error: []struct {
+				ErrorType    string `json:"error-type"`
+				ErrorTag     string `json:"error-tag"`
+				ErrorMessage string `json:"error-message"`
+			}{
+				{
+					ErrorType:    "protocol",
+					ErrorTag:     "access-denied",
+					ErrorMessage: "failed",
+				},
+			},
+		},
+	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, pass, _ := r.BasicAuth()
 		log.Println(user, pass)
@@ -162,6 +183,9 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		case (user + ":" + pass) == "KOBASE64:KO":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedFailedBase64)
+		case (user + ":" + pass) == "KO:KO":
+			w.WriteHeader(401)
+			output, _ = json.Marshal(expectedError)
 		default:
 			w.WriteHeader(400)
 			output, _ = json.Marshal(expectedOnboarding)
