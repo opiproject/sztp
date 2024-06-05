@@ -9,11 +9,13 @@ package secureagent
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"github.com/jaypipes/ghw"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -46,6 +48,7 @@ func extractfromLine(line, regex string, index int) string {
 
 func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapServerPostOutput, error) {
 	var postResponse BootstrapServerPostOutput
+	var errorResponse BootstrapServerErrorOutput
 
 	body := strings.NewReader(input)
 	r, err := http.NewRequest(http.MethodPost, url, body)
@@ -74,20 +77,36 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 		log.Println("Error doing the request", err.Error())
 		return nil, err
 	}
+	defer res.Body.Close()
 
-	decoder := json.NewDecoder(res.Body)
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("Error reading the request", err.Error())
+		return nil, err
+	}
+
+	decoder := json.NewDecoder(bytes.NewReader(bodyBytes))
 	decoder.DisallowUnknownFields()
 	if !empty {
 		derr := decoder.Decode(&postResponse)
 		if derr != nil {
-			return nil, derr
+			errdecoder := json.NewDecoder(bytes.NewReader(bodyBytes))
+			errdecoder.DisallowUnknownFields()
+			eerr := errdecoder.Decode(&errorResponse)
+			if eerr != nil {
+				log.Println("Received unknown response", string(bodyBytes))
+				return nil, derr
+			}
+			return nil, errors.New("[ERROR] Expected conveyed-information" +
+				", received error type=" + errorResponse.IetfRestconfErrors.Error[0].ErrorType +
+				", tag=" + errorResponse.IetfRestconfErrors.Error[0].ErrorTag +
+				", message=" + errorResponse.IetfRestconfErrors.Error[0].ErrorMessage)
 		}
 		log.Println(postResponse)
 	}
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New("[ERROR] Status code received: " + strconv.Itoa(res.StatusCode) + " ...but status code expected: " + strconv.Itoa(http.StatusOK))
 	}
-	defer res.Body.Close()
 	return &postResponse, nil
 }
 
