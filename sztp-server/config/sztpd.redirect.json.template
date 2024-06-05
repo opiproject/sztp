@@ -124,6 +124,44 @@
                       }
                   ]
               }
+          },
+          {
+              "serial-number": "second-serial-number",
+              "device-type": "my-device-type",
+              "activation-code": "$0$my-secret",
+              "response-manager": {
+                  "matched-response": [
+                      {
+                          "name": "catch-all-response",
+                          "response": {
+                              "conveyed-information": {
+                                  "redirect-information": {
+                                      "reference": "my-redirect-information"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          {
+              "serial-number": "third-serial-number",
+              "device-type": "my-device-type",
+              "activation-code": "$0$my-secret",
+              "response-manager": {
+                  "matched-response": [
+                      {
+                          "name": "catch-all-response",
+                          "response": {
+                              "conveyed-information": {
+                                  "redirect-information": {
+                                      "reference": "my-redirect-information"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
           }
       ]
   },

@@ -36,15 +36,23 @@ RUN \
     BOOTSVR_TA_CERT_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
     CLIENT_CERT_TA_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
     envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64,$BOOTSVR_TA_CERT_B64' < /tmp/sztpd.redirect.json.template > /tmp/redirect.json.static && \
-    BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /media/my-boot-image.img | awk '{print $2}'` \
-    PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-pre-configuration-script.sh` \
-    POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-post-configuration-script.sh` \
-    CONFIG_B64=`openssl enc -base64 -A -in /tmp/my-configuration.xml` \
+    FIRST_BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /media/first-boot-image.img | awk '{print $2}'` \
+    FIRST_PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/first-pre-configuration-script.sh` \
+    FIRST_POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/first-post-configuration-script.sh` \
+    FIRST_CONFIG_B64=`openssl enc -base64 -A -in /tmp/first-configuration.xml` \
+    SECOND_BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /media/second-boot-image.img | awk '{print $2}'` \
+    SECOND_PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/second-pre-configuration-script.sh` \
+    SECOND_POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/second-post-configuration-script.sh` \
+    SECOND_CONFIG_B64=`openssl enc -base64 -A -in /tmp/second-configuration.xml` \
+    THIRD_BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /media/third-boot-image.img | awk '{print $2}'` \
+    THIRD_PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/third-pre-configuration-script.sh` \
+    THIRD_POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/third-post-configuration-script.sh` \
+    THIRD_CONFIG_B64=`openssl enc -base64 -A -in /tmp/third-configuration.xml` \
     SBI_PRI_KEY_B64=`openssl enc -base64 -A -in sztpd1/sbi/end-entity/private_key.der` \
     SBI_PUB_KEY_B64=`openssl enc -base64 -A -in sztpd1/sbi/end-entity/public_key.der` \
     SBI_EE_CERT_B64=`openssl enc -base64 -A -in /tmp/cert_chain.cms` \
     CLIENT_CERT_TA_B64=`openssl enc -base64 -A -in /tmp/ta_cert_chain.cms` \
-    envsubst '$BOOT_IMG_HASH_VAL,$PRE_SCRIPT_B64,$POST_SCRIPT_B64,$CONFIG_B64,$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64' < /tmp/sztpd.running.json.template > /tmp/running.json.static
+    envsubst '$FIRST_BOOT_IMG_HASH_VAL,$FIRST_PRE_SCRIPT_B64,$FIRST_POST_SCRIPT_B64,$FIRST_CONFIG_B64,$SECOND_BOOT_IMG_HASH_VAL,$SECOND_PRE_SCRIPT_B64,$SECOND_POST_SCRIPT_B64,$SECOND_CONFIG_B64,$THIRD_BOOT_IMG_HASH_VAL,$THIRD_PRE_SCRIPT_B64,$THIRD_POST_SCRIPT_B64,$THIRD_CONFIG_B64,$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64' < /tmp/sztpd.running.json.template > /tmp/running.json.static
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

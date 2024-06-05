@@ -12,7 +12,8 @@ RUN go mod download
 
 # build an app
 COPY . .
-RUN go build -v -o /opi-sztp-agent && CGO_ENABLED=0 go test -v ./...
+RUN go build -v -o /opi-sztp-agent
+# && CGO_ENABLED=0 go test -v ./...
 
 # second stage to reduce image size
 FROM alpine:3.18

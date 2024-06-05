@@ -117,7 +117,45 @@
               "response": {
                 "conveyed-information": {
                   "onboarding-information": {
-                    "reference": "my-onboarding-information"
+                    "reference": "first-onboarding-information"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "serial-number": "second-serial-number",
+        "device-type": "my-device-type",
+        "activation-code": "$0$my-secret",
+        "response-manager": {
+          "matched-response": [
+            {
+              "name": "catch-all-response",
+              "response": {
+                "conveyed-information": {
+                  "onboarding-information": {
+                    "reference": "second-onboarding-information"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "serial-number": "third-serial-number",
+        "device-type": "my-device-type",
+        "activation-code": "$0$my-secret",
+        "response-manager": {
+          "matched-response": [
+            {
+              "name": "catch-all-response",
+              "response": {
+                "conveyed-information": {
+                  "onboarding-information": {
+                    "reference": "third-onboarding-information"
                   }
                 }
               }
@@ -130,15 +168,41 @@
   "wn-sztpd-1:boot-images": {
     "boot-image": [
       {
-        "name": "my-boot-image.img",
+        "name": "first-boot-image.img",
         "download-uri": [
-          "http://web:80/my-boot-image.img",
-          "ftp://web:82/my-boot-image.img"
+          "http://web:80/first-boot-image.img",
+          "ftp://web:82/first-boot-image.img"
         ],
         "image-verification": [
           {
             "hash-algorithm": "ietf-sztp-conveyed-info:sha-256",
-            "hash-value": "$BOOT_IMG_HASH_VAL"
+            "hash-value": "$FIRST_BOOT_IMG_HASH_VAL"
+          }
+        ]
+      },
+      {
+        "name": "second-boot-image.img",
+        "download-uri": [
+          "http://web:80/first-boot-image.img",
+          "ftp://web:82/first-boot-image.img"
+        ],
+        "image-verification": [
+          {
+            "hash-algorithm": "ietf-sztp-conveyed-info:sha-256",
+            "hash-value": "$SECOND_BOOT_IMG_HASH_VAL"
+          }
+        ]
+      },
+      {
+        "name": "third-boot-image.img",
+        "download-uri": [
+          "http://web:80/third-boot-image.img",
+          "ftp://web:82/third-boot-image.img"
+        ],
+        "image-verification": [
+          {
+            "hash-algorithm": "ietf-sztp-conveyed-info:sha-256",
+            "hash-value": "$THIRD_BOOT_IMG_HASH_VAL"
           }
         ]
       }
@@ -147,35 +211,79 @@
   "wn-sztpd-1:scripts": {
       "pre-configuration-script": [
           {
-              "name": "my-pre-configuration-script",
-              "script": "$PRE_SCRIPT_B64"
+              "name": "first-pre-configuration-script",
+              "script": "$FIRST_PRE_SCRIPT_B64"
+          },
+          {
+              "name": "second-pre-configuration-script",
+              "script": "$SECOND_PRE_SCRIPT_B64"
+          },
+          {
+              "name": "third-pre-configuration-script",
+              "script": "$THIRD_PRE_SCRIPT_B64"
           }
       ],
       "post-configuration-script": [
           {
-              "name": "my-post-configuration-script",
-              "script": "$POST_SCRIPT_B64"
+              "name": "first-post-configuration-script",
+              "script": "$FIRST_POST_SCRIPT_B64"
+          },
+          {
+              "name": "second-post-configuration-script",
+              "script": "$SECOND_POST_SCRIPT_B64"
+          },
+          {
+              "name": "third-post-configuration-script",
+              "script": "$THIRD_POST_SCRIPT_B64"
           }
       ]
   },
   "wn-sztpd-1:configurations": {
       "configuration": [
           {
-              "name": "my-configuration",
+              "name": "first-configuration",
               "configuration-handling": "merge",
-              "config": "$CONFIG_B64"
+              "config": "$FIRST_CONFIG_B64"
+          },
+          {
+              "name": "second-configuration",
+              "configuration-handling": "merge",
+              "config": "$SECOND_CONFIG_B64"
+          },
+          {
+              "name": "third-configuration",
+              "configuration-handling": "merge",
+              "config": "$THIRD_CONFIG_B64"
           }
       ]
   },
   "wn-sztpd-1:conveyed-information-responses": {
       "onboarding-information-response": [
           {
-              "name": "my-onboarding-information",
+              "name": "first-onboarding-information",
               "onboarding-information": {
-                  "boot-image": "my-boot-image.img",
-                  "pre-configuration-script": "my-pre-configuration-script",
-                  "configuration": "my-configuration",
-                  "post-configuration-script": "my-post-configuration-script"
+                  "boot-image": "first-boot-image.img",
+                  "pre-configuration-script": "first-pre-configuration-script",
+                  "configuration": "first-configuration",
+                  "post-configuration-script": "first-post-configuration-script"
+              }
+          },
+          {
+              "name": "second-onboarding-information",
+              "onboarding-information": {
+                  "boot-image": "second-boot-image.img",
+                  "pre-configuration-script": "second-pre-configuration-script",
+                  "configuration": "second-configuration",
+                  "post-configuration-script": "second-post-configuration-script"
+              }
+          },
+          {
+              "name": "third-onboarding-information",
+              "onboarding-information": {
+                  "boot-image": "third-boot-image.img",
+                  "pre-configuration-script": "third-pre-configuration-script",
+                  "configuration": "third-configuration",
+                  "post-configuration-script": "third-post-configuration-script"
               }
           }
       ]
