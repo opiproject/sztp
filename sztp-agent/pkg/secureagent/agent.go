@@ -156,6 +156,16 @@ type BootstrapServerPostOutput struct {
 	} `json:"ietf-sztp-bootstrap-server:output"`
 }
 
+type BootstrapServerErrorOutput struct {
+	IetfRestconfErrors struct {
+		Error []struct {
+			ErrorType    string `json:"error-type"`
+			ErrorTag     string `json:"error-tag"`
+			ErrorMessage string `json:"error-message"`
+		} `json:"error"`
+	} `json:"ietf-restconf:errors"`
+}
+
 // Agent is the basic structure to define an agent instance
 type Agent struct {
 	BootstrapURL                  string                        // Bootstrap complete URL
