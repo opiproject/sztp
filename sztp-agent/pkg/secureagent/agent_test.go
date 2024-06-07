@@ -893,6 +893,9 @@ func TestAgent_GetProgressJson(t *testing.T) {
 								KeyData   string `json:"key-data"`
 							} `json:"ssh-host-key,omitempty"`
 						} `json:"ssh-host-keys,omitempty"`
+						TrustAnchorCerts struct {
+							TrustAnchorCert []string `json:"trust-anchor-cert,omitempty"`
+						} `json:"trust-anchor-certs,omitempty"`
 					}{
 						ProgressType: "test",
 						Message:      "test",
@@ -909,6 +912,9 @@ func TestAgent_GetProgressJson(t *testing.T) {
 							KeyData   string `json:"key-data"`
 						} `json:"ssh-host-key,omitempty"`
 					} `json:"ssh-host-keys,omitempty"`
+					TrustAnchorCerts struct {
+						TrustAnchorCert []string `json:"trust-anchor-cert,omitempty"`
+					} `json:"trust-anchor-certs,omitempty"`
 				}{
 					ProgressType: "test",
 					Message:      "test",
@@ -980,6 +986,9 @@ func TestAgent_SetProgressJson(t *testing.T) {
 								KeyData   string `json:"key-data"`
 							} `json:"ssh-host-key,omitempty"`
 						} `json:"ssh-host-keys,omitempty"`
+						TrustAnchorCerts struct {
+							TrustAnchorCert []string `json:"trust-anchor-cert,omitempty"`
+						} `json:"trust-anchor-certs,omitempty"`
 					}{
 						ProgressType: "test",
 						Message:      "test",
@@ -997,6 +1006,9 @@ func TestAgent_SetProgressJson(t *testing.T) {
 								KeyData   string `json:"key-data"`
 							} `json:"ssh-host-key,omitempty"`
 						} `json:"ssh-host-keys,omitempty"`
+						TrustAnchorCerts struct {
+							TrustAnchorCert []string `json:"trust-anchor-cert,omitempty"`
+						} `json:"trust-anchor-certs,omitempty"`
 					}{
 						ProgressType: "testNew",
 						Message:      "testNew",
