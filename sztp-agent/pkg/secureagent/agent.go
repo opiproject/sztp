@@ -111,6 +111,12 @@ type ProgressJSON struct {
 	IetfSztpBootstrapServerInput struct {
 		ProgressType string `json:"progress-type"`
 		Message      string `json:"message"`
+		SSHHostKeys  struct {
+			SSHHostKey []struct {
+				Algorithm string `json:"algorithm"`
+				KeyData   string `json:"key-data"`
+			} `json:"ssh-host-key,omitempty"`
+		} `json:"ssh-host-keys,omitempty"`
 	} `json:"ietf-sztp-bootstrap-server:input"`
 }
 

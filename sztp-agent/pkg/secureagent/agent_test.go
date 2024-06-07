@@ -886,6 +886,12 @@ func TestAgent_GetProgressJson(t *testing.T) {
 					IetfSztpBootstrapServerInput: struct {
 						ProgressType string `json:"progress-type"`
 						Message      string `json:"message"`
+						SSHHostKeys  struct {
+							SSHHostKey []struct {
+								Algorithm string `json:"algorithm"`
+								KeyData   string `json:"key-data"`
+							} `json:"ssh-host-key,omitempty"`
+						} `json:"ssh-host-keys,omitempty"`
 					}{
 						ProgressType: "test",
 						Message:      "test",
@@ -896,6 +902,12 @@ func TestAgent_GetProgressJson(t *testing.T) {
 				IetfSztpBootstrapServerInput: struct {
 					ProgressType string `json:"progress-type"`
 					Message      string `json:"message"`
+					SSHHostKeys  struct {
+						SSHHostKey []struct {
+							Algorithm string `json:"algorithm"`
+							KeyData   string `json:"key-data"`
+						} `json:"ssh-host-key,omitempty"`
+					} `json:"ssh-host-keys,omitempty"`
 				}{
 					ProgressType: "test",
 					Message:      "test",
@@ -961,6 +973,12 @@ func TestAgent_SetProgressJson(t *testing.T) {
 					IetfSztpBootstrapServerInput: struct {
 						ProgressType string `json:"progress-type"`
 						Message      string `json:"message"`
+						SSHHostKeys  struct {
+							SSHHostKey []struct {
+								Algorithm string `json:"algorithm"`
+								KeyData   string `json:"key-data"`
+							} `json:"ssh-host-key,omitempty"`
+						} `json:"ssh-host-keys,omitempty"`
 					}{
 						ProgressType: "test",
 						Message:      "test",
@@ -972,6 +990,12 @@ func TestAgent_SetProgressJson(t *testing.T) {
 					IetfSztpBootstrapServerInput: struct {
 						ProgressType string `json:"progress-type"`
 						Message      string `json:"message"`
+						SSHHostKeys  struct {
+							SSHHostKey []struct {
+								Algorithm string `json:"algorithm"`
+								KeyData   string `json:"key-data"`
+							} `json:"ssh-host-key,omitempty"`
+						} `json:"ssh-host-keys,omitempty"`
 					}{
 						ProgressType: "testNew",
 						Message:      "testNew",
@@ -995,7 +1019,7 @@ func TestAgent_SetProgressJson(t *testing.T) {
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
 			a.SetProgressJSON(tt.args.p)
-			if a.GetProgressJSON() != tt.args.p {
+			if ! reflect.DeepEqual(a.GetProgressJSON(), tt.args.p) {
 				t.Errorf("SetProgressJson = %v, want %v", a.GetProgressJSON(), tt.args.p)
 			}
 		})
