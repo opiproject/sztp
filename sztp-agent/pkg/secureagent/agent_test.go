@@ -1019,7 +1019,7 @@ func TestAgent_SetProgressJson(t *testing.T) {
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
 			a.SetProgressJSON(tt.args.p)
-			if ! reflect.DeepEqual(a.GetProgressJSON(), tt.args.p) {
+			if !reflect.DeepEqual(a.GetProgressJSON(), tt.args.p) {
 				t.Errorf("SetProgressJson = %v, want %v", a.GetProgressJSON(), tt.args.p)
 			}
 		})
