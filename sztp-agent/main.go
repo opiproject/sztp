@@ -11,9 +11,10 @@ import (
 	"github.com/TwiN/go-color"
 	"github.com/opiproject/sztp/sztp-agent/cmd"
 
-	"github.com/spf13/cobra"
 	"log"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func main() {

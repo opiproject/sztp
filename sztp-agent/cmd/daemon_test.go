@@ -3,9 +3,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"reflect"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestNewDaemonCommand(t *testing.T) {

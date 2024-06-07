@@ -15,7 +15,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/github/smimesign/ietf-cms/protocol"
 	"io"
 	"log"
 	"net/http"
@@ -27,6 +26,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/github/smimesign/ietf-cms/protocol"
 )
 
 const (
