@@ -4,7 +4,8 @@ Copyright (C) 2022-2023 Intel Corporation
 Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
-// Package secureAgent implements the secure agent
+
+// Package secureagent implements the secure agent
 package secureagent
 
 import (
@@ -81,7 +82,11 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 		log.Println("Error doing the request", err.Error())
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			log.Println("Error when closing:", err)
+		}
+	}()
 
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
