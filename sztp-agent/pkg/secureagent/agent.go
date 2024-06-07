@@ -118,6 +118,9 @@ type ProgressJSON struct {
 				KeyData   string `json:"key-data"`
 			} `json:"ssh-host-key,omitempty"`
 		} `json:"ssh-host-keys,omitempty"`
+		TrustAnchorCerts struct {
+			TrustAnchorCert []string `json:"trust-anchor-cert,omitempty"`
+		} `json:"trust-anchor-certs,omitempty"`
 	} `json:"ietf-sztp-bootstrap-server:input"`
 }
 
