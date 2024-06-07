@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (C) 2022-2023 Red Hat.
+
+// Package secureagent implements the secure agent
 package secureagent
 
 import "testing"
