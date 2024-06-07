@@ -65,7 +65,7 @@ func (a *Agent) RunCommandDaemon() error {
 	if err != nil {
 		return err
 	}
-	// _ = a.doReportProgress(ProgressTypeBootstrapComplete)
+	_ = a.doReportProgress(ProgressTypeBootstrapComplete, true)
 	return nil
 }
 
@@ -88,10 +88,10 @@ func (a *Agent) getBootstrapURL() error {
 	return nil
 }
 
-func (a *Agent) doReportProgress(s ProgressType) error {
+func (a *Agent) doReportProgress(s ProgressType, needssh bool) error {
 	log.Println("[INFO] Starting the Report Progress request.")
 	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
-	a.SetProgressJSON(ProgressJSON{
+	p := ProgressJSON{
 		IetfSztpBootstrapServerInput: struct {
 			ProgressType string `json:"progress-type"`
 			Message      string `json:"message"`
@@ -105,7 +105,28 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 			ProgressType: s.String(),
 			Message:      "message sent via JSON",
 		},
-	})
+	}
+	if needssh {
+		// TODO: generate real key here
+		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
+		p.IetfSztpBootstrapServerInput.SSHHostKeys = struct {
+			SSHHostKey []struct {
+				Algorithm string `json:"algorithm"`
+				KeyData   string `json:"key-data"`
+			} `json:"ssh-host-key,omitempty"`
+		}{
+			SSHHostKey: []struct {
+				Algorithm string `json:"algorithm"`
+				KeyData   string `json:"key-data"`
+			}{
+				{
+					Algorithm: "ssh-rsa",
+					KeyData:   encodedKey,
+				},
+			},
+		}
+	}
+	a.SetProgressJSON(p)
 	inputJSON, _ := json.Marshal(a.GetProgressJSON())
 	res, err := a.doTLSRequest(string(inputJSON), url, true)
 	if err != nil {
@@ -150,7 +171,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
-	_ = a.doReportProgress(ProgressTypeBootstrapInitiated)
+	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, false)
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {
@@ -190,7 +211,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 //nolint:funlen
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
-	_ = a.doReportProgress(ProgressTypeBootImageInitiated)
+	_ = a.doReportProgress(ProgressTypeBootImageInitiated, false)
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -251,7 +272,7 @@ func (a *Agent) downloadAndValidateImage() error {
 				return errors.New("Checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
-			_ = a.doReportProgress(ProgressTypeBootImageComplete)
+			_ = a.doReportProgress(ProgressTypeBootImageComplete, false)
 			return nil
 		default:
 			return errors.New("Unsupported hash algorithm")
@@ -262,7 +283,7 @@ func (a *Agent) downloadAndValidateImage() error {
 
 func (a *Agent) copyConfigurationFile() error {
 	log.Println("[INFO] Starting the Copy Configuration.")
-	_ = a.doReportProgress(ProgressTypeConfigInitiated)
+	_ = a.doReportProgress(ProgressTypeConfigInitiated, false)
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -283,7 +304,7 @@ func (a *Agent) copyConfigurationFile() error {
 		return err
 	}
 	log.Println("[INFO] Configuration file copied successfully")
-	_ = a.doReportProgress(ProgressTypeConfigComplete)
+	_ = a.doReportProgress(ProgressTypeConfigComplete, false)
 	return nil
 }
 
@@ -303,7 +324,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		reportEnd = ProgressTypePreScriptComplete
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
-	_ = a.doReportProgress(reportStart)
+	_ = a.doReportProgress(reportStart, false)
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
 		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
@@ -330,7 +351,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		return err
 	}
 	log.Println(string(out)) // remove it
-	_ = a.doReportProgress(reportEnd)
+	_ = a.doReportProgress(reportEnd, false)
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }
