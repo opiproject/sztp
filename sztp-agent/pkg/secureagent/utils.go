@@ -50,6 +50,9 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 	var postResponse BootstrapServerPostOutput
 	var errorResponse BootstrapServerErrorOutput
 
+	log.Println("[DEBUG] Sending to: " + url)
+	log.Println("[DEBUG] Sending input: " + input)
+
 	body := strings.NewReader(input)
 	r, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
