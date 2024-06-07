@@ -330,16 +330,18 @@ func TestAgent_doReportProgress(t *testing.T) {
 		user, pass, _ := r.BasicAuth()
 		log.Println(user, pass)
 
-		if (user + ":" + pass) == "USER:PASS" {
+		switch {
+		case (user + ":" + pass) == "USER:PASS":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expected)
-		} else if (user + ":" + pass) == "KOBASE64:KO" {
+		case (user + ":" + pass) == "KOBASE64:KO":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedFailedBase64)
-		} else {
+		default:
 			w.WriteHeader(400)
 			output, _ = json.Marshal(expected)
 		}
+
 		_, err := fmt.Fprint(w, string(output))
 		if err != nil {
 			return
