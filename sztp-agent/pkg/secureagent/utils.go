@@ -14,7 +14,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
-	"github.com/jaypipes/ghw"
 	"io"
 	"log"
 	"net/http"
@@ -22,6 +21,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/jaypipes/ghw"
 )
 
 // Auxiliar function to get lines from file matching with the substr
