@@ -147,7 +147,10 @@ services:
         condition: service_healthy
       redirecter:
         condition: service_healthy
+      setup-cert:
+        condition: service_completed_successfully
     volumes:
+      - client-certs:/certs
       - dhcp-leases-folder:/var/lib/dhclient/
       - /etc/os-release:/etc/os-release
     networks:
