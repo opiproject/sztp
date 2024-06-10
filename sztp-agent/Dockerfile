@@ -24,11 +24,11 @@ COPY ./*.json /tmp/
 # hadolint ignore=DL3022
 COPY --from=builder /opi-sztp-agent /
 # hadolint ignore=DL3022
-COPY --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /opi.pem
+COPY --from=ghcr.io/opiproject/opi-sztp-server:main /opi.pem /certs/
 # hadolint ignore=DL3022
-COPY --from=ghcr.io/opiproject/opi-sztp-server:main /tmp/sztpd-simulator/pki/client/end-entity/my_cert.pem /my_cert.pem
+COPY --from=ghcr.io/opiproject/opi-sztp-server:main /tmp/sztpd-simulator/pki/client/end-entity/my_cert.pem /certs/
 # hadolint ignore=DL3022
-COPY --from=ghcr.io/opiproject/opi-sztp-server:main /tmp/sztpd-simulator/pki/client/end-entity/private_key.pem /private_key.pem
+COPY --from=ghcr.io/opiproject/opi-sztp-server:main /tmp/sztpd-simulator/pki/client/end-entity/private_key.pem /certs/
 # TODO: consider generating iDevID certificates using https://github.com/usnistgov/iDevIDCerts
 
 CMD [ "/opi-sztp-agent" ]
