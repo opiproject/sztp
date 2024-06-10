@@ -32,7 +32,7 @@ REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases |
 docker-compose exec -T redirecter curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would) and see it is redirect
-docker-compose run -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${REDIRECT}" | tee /tmp/post_rpc_input.json
+docker-compose run -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem "${REDIRECT}" | tee /tmp/post_rpc_input.json
 
 # parse the redirect reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json
@@ -47,13 +47,13 @@ BOOTSTRAP="${REDIRECT//redirecter:8080/$addr:$port}"
 docker-compose exec -T bootstrap curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would)
-docker-compose run -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
+docker-compose run -T agent curl -X POST --data @/tmp/input.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
 
 # parse the reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json
 
 # send progress
-docker-compose run -T agent curl -X POST --data @/tmp/progress.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
+docker-compose run -T agent curl -X POST --data @/tmp/progress.json -H "Content-Type:application/yang-data+json" --user my-serial-number:my-secret --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
 
 # check audit log
 docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
@@ -77,12 +77,12 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"downl
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
 
 # TODO: remove --insecure
-docker-compose run -T agent curl --insecure --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem --output /tmp/my-boot-image.tst https://web:443/my-boot-image.img
+docker-compose run -T agent curl --insecure --fail --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem --output /tmp/my-boot-image.tst https://web:443/my-boot-image.img
 
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
 BASENAME=$(basename "${URL}")
-docker-compose run -T agent curl --insecure --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem --output "/tmp/${BASENAME}" "${URL}"
+docker-compose run -T agent curl --insecure --fail --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem --output "/tmp/${BASENAME}" "${URL}"
 
 # Validate signature
 SIGNATURE=$(docker-compose run -T agent ash -c "openssl dgst -sha256 -c \"/tmp/${BASENAME}\" | awk '{print \$2}'")

@@ -39,9 +39,9 @@ func NewDaemonCommand() *cobra.Command {
 	flags.StringVar(&serialNumber, "serial-number", "my-serial-number", "Device's serial number")
 	flags.StringVar(&dhcpLeaseFile, "dhcp-lease-file", "/var/lib/dhclient/dhclient.leases", "Device's dhclient leases file")
 	flags.StringVar(&devicePassword, "device-password", "my-secret", "Device's password")
-	flags.StringVar(&devicePrivateKey, "device-private-key", "/private_key.pem", "Device's private key")
-	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/my_cert.pem", "Device's End Entity cert")
-	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/opi.pem", "Bootstrap server trust anchor Cert")
+	flags.StringVar(&devicePrivateKey, "device-private-key", "/certs/private_key.pem", "Device's private key")
+	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/certs/my_cert.pem", "Device's End Entity cert")
+	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/certs/opi.pem", "Bootstrap server trust anchor Cert")
 
 	return cmd
 }
