@@ -45,7 +45,6 @@ jobs:
           cache-to: type=gha,mode=max
 
   sztp-client-push:
-    needs: sztp-server-push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
