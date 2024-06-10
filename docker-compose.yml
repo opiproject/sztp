@@ -84,13 +84,15 @@ services:
     build:
       context: sztp-server
     volumes:
-      - certs:/certs
+      - server-certs:/certs/server
+      - client-certs:/certs/client
     user: "0"
     entrypoint: /bin/bash
     command: >
       -c '
         set -e
-        cp sztpd1/sbi/end-entity/private_key.pem sztpd1/sbi/end-entity/my_cert.pem /tmp/ta_cert_chain.pem /certs/
+        cp sztpd1/sbi/end-entity/private_key.pem sztpd1/sbi/end-entity/my_cert.pem /tmp/ta_cert_chain.pem /certs/server/
+        cp client/end-entity/private_key.pem client/end-entity/my_cert.pem /opi.pem /certs/client/
       '
 
   web:
@@ -99,7 +101,7 @@ services:
       setup-cert:
         condition: service_completed_successfully
     volumes:
-      - certs:/certs
+      - server-certs:/certs
       - ./sztp-server/images:/usr/local/apache2/htdocs
     ports:
       - 443:443
@@ -160,7 +162,8 @@ services:
       - opi
 
 volumes:
-  certs:
+  server-certs:
+  client-certs:
   dhcp-leases-folder:
 
 networks:
