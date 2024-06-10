@@ -79,9 +79,10 @@ services:
       - opi
     command: --script=dns-service-discovery -p 5353 avahi
 
-  # TODO: remove this and use sztp keys and certificates
   setup-cert:
     image: ghcr.io/opiproject/opi-sztp-server:main
+    build:
+      context: sztp-server
     volumes:
       - certs:/certs
     user: "0"
@@ -89,10 +90,7 @@ services:
     command: >
       -c '
         set -e
-        openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 365 \
-          -subj "/C=GB/ST=London/L=London/O=Alros/OU=IT Department/CN=localhost"
-        cp key.pem cert.pem /certs/
-        echo "Certificates created succcessfully."
+        cp sztpd1/sbi/end-entity/private_key.pem sztpd1/sbi/end-entity/my_cert.pem /tmp/ta_cert_chain.pem /certs/
       '
 
   web:
@@ -115,8 +113,8 @@ services:
         -e "s/^#\(LoadModule .*mod_ssl.so\)/\1/" \
         -e "s/^#\(LoadModule .*mod_socache_shmcb.so\)/\1/" \
         conf/httpd.conf
-        cp /certs/cert.pem conf/server.crt
-        cp /certs/key.pem conf/server.key
+        cp /certs/my_cert.pem conf/server.crt
+        cp /certs/private_key.pem conf/server.key
         httpd-foreground
         '
 
