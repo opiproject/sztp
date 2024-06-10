@@ -113,8 +113,15 @@ services:
         -e "s/^#\(LoadModule .*mod_ssl.so\)/\1/" \
         -e "s/^#\(LoadModule .*mod_socache_shmcb.so\)/\1/" \
         conf/httpd.conf
+        sed -i \
+        -e "s/^#\(SSLVerifyClient .*require\)/\1/" \
+        -e "s/^#\(SSLVerifyDepth .*\)/\1/" \
+        -e "s/^#\(SSLCACertificateFile .*\)/\1/" \
+        conf/extra/httpd-ssl.conf
         cp /certs/my_cert.pem conf/server.crt
         cp /certs/private_key.pem conf/server.key
+        mkdir -p /usr/local/apache2/conf/ssl.crt/
+        cp /certs/ta_cert_chain.pem /usr/local/apache2/conf/ssl.crt/ca-bundle.crt
         httpd-foreground
         '
 
