@@ -100,20 +100,13 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 	if s == ProgressTypeBootstrapComplete {
 		// TODO: generate real key here
 		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
-		p.IetfSztpBootstrapServerInput.SSHHostKeys = struct {
-			SSHHostKey []struct {
-				Algorithm string `json:"algorithm"`
-				KeyData   string `json:"key-data"`
-			} `json:"ssh-host-key,omitempty"`
+		p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey = []struct {
+			Algorithm string `json:"algorithm"`
+			KeyData   string `json:"key-data"`
 		}{
-			SSHHostKey: []struct {
-				Algorithm string `json:"algorithm"`
-				KeyData   string `json:"key-data"`
-			}{
-				{
-					Algorithm: "ssh-rsa",
-					KeyData:   encodedKey,
-				},
+			{
+				Algorithm: "ssh-rsa",
+				KeyData:   encodedKey,
 			},
 		}
 	}
