@@ -95,21 +95,9 @@ func (a *Agent) getBootstrapURL() error {
 func (a *Agent) doReportProgress(s ProgressType) error {
 	log.Println("[INFO] Starting the Report Progress request.")
 	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
-	p := ProgressJSON{
-		IetfSztpBootstrapServerInput: struct {
-			ProgressType string `json:"progress-type"`
-			Message      string `json:"message"`
-			SSHHostKeys  struct {
-				SSHHostKey []struct {
-					Algorithm string `json:"algorithm"`
-					KeyData   string `json:"key-data"`
-				} `json:"ssh-host-key,omitempty"`
-			} `json:"ssh-host-keys,omitempty"`
-		}{
-			ProgressType: s.String(),
-			Message:      "message sent via JSON",
-		},
-	}
+	var p ProgressJSON
+	p.IetfSztpBootstrapServerInput.ProgressType = s.String()
+	p.IetfSztpBootstrapServerInput.Message = "message sent via JSON"
 	if s == ProgressTypeBootstrapComplete {
 		// TODO: generate real key here
 		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))

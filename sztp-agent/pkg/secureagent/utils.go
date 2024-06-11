@@ -129,20 +129,11 @@ func generateInputJSONContent() string {
 	} else {
 		hwModel = baseboard.Product
 	}
-
-	input := &InputJSON{
-		IetfSztpBootstrapServerInput: struct {
-			HwModel   string `json:"hw-model"`
-			OsName    string `json:"os-name"`
-			OsVersion string `json:"os-version"`
-			Nonce     string `json:"nonce"`
-		}{
-			HwModel:   hwModel,
-			OsName:    osName,
-			OsVersion: osVersion,
-			Nonce:     "",
-		},
-	}
+	var input InputJSON
+	input.IetfSztpBootstrapServerInput.HwModel = hwModel
+	input.IetfSztpBootstrapServerInput.OsName = osName
+	input.IetfSztpBootstrapServerInput.OsVersion = osVersion
+	input.IetfSztpBootstrapServerInput.Nonce = ""
 	inputJSON, _ := json.Marshal(input)
 	return string(inputJSON)
 }
