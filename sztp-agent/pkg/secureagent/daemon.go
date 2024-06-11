@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -215,7 +214,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			return err
 		}
 
-		caCert, _ := ioutil.ReadFile(a.GetBootstrapTrustAnchorCert())
+		caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
 		cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
