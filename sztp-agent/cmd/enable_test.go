@@ -21,7 +21,9 @@ func TestNewEnableCommand(t *testing.T) {
 			want: &cobra.Command{
 				Use:   "enable",
 				Short: "Run the enable command",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(c *cobra.Command, args []string) error {
+					err := c.Help()
+					cobra.CheckErr(err)
 					return nil
 				},
 			},

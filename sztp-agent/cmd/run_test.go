@@ -21,7 +21,9 @@ func TestNewRunCommand(t *testing.T) {
 			want: &cobra.Command{
 				Use:   "run",
 				Short: "Exec the run command",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(c *cobra.Command, args []string) error {
+					err := c.Help()
+					cobra.CheckErr(err)
 					return nil
 				},
 			},
