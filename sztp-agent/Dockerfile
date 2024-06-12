@@ -19,9 +19,6 @@ FROM alpine:3.18
 
 RUN apk add --no-cache --no-check-certificate curl && rm -rf /var/cache/apk/*
 
-# hadolint ignore=DL3022
-COPY ./*.json /tmp/
-# hadolint ignore=DL3022
 COPY --from=builder /opi-sztp-agent /
 
 CMD [ "/opi-sztp-agent" ]
