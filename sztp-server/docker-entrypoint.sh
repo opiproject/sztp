@@ -16,7 +16,13 @@ wait_curl () {
 }
 
 env
-diff /tmp/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.configs || true
+
+# shellcheck disable=SC2016
+PRE_SCRIPT_B64=$(openssl enc -base64 -A -in /mnt/my-pre-configuration-script.sh) \
+POST_SCRIPT_B64=$(openssl enc -base64 -A -in /mnt/my-post-configuration-script.sh) \
+CONFIG_B64=$(openssl enc -base64 -A -in /mnt/my-configuration.xml) \
+envsubst '$PRE_SCRIPT_B64,$POST_SCRIPT_B64,$CONFIG_B64' < /mnt/sztpd."${SZTPD_OPI_MODE}".json.template > /tmp/"${SZTPD_OPI_MODE}".json.configs
+diff /mnt/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.configs || true
 
 # shellcheck disable=SC2016
 BOOT_IMG_HASH_VAL=$(openssl dgst -sha256 -c /media/my-boot-image.img | awk '{print $2}') \
