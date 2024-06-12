@@ -67,18 +67,20 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"configuration\" /tmp
 
 # parse and execute pre-configuration-script
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"pre-configuration-script\" /tmp/post_rpc_fixed.json | base64 --decode
-jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"pre-configuration-script\" /tmp/post_rpc_fixed.json | base64 --decode | sh | grep "inside the pre-configuration-script..."
+jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"pre-configuration-script\" /tmp/post_rpc_fixed.json | base64 --decode | sh | grep "inside the third-pre-configuration-script..."
 
 # parse and execute post-configuration-script
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-script\" /tmp/post_rpc_fixed.json | base64 --decode
-jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-script\" /tmp/post_rpc_fixed.json | base64 --decode | sh | grep "inside the post-configuration-script..."
+jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-script\" /tmp/post_rpc_fixed.json | base64 --decode | sh | grep "inside the third-post-configuration-script..."
 
 # parse image URL and SHA
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
 
 # TODO: remove --insecure
-docker-compose run -T agent curl --insecure --fail --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem --output /tmp/my-boot-image.tst https://web:443/my-boot-image.img
+docker-compose run -T agent curl --insecure --fail --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem --output /tmp/first-boot-image.tst https://web:443/first-boot-image.img
+docker-compose run -T agent curl --insecure --fail --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem --output /tmp/second-boot-image.tst https://web:443/second-boot-image.img
+docker-compose run -T agent curl --insecure --fail --key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem --output /tmp/third-boot-image.tst https://web:443/third-boot-image.img
 
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
