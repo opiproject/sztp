@@ -274,9 +274,9 @@ func (a *Agent) downloadAndValidateImage() error {
 				return err
 			}
 			sum := fmt.Sprintf("%x", h.Sum(nil))
-			log.Println(sum)
-			log.Println(strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", ""))
 			original := strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "")
+			log.Println("calculated: " + sum)
+			log.Println("expected  : " + original)
 			if sum != original {
 				return errors.New("Checksum mismatch")
 			}
