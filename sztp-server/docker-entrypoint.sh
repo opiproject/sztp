@@ -24,11 +24,11 @@ envsubst '$BOOT_IMG_HASH_VAL' < /tmp/"${SZTPD_OPI_MODE}".json.configs > /tmp/"${
 diff /tmp/"${SZTPD_OPI_MODE}".json.configs /tmp/"${SZTPD_OPI_MODE}".json.images || true
 
 # shellcheck disable=SC2016
-SBI_PRI_KEY_B64=$(openssl enc -base64 -A -in sztpd1/sbi/end-entity/private_key.der) \
-SBI_PUB_KEY_B64=$(openssl enc -base64 -A -in sztpd1/sbi/end-entity/public_key.der) \
-SBI_EE_CERT_B64=$(openssl enc -base64 -A -in /tmp/cert_chain.cms) \
-BOOTSVR_TA_CERT_B64=$(openssl enc -base64 -A -in /tmp/ta_cert_chain.cms) \
-CLIENT_CERT_TA_B64=$(openssl enc -base64 -A -in /tmp/ta_cert_chain.cms) \
+SBI_PRI_KEY_B64=$(openssl enc -base64 -A -in /certs/private_key.der) \
+SBI_PUB_KEY_B64=$(openssl enc -base64 -A -in /certs/public_key.der) \
+SBI_EE_CERT_B64=$(openssl enc -base64 -A -in /certs/cert_chain.cms) \
+BOOTSVR_TA_CERT_B64=$(openssl enc -base64 -A -in /certs/ta_cert_chain.cms) \
+CLIENT_CERT_TA_B64=$(openssl enc -base64 -A -in /certs/ta_cert_chain.cms) \
 envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64,$BOOTSVR_TA_CERT_B64' < /tmp/"${SZTPD_OPI_MODE}".json.images > /tmp/"${SZTPD_OPI_MODE}".json.keys
 diff /tmp/"${SZTPD_OPI_MODE}".json.images /tmp/"${SZTPD_OPI_MODE}".json.keys || true
 
