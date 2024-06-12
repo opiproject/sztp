@@ -21,7 +21,7 @@ declare -a names
 
 # files and configs
 
-for vendor in first second my
+for vendor in first second third
 do
     names+=("${vendor^^}_BOOT_IMG_HASH_VAL" "${vendor^^}_CONFIG_B64")
     export ${vendor^^}_BOOT_IMG_HASH_VAL="$(openssl dgst -sha256 -c  /media/${vendor,,}-boot-image.img | awk '{print $2}')"

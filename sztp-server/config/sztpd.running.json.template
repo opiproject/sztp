@@ -155,7 +155,7 @@
               "response": {
                 "conveyed-information": {
                   "onboarding-information": {
-                    "reference": "my-onboarding-information"
+                    "reference": "third-onboarding-information"
                   }
                 }
               }
@@ -194,15 +194,15 @@
         ]
       },
       {
-        "name": "my-boot-image.img",
+        "name": "third-boot-image.img",
         "download-uri": [
-          "https://web:443/my-boot-image.img",
-          "ftps://web:990/my-boot-image.img"
+          "https://web:443/third-boot-image.img",
+          "ftps://web:990/third-boot-image.img"
         ],
         "image-verification": [
           {
             "hash-algorithm": "ietf-sztp-conveyed-info:sha-256",
-            "hash-value": "$MY_BOOT_IMG_HASH_VAL"
+            "hash-value": "$THIRD_BOOT_IMG_HASH_VAL"
           }
         ]
       }
@@ -219,8 +219,8 @@
               "script": "$SECOND_PRE_SCRIPT_B64"
           },
           {
-              "name": "my-pre-configuration-script",
-              "script": "$MY_PRE_SCRIPT_B64"
+              "name": "third-pre-configuration-script",
+              "script": "$THIRD_PRE_SCRIPT_B64"
           }
       ],
       "post-configuration-script": [
@@ -233,8 +233,8 @@
               "script": "$SECOND_POST_SCRIPT_B64"
           },
           {
-              "name": "my-post-configuration-script",
-              "script": "$MY_POST_SCRIPT_B64"
+              "name": "third-post-configuration-script",
+              "script": "$THIRD_POST_SCRIPT_B64"
           }
       ]
   },
@@ -251,9 +251,9 @@
               "config": "$SECOND_CONFIG_B64"
           },
           {
-              "name": "my-configuration",
+              "name": "third-configuration",
               "configuration-handling": "merge",
-              "config": "$MY_CONFIG_B64"
+              "config": "$THIRD_CONFIG_B64"
           }
       ]
   },
@@ -278,12 +278,12 @@
               }
           },
           {
-              "name": "my-onboarding-information",
+              "name": "third-onboarding-information",
               "onboarding-information": {
-                  "boot-image": "my-boot-image.img",
-                  "pre-configuration-script": "my-pre-configuration-script",
-                  "configuration": "my-configuration",
-                  "post-configuration-script": "my-post-configuration-script"
+                  "boot-image": "third-boot-image.img",
+                  "pre-configuration-script": "third-pre-configuration-script",
+                  "configuration": "third-configuration",
+                  "post-configuration-script": "third-post-configuration-script"
               }
           }
       ]
