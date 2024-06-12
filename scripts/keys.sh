@@ -16,9 +16,9 @@ docker-compose ps
 # TODO: start using https://github.com/usnistgov/iDevIDCerts to generate all keys and certificates
 
 # extract PEM files from the running docker image
-docker-compose cp bootstrap:/opi.pem /tmp/opi.pem
-docker-compose cp bootstrap:/tmp/sztpd-simulator/pki/client/end-entity/my_cert.pem /tmp/opi_cert.pem
-docker-compose cp bootstrap:/tmp/sztpd-simulator/pki/client/end-entity/private_key.pem /tmp/opi_private_key.pem
+docker-compose cp setup-cert:/certs/client/opi.pem /tmp/opi.pem
+docker-compose cp setup-cert:/certs/client/my_cert.pem /tmp/opi_cert.pem
+docker-compose cp setup-cert:/certs/client/private_key.pem /tmp/opi_private_key.pem
 
 # you can scp them into DPU now...
 echo ==================================
