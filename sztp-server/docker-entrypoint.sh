@@ -21,8 +21,7 @@ declare -a names
 
 # files and configs
 
-# shellcheck disable=SC2043
-for vendor in my
+for vendor in first second my
 do
     names+=("${vendor^^}_BOOT_IMG_HASH_VAL" "${vendor^^}_CONFIG_B64")
     export ${vendor^^}_BOOT_IMG_HASH_VAL="$(openssl dgst -sha256 -c  /media/${vendor,,}-boot-image.img | awk '{print $2}')"
