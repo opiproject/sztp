@@ -9,7 +9,11 @@ services:
     image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
+    depends_on:
+      setup-cert:
+        condition: service_completed_successfully
     volumes:
+      - server-certs:/certs
       - ./sztp-server/images:/media
     environment:
       SZTPD_INIT_PORT: 6080
@@ -32,6 +36,11 @@ services:
     image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
+    depends_on:
+      setup-cert:
+        condition: service_completed_successfully
+    volumes:
+      - server-certs:/certs
     environment:
       SZTPD_INIT_PORT: 6080
       SZTPD_NBI_PORT: 7070
@@ -92,8 +101,8 @@ services:
     entrypoint: /bin/bash
     command: >
       -c '
-        set -e
-        cp sztpd1/sbi/end-entity/private_key.pem sztpd1/sbi/end-entity/my_cert.pem /tmp/ta_cert_chain.pem /certs/server/
+        set -ex
+        cp sztpd1/sbi/end-entity/private_key.{pem,der} sztpd1/sbi/end-entity/public_key.der sztpd1/sbi/end-entity/my_cert.pem /tmp/cert_chain.{pem,cms} /tmp/ta_cert_chain.{pem,cms} /certs/server/
         cp client/end-entity/private_key.pem client/end-entity/my_cert.pem /opi.pem /certs/client/
       '
 
