@@ -6,9 +6,7 @@ version: '3.7'
 services:
 
   bootstrap:
-    image: ghcr.io/opiproject/opi-sztp-server:main
-    build:
-      context: sztp-server
+    image: docker.io/opiproject/sztpd:0.0.15
     depends_on:
       setup-cert:
         condition: service_completed_successfully
@@ -16,6 +14,8 @@ services:
       - server-certs:/certs
       - ./sztp-server/images:/media
       - ./sztp-server/config:/mnt
+      - ./sztp-server/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
     environment:
       SZTPD_INIT_PORT: 6080
       SZTPD_NBI_PORT: 7080
@@ -34,15 +34,15 @@ services:
       test: ["CMD-SHELL", "curl --fail -H Accept:application/yang-data+json http://127.0.0.1:$$SZTPD_NBI_PORT/.well-known/host-meta || exit 1"]
 
   redirecter:
-    image: ghcr.io/opiproject/opi-sztp-server:main
-    build:
-      context: sztp-server
+    image: docker.io/opiproject/sztpd:0.0.15
     depends_on:
       setup-cert:
         condition: service_completed_successfully
     volumes:
       - server-certs:/certs
       - ./sztp-server/config/sztpd.redirect.json.template:/mnt/sztpd.redirect.json.template
+      - ./sztp-server/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
     environment:
       SZTPD_INIT_PORT: 6080
       SZTPD_NBI_PORT: 7070
