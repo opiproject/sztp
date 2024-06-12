@@ -145,7 +145,7 @@
               }
           },
           {
-              "serial-number": "opi-serial-number",
+              "serial-number": "third-serial-number",
               "device-type": "my-device-type",
               "activation-code": "$0$my-secret",
               "response-manager": {
