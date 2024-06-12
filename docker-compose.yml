@@ -9,6 +9,8 @@ services:
     image: ghcr.io/opiproject/opi-sztp-server:main
     build:
       context: sztp-server
+    volumes:
+      - ./sztp-server/images:/media
     environment:
       SZTPD_INIT_PORT: 6080
       SZTPD_NBI_PORT: 7080
