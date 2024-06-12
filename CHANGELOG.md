@@ -2,7 +2,6 @@
 
 ## [0.2.0](https://github.com/opiproject/sztp/compare/v0.1.1...v0.2.0) (2024-06-12)
 
-
 ### Features
 
 * add helper script to extract keys ([1d1cd6c](https://github.com/opiproject/sztp/commit/1d1cd6cb9d7d75596fd000f26be903a419374c2e))
@@ -12,7 +11,6 @@
 * add script to run just agent ([4be5a8e](https://github.com/opiproject/sztp/commit/4be5a8ed7547b81180d280ec7f5ba419eca62fad))
 * expose dhclient.leases as argument ([9ab1fca](https://github.com/opiproject/sztp/commit/9ab1fca11dfe21e86e87a0392e1f5bb92a49091c))
 * move images to their own folder ([c3b6908](https://github.com/opiproject/sztp/commit/c3b69084be223ee350d999b5a8c117ee79de8e6b))
-
 
 ### Bug Fixes
 
