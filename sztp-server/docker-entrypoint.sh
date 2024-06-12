@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e -u -x
 
 wait_curl () {
@@ -17,17 +17,29 @@ wait_curl () {
 
 env
 
-# shellcheck disable=SC2016
-PRE_SCRIPT_B64=$(openssl enc -base64 -A -in /mnt/my-pre-configuration-script.sh) \
-POST_SCRIPT_B64=$(openssl enc -base64 -A -in /mnt/my-post-configuration-script.sh) \
-CONFIG_B64=$(openssl enc -base64 -A -in /mnt/my-configuration.xml) \
-envsubst '$PRE_SCRIPT_B64,$POST_SCRIPT_B64,$CONFIG_B64' < /mnt/sztpd."${SZTPD_OPI_MODE}".json.template > /tmp/"${SZTPD_OPI_MODE}".json.configs
-diff /mnt/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.configs || true
+declare -a names
 
+# files and configs
+
+# shellcheck disable=SC2043
+for vendor in my
+do
+    names+=("${vendor^^}_BOOT_IMG_HASH_VAL" "${vendor^^}_CONFIG_B64")
+    export ${vendor^^}_BOOT_IMG_HASH_VAL="$(openssl dgst -sha256 -c  ./media/${vendor,,}-boot-image.img | awk '{print $2}')"
+    export ${vendor^^}_CONFIG_B64="$(openssl enc -base64 -A -in      /mnt/${vendor,,}-configuration.xml)"
+    for item in pre post
+    do
+        names+=("${vendor^^}_${item^^}_SCRIPT_B64")
+        export ${vendor^^}_${item^^}_SCRIPT_B64="$(openssl enc -base64 -A -in  /mnt/${vendor,,}-${item,,}-configuration-script.sh)"
+    done
+done
+
+export "${names[@]}"
 # shellcheck disable=SC2016
-BOOT_IMG_HASH_VAL=$(openssl dgst -sha256 -c /media/my-boot-image.img | awk '{print $2}') \
-envsubst '$BOOT_IMG_HASH_VAL' < /tmp/"${SZTPD_OPI_MODE}".json.configs > /tmp/"${SZTPD_OPI_MODE}".json.images
-diff /tmp/"${SZTPD_OPI_MODE}".json.configs /tmp/"${SZTPD_OPI_MODE}".json.images || true
+envsubst "$(printf '${%s} ' "${names[@]}")" < /mnt/sztpd."${SZTPD_OPI_MODE}".json.template > /tmp/"${SZTPD_OPI_MODE}".json.images
+
+# check what changed
+diff /mnt/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.images || true
 
 # shellcheck disable=SC2016
 SBI_PRI_KEY_B64=$(openssl enc -base64 -A -in /certs/private_key.der) \
