@@ -15,6 +15,7 @@ services:
     volumes:
       - server-certs:/certs
       - ./sztp-server/images:/media
+      - ./sztp-server/config:/mnt
     environment:
       SZTPD_INIT_PORT: 6080
       SZTPD_NBI_PORT: 7080
@@ -41,6 +42,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - server-certs:/certs
+      - ./sztp-server/config/sztpd.redirect.json.template:/mnt/sztpd.redirect.json.template
     environment:
       SZTPD_INIT_PORT: 6080
       SZTPD_NBI_PORT: 7070
