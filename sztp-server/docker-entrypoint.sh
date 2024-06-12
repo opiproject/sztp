@@ -16,10 +16,20 @@ wait_curl () {
 }
 
 env
+diff /tmp/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.images || true
 
 # shellcheck disable=SC2016
-envsubst '$SZTPD_INIT_PORT,$SZTPD_NBI_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR,$BOOTSVR_PORT,$BOOTSVR_ADDR' < /tmp/"${SZTPD_OPI_MODE}".json.static > /tmp/running.json
-diff /tmp/"${SZTPD_OPI_MODE}".json.static /tmp/running.json || true
+SBI_PRI_KEY_B64=$(openssl enc -base64 -A -in sztpd1/sbi/end-entity/private_key.der) \
+SBI_PUB_KEY_B64=$(openssl enc -base64 -A -in sztpd1/sbi/end-entity/public_key.der) \
+SBI_EE_CERT_B64=$(openssl enc -base64 -A -in /tmp/cert_chain.cms) \
+BOOTSVR_TA_CERT_B64=$(openssl enc -base64 -A -in /tmp/ta_cert_chain.cms) \
+CLIENT_CERT_TA_B64=$(openssl enc -base64 -A -in /tmp/ta_cert_chain.cms) \
+envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64,$BOOTSVR_TA_CERT_B64' < /tmp/"${SZTPD_OPI_MODE}".json.images > /tmp/"${SZTPD_OPI_MODE}".json.keys
+diff /tmp/sztpd."${SZTPD_OPI_MODE}".json.images /tmp/"${SZTPD_OPI_MODE}".json.keys || true
+
+# shellcheck disable=SC2016
+envsubst '$SZTPD_INIT_PORT,$SZTPD_NBI_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR,$BOOTSVR_PORT,$BOOTSVR_ADDR' < /tmp/"${SZTPD_OPI_MODE}".json.keys > /tmp/running.json
+diff /tmp/"${SZTPD_OPI_MODE}".json.keys /tmp/running.json || true
 
 echo "starting server in the background"
 sztpd sqlite:///:memory: 2>&1 &
