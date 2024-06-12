@@ -16,7 +16,12 @@ wait_curl () {
 }
 
 env
-diff /tmp/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.images || true
+diff /tmp/sztpd."${SZTPD_OPI_MODE}".json.template /tmp/"${SZTPD_OPI_MODE}".json.configs || true
+
+# shellcheck disable=SC2016
+BOOT_IMG_HASH_VAL=$(openssl dgst -sha256 -c /media/my-boot-image.img | awk '{print $2}') \
+envsubst '$BOOT_IMG_HASH_VAL' < /tmp/"${SZTPD_OPI_MODE}".json.configs > /tmp/"${SZTPD_OPI_MODE}".json.images
+diff /tmp/"${SZTPD_OPI_MODE}".json.configs /tmp/"${SZTPD_OPI_MODE}".json.images || true
 
 # shellcheck disable=SC2016
 SBI_PRI_KEY_B64=$(openssl enc -base64 -A -in sztpd1/sbi/end-entity/private_key.der) \
@@ -25,7 +30,7 @@ SBI_EE_CERT_B64=$(openssl enc -base64 -A -in /tmp/cert_chain.cms) \
 BOOTSVR_TA_CERT_B64=$(openssl enc -base64 -A -in /tmp/ta_cert_chain.cms) \
 CLIENT_CERT_TA_B64=$(openssl enc -base64 -A -in /tmp/ta_cert_chain.cms) \
 envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64,$BOOTSVR_TA_CERT_B64' < /tmp/"${SZTPD_OPI_MODE}".json.images > /tmp/"${SZTPD_OPI_MODE}".json.keys
-diff /tmp/sztpd."${SZTPD_OPI_MODE}".json.images /tmp/"${SZTPD_OPI_MODE}".json.keys || true
+diff /tmp/"${SZTPD_OPI_MODE}".json.images /tmp/"${SZTPD_OPI_MODE}".json.keys || true
 
 # shellcheck disable=SC2016
 envsubst '$SZTPD_INIT_PORT,$SZTPD_NBI_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR,$BOOTSVR_PORT,$BOOTSVR_ADDR' < /tmp/"${SZTPD_OPI_MODE}".json.keys > /tmp/running.json

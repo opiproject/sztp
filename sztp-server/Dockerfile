@@ -24,18 +24,16 @@ RUN echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf && \
 
 # configurations, images, templates
 COPY config/ /tmp/
-COPY images/ /media/
 
 # generate static template
 
 # hadolint ignore=SC2016
 RUN \
-    cp /tmp/sztpd.redirect.json.template /tmp/redirect.json.images && \
-    BOOT_IMG_HASH_VAL=`openssl dgst -sha256 -c /media/my-boot-image.img | awk '{print $2}'` \
+    cp /tmp/sztpd.redirect.json.template /tmp/redirect.json.configs && \
     PRE_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-pre-configuration-script.sh` \
     POST_SCRIPT_B64=`openssl enc -base64 -A -in /tmp/my-post-configuration-script.sh` \
     CONFIG_B64=`openssl enc -base64 -A -in /tmp/my-configuration.xml` \
-    envsubst '$BOOT_IMG_HASH_VAL,$PRE_SCRIPT_B64,$POST_SCRIPT_B64,$CONFIG_B64' < /tmp/sztpd.running.json.template > /tmp/running.json.images
+    envsubst '$PRE_SCRIPT_B64,$POST_SCRIPT_B64,$CONFIG_B64' < /tmp/sztpd.running.json.template > /tmp/running.json.configs
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
