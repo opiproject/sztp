@@ -138,7 +138,7 @@
         "image-verification": [
           {
             "hash-algorithm": "ietf-sztp-conveyed-info:sha-256",
-            "hash-value": "$BOOT_IMG_HASH_VAL"
+            "hash-value": "$MY_BOOT_IMG_HASH_VAL"
           }
         ]
       }
@@ -148,13 +148,13 @@
       "pre-configuration-script": [
           {
               "name": "my-pre-configuration-script",
-              "script": "$PRE_SCRIPT_B64"
+              "script": "$MY_PRE_SCRIPT_B64"
           }
       ],
       "post-configuration-script": [
           {
               "name": "my-post-configuration-script",
-              "script": "$POST_SCRIPT_B64"
+              "script": "$MY_POST_SCRIPT_B64"
           }
       ]
   },
@@ -163,7 +163,7 @@
           {
               "name": "my-configuration",
               "configuration-handling": "merge",
-              "config": "$CONFIG_B64"
+              "config": "$MY_CONFIG_B64"
           }
       ]
   },
