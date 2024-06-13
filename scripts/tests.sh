@@ -31,7 +31,7 @@ REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases |
 # reusable variables
 CERTIFICATES=(--key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem)
 SERIAL_NUMBER=third-serial-number
-CREDENTIALS=(--user "${SERIAL_NUMBER}":my-secret)
+SBI_CREDENTIALS=(--user "${SERIAL_NUMBER}":my-secret)
 NBI_CREDENTIALS=(--user my-admin@example.com:my-secret)
 
 # TODO: remove --insecure
@@ -43,7 +43,7 @@ docker-compose run -T agent curl --insecure --fail-with-body "${CERTIFICATES[@]}
 docker-compose exec -T redirecter curl --include --fail "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would) and see it is redirect
-docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${REDIRECT}" | tee /tmp/post_rpc_input.json
+docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${REDIRECT}" | tee /tmp/post_rpc_input.json
 
 # parse the redirect reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json
@@ -58,13 +58,13 @@ BOOTSTRAP="${REDIRECT//redirecter:8080/$addr:$port}"
 docker-compose exec -T bootstrap curl --include --fail "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would)
-docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
+docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
 
 # parse the reply
 jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_rpc_input.json | base64 --decode | tail -n +2 | sed  '1i {' | jq . | tee /tmp/post_rpc_fixed.json
 
 # send progress
-docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"progress-type":"bootstrap-initiated","message":"message sent via JSON"}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
+docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"progress-type":"bootstrap-initiated","message":"message sent via JSON"}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
 
 # check audit log
 docker-compose exec -T bootstrap curl --include --fail -X GET "${NBI_CREDENTIALS[@]}"  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
@@ -97,7 +97,7 @@ SIGNATURE=$(docker-compose run -T agent ash -c "openssl dgst -sha256 -c \"/tmp/$
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json | grep "${SIGNATURE}"
 
 # send progress
-docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"progress-type":"bootstrap-complete","message":"message sent via JSON"}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
+docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"progress-type":"bootstrap-complete","message":"message sent via JSON"}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
 
 # print for debug
 docker-compose ps
