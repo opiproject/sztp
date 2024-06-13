@@ -104,23 +104,26 @@ services:
         set -euxo pipefail
         env
         apk add --no-cache --no-check-certificate make && rm -rf /var/cache/apk/*
+        rm -rf sztpd-simulator-0.0.11.tgz
         wget --no-check-certificate https://watsen.net/support/sztpd-simulator-0.0.11.tgz
-        tar -zxvf sztpd-simulator-0.0.11.tgz -C /tmp
+        tar -zxvf sztpd-simulator-0.0.11.tgz -C /tmp sztpd-simulator/pki/sztpd1/sbi sztpd-simulator/pki/client
         cd /tmp/sztpd-simulator/pki
         echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf
         echo "DNS.3 = web" >> sztpd1/sbi/end-entity/openssl.cnf
         echo "DNS.4 = redirecter" >> sztpd1/sbi/end-entity/openssl.cnf
         sed -i 's/my-serial-number/third-serial-number/g' client/end-entity/openssl.cnf
-        make pki SHELL=/bin/ash
-        echo SERVER SBI certificates
+        make -C sztpd1/sbi pki SHELL=/bin/ash
+        make -C client     pki SHELL=/bin/ash
+        echo === SERVER SBI certificates ===
         cat sztpd1/sbi/end-entity/my_cert.pem sztpd1/sbi/intermediate2/my_cert.pem > /tmp/cert_chain.pem
         openssl crl2pkcs7 -nocrl -certfile /tmp/cert_chain.pem -outform DER -out /tmp/cert_chain.cms
-        echo CLIENT cert DevID trust anchor
+        echo === CLIENT cert DevID trust  ===
         cat client/root-ca/my_cert.pem client/intermediate1/my_cert.pem client/intermediate2/my_cert.pem > /tmp/ta_cert_chain.pem
         openssl crl2pkcs7 -nocrl -certfile /tmp/ta_cert_chain.pem -outform DER -out /tmp/ta_cert_chain.cms
         cat sztpd1/sbi/root-ca/my_cert.pem sztpd1/sbi/intermediate1/my_cert.pem > /opi.pem
-        echo COPY TO FINAL DESTINATION
-        cp sztpd1/sbi/end-entity/private_key.der \
+        echo === COPY TO FINAL DESTINATION ===
+        cp \
+          sztpd1/sbi/end-entity/private_key.der \
           sztpd1/sbi/end-entity/private_key.pem \
           sztpd1/sbi/end-entity/public_key.der \
           sztpd1/sbi/end-entity/my_cert.pem \
