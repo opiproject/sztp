@@ -97,7 +97,7 @@ docker-compose up --build bootstrap
 Fetching Host-meta
 
 ```text
-$ docker-compose run --rm -T agent curl -i --fail -H Accept:application/yang-data+json http://bootstrap:1080/.well-known/host-meta
+$ docker run --rm --network sztp_opi docker.io/curlimages/curl:8.5.0 --silent --fail-with-body -H Accept:application/yang-data+json http://bootstrap:7080/.well-known/host-meta
 HTTP/1.1 200 OK
 Content-Type: application/xrd+xml; charset=utf-8
 Content-Length: 104
@@ -112,7 +112,7 @@ Server: <redacted>
 Fetching the RESTCONF Root Resource
 
 ```text
-$ docker-compose run --rm -T agent curl -i --fail -H Accept:application/yang-data+json http://bootstrap:1080/restconf/
+$ docker run --rm --network sztp_opi docker.io/curlimages/curl:8.5.0 --silent --fail-with-body --user my-admin@example.com:my-secret -H Accept:application/yang-data+json http://bootstrap:7080/restconf/
 HTTP/1.1 200 OK
 Content-Type: application/yang-data+json; charset=utf-8
 Content-Length: 137
@@ -131,7 +131,7 @@ Server: <redacted>
 Get the Current (Default) Configuration
 
 ```text
-$ docker-compose run --rm -T agent curl -i -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:running
+$ docker run --rm --network sztp_opi docker.io/curlimages/curl:8.5.0 --silent --fail-with-body --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 HTTP/1.1 200 OK
 Content-Type: application/yang-data+json; charset=utf-8
 Content-Length: 318
@@ -162,13 +162,13 @@ Server: <redacted>
 Read the configuration back and validate it is correct:
 
 ```text
-docker-compose exec bootstrap curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:running
+docker run --rm --network sztp_opi docker.io/curlimages/curl:8.5.0 --silent --fail-with-body --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 ```
 
 Get onboarding info (from device perspective)
 
 ```text
-$ docker-compose exec -T agent curl -X POST --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H Content-Type:application/yang-data+json --user third-serial-number:my-secret --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem https://bootstrap:9090/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data  | tee /tmp/post_rpc_input.json
+$ docker run --rm --user 0 --network sztp_opi -v sztp_client-certs:/certs docker.io/curlimages/curl:8.5.0 --fail-with-body -X POST --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H Content-Type:application/yang-data+json --user third-serial-number:my-secret --key /certs/third_private_key.pem --cert /certs/third_my_cert.pem --cacert /certs/opi.pem https://bootstrap:9090/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data  | tee /tmp/post_rpc_input.json
 {
   "ietf-sztp-bootstrap-server:output": {
     "conveyed-information": "MIIDfwYLKoZIhvcNAQkQASugggNuBIIDansKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwOi8vd2ViOjgwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIiwKICAgICAgICAiZnRwOi8vd2ViOjMwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIgogICAgICBdLAogICAgICAiaW1hZ2UtdmVyaWZpY2F0aW9uIjogWwogICAgICAgIHsKICAgICAgICAgICJoYXNoLWFsZ29yaXRobSI6ICJpZXRmLXN6dHAtY29udmV5ZWQtaW5mbzpzaGEtMjU2IiwKICAgICAgICAgICJoYXNoLXZhbHVlIjogIjdiOmNhOmU2OmFjOjIzOjA2OmQ4Ojc5OjA2OjhjOmFjOjAzOjgwOmUyOjE2OjQ0OjdlOjQwOjZhOjY1OmZhOmQ0OjY5OjYxOjZlOjA1OmNlOmY1Ojg3OmRjOjJiOjk3IgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgICJwcmUtY29uZmlndXJhdGlvbi1zY3JpcHQiOiAiSXlFdlltbHVMMkpoYzJnS1pXTm9ieUFpYVc1emFXUmxJSFJvWlNCd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0J3YjNOMExXTnZibVpwWjNWeVlYUnBiMjR0YzJOeWFYQjBMaTR1SWdvPSIKICB9Cn0="
@@ -205,7 +205,7 @@ $ jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/pos
 View the Audit Log
 
 ```text
-$ docker-compose exec bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
+$ docker run --rm --network sztp_opi docker.io/curlimages/curl:8.5.0 --silent --fail-with-body --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
 
 HTTP/1.1 200 OK
 Content-Type: application/yang-data+json; charset=utf-8
@@ -232,7 +232,7 @@ Server: <redacted>
 View the Bootstrapping Log
 
 ```text
-$ docker-compose exec bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:1080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log
+$ docker run --rm --network sztp_opi docker.io/curlimages/curl:8.5.0 --silent --fail-with-body --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log
 HTTP/1.1 200 OK
 Content-Type: application/yang-data+json; charset=utf-8
 Content-Length: 1034
@@ -406,20 +406,14 @@ MAC Address: 02:42:0A:7F:7F:04 (Unknown)
 Nmap done: 1 IP address (1 host up) scanned in 0.34 seconds
 ```
 
-## Run HTTP server only
+## Run HTTPs server only
 
 ```text
 docker-compose up --build web
 ```
 
-## Test HTTP server from agent
+## Test HTTPs server only
 
 ```text
-docker-compose run --rm -T agent curl --fail --key /private_key.pem --cert /my_cert.pem --cacert /opi.pem https://web:443/
-```
-
-OR
-
-```text
-docker run --network=sztp_opi --security-opt seccomp=unconfined -it --rm fedora:36 curl --fail https://web:443/
+docker run --rm --user 0 --network sztp_opi -v sztp_client-certs:/certs docker.io/curlimages/curl:8.5.0 --insecure --fail-with-body --key /certs/third_private_key.pem --cert /certs/third_my_cert.pem --cacert /certs/opi.pem --output /tmp/third-boot-image.tst "https://web:443/third-boot-image.img"
 ```
