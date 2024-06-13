@@ -104,12 +104,12 @@ services:
         set -euxo pipefail
         env
         apk add --no-cache --no-check-certificate curl make && rm -rf /var/cache/apk/*
+        rm -rf /tmp/sztpd-simulator
         curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf - -C /tmp/
         cd /tmp/sztpd-simulator/pki
         echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf
         echo "DNS.3 = web" >> sztpd1/sbi/end-entity/openssl.cnf
         echo "DNS.4 = redirecter" >> sztpd1/sbi/end-entity/openssl.cnf
-        sed -i 's/my-serial-number/third-serial-number/g' client/end-entity/openssl.cnf
         make pki SHELL=/bin/ash
         echo === SERVER SBI certificates ===
         cat sztpd1/sbi/end-entity/my_cert.pem sztpd1/sbi/intermediate2/my_cert.pem > /tmp/cert_chain.pem
@@ -117,8 +117,8 @@ services:
         echo === CLIENT cert DevID trust anchor ===
         cat client/root-ca/my_cert.pem client/intermediate1/my_cert.pem client/intermediate2/my_cert.pem > /tmp/ta_cert_chain.pem
         openssl crl2pkcs7 -nocrl -certfile /tmp/ta_cert_chain.pem -outform DER -out /tmp/ta_cert_chain.cms
-        cat sztpd1/sbi/root-ca/my_cert.pem sztpd1/sbi/intermediate1/my_cert.pem > /opi.pem
         echo === COPY TO FINAL DESTINATION ===
+        cat sztpd1/sbi/root-ca/my_cert.pem sztpd1/sbi/intermediate1/my_cert.pem > /certs/client/opi.pem
         cp sztpd1/sbi/end-entity/private_key.der \
           sztpd1/sbi/end-entity/private_key.pem \
           sztpd1/sbi/end-entity/public_key.der \
@@ -128,7 +128,15 @@ services:
           /tmp/ta_cert_chain.cms \
           /tmp/ta_cert_chain.pem \
           /certs/server/
-        cp client/end-entity/private_key.pem client/end-entity/my_cert.pem /opi.pem /certs/client/
+        echo === Generate Clients Endponts ===
+        for vendor in first second third; do
+            sed -i "s/my-serial-number/$${vendor}-serial-number/g" client/end-entity/openssl.cnf
+            make -C client/end-entity    cert_request      OPENSSL=openssl SHELL=/bin/ash
+            make -C client/intermediate2 sign_cert_request OPENSSL=openssl SHELL=/bin/ash REQDIR="../end-entity"
+            cp client/end-entity/private_key.pem /certs/client/$${vendor}_private_key.pem
+            cp client/end-entity/my_cert.pem /certs/client/$${vendor}_my_cert.pem
+            sed -i "s/$${vendor}-serial-number/my-serial-number/g" client/end-entity/openssl.cnf
+        done
       '
 
   web:
@@ -174,7 +182,7 @@ services:
       - opi
     command: dhclient -d -v
 
-  agent:
+  agent3: &agent
     image: ghcr.io/opiproject/opi-sztp-client:main
     build:
       context: sztp-agent
@@ -193,9 +201,25 @@ services:
       - opi
     command: ['/opi-sztp-agent', 'daemon',
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
-              '--device-end-entity-cert', '/certs/my_cert.pem',
-              '--device-private-key', '/certs/private_key.pem',
+              '--device-end-entity-cert', '/certs/third_my_cert.pem',
+              '--device-private-key', '/certs/third_private_key.pem',
               '--serial-number', 'third-serial-number']
+
+  agent2:
+    <<: *agent
+    command: ['/opi-sztp-agent', 'daemon',
+              '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
+              '--device-end-entity-cert', '/certs/second_my_cert.pem',
+              '--device-private-key', '/certs/second_private_key.pem',
+              '--serial-number', 'second-serial-number']
+
+  agent1:
+    <<: *agent
+    command: ['/opi-sztp-agent', 'daemon',
+              '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
+              '--device-end-entity-cert', '/certs/first_my_cert.pem',
+              '--device-private-key', '/certs/first_private_key.pem',
+              '--serial-number', 'first-serial-number']
 
   avahi:
     image: docker.io/flungo/avahi:latest
