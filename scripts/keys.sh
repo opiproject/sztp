@@ -17,8 +17,8 @@ docker-compose ps
 
 # extract PEM files from the running docker image
 docker-compose cp setup-cert:/certs/client/opi.pem /tmp/opi.pem
-docker-compose cp setup-cert:/certs/client/my_cert.pem /tmp/opi_cert.pem
-docker-compose cp setup-cert:/certs/client/private_key.pem /tmp/opi_private_key.pem
+docker-compose cp setup-cert:/certs/client/third_my_cert.pem /tmp/opi_cert.pem
+docker-compose cp setup-cert:/certs/client/third_private_key.pem /tmp/opi_private_key.pem
 
 # you can scp them into DPU now...
 echo ==================================
