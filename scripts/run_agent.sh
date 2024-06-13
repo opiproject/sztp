@@ -21,6 +21,10 @@ docker run --rm -it --network=host -v /mnt/:/mnt \
     --mount type=bind,source=/etc/os-release,target=/etc/os-release \
     --mount type=bind,source=${DHCLIENT_LEASE_FILE},target=/var/lib/dhclient/dhclient.leases \
     ${DOCKER_SZTP_IMAGE} \
-    /opi-sztp-agent daemon --bootstrap-trust-anchor-cert /mnt/opi.pem --device-end-entity-cert /mnt/opi_cert.pem --device-private-key /mnt/opi_private_key.pem
+    /opi-sztp-agent daemon \
+    --bootstrap-trust-anchor-cert /mnt/opi.pem \
+    --device-end-entity-cert /mnt/opi_cert.pem \
+    --device-private-key /mnt/opi_private_key.pem \
+    --serial-number third-serial-number
 
 echo "DONE"
