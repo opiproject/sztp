@@ -31,6 +31,11 @@ REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases |
 # certificates reusable variable
 CERTIFICATES=(--key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem)
 
+# TODO: remove --insecure
+docker-compose run -T agent curl --insecure --fail "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
+docker-compose run -T agent curl --insecure --fail "${CERTIFICATES[@]}" --output /tmp/second-boot-image.tst "https://web:443/second-boot-image.img"
+docker-compose run -T agent curl --insecure --fail "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
+
 # read back to check configuration was set
 docker-compose exec -T redirecter curl -i --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
 
@@ -63,8 +68,7 @@ docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-s
 
 # check bootstrapping log
 docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log
-docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log | grep -zqv ietf-restconf:errors
-docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log | grep bootstrap-complete
+
 # parse the reply some more
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"configuration\" /tmp/post_rpc_fixed.json | base64 --decode
 
@@ -79,11 +83,6 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"post-configuration-s
 # parse image URL and SHA
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[] /tmp/post_rpc_fixed.json
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json
-
-# TODO: remove --insecure
-docker-compose run -T agent curl --insecure --fail "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
-docker-compose run -T agent curl --insecure --fail "${CERTIFICATES[@]}" --output /tmp/second-boot-image.tst "https://web:443/second-boot-image.img"
-docker-compose run -T agent curl --insecure --fail "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
 
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
@@ -108,5 +107,10 @@ if [ "${rc}" != "0" ]; then
     docker logs "${name}"
     exit 1
 fi
+
+# check bootstrapping log
+docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log
+docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log | grep -zqv ietf-restconf:errors
+docker-compose exec -T bootstrap curl -i -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device=third-serial-number/bootstrapping-log | grep bootstrap-complete
 
 echo "DONE"
