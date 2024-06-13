@@ -61,6 +61,15 @@ graph LR;
 command -v docker-compose || { shopt -s expand_aliases && alias docker-compose='docker compose'; }
 ```
 
+## Serial number
+
+Get real serial number using
+
+```bash
+root@bf2:~# dmidecode -s system-serial-number
+MT2321XZ0KVX
+```
+
 ## Before start
 
 Change in `docker-compose.yml` file those settings per your lab:
