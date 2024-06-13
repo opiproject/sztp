@@ -29,11 +29,11 @@ docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases | grep sztp-
 REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases | grep sztp-redirect-urls | head -n 1 | awk '{print $3}' | tr -d '";')
 
 # reusable variables
-CERTIFICATES=(--key /certs/private_key.pem --cert /certs/my_cert.pem --cacert /certs/opi.pem)
+CERTIFICATES=(--key /certs/third_private_key.pem --cert /certs/third_my_cert.pem --cacert /certs/opi.pem)
 SERIAL_NUMBER=third-serial-number
 SBI_CREDENTIALS=(--user "${SERIAL_NUMBER}":my-secret)
 NBI_CREDENTIALS=(--user my-admin@example.com:my-secret)
-CURL=(docker run --rm --user 0 --network sztp_opi -v sztp_client-certs:/certs docker.io/curlimages/curl:8.5.0 --fail-with-body)
+CURL=(docker run --rm --user 0 --network sztp_opi -v /tmp:/tmp -v sztp_client-certs:/certs docker.io/curlimages/curl:8.5.0 --fail-with-body)
 
 # TODO: remove --insecure
 "${CURL[@]}" --insecure "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
@@ -94,7 +94,7 @@ BASENAME=$(basename "${URL}")
 "${CURL[@]}" --insecure "${CERTIFICATES[@]}" --output "/tmp/${BASENAME}" "${URL}"
 
 # Validate signature
-SIGNATURE=$(docker-compose run -T agent ash -c "openssl dgst -sha256 -c \"/tmp/${BASENAME}\" | awk '{print \$2}'")
+SIGNATURE=$(docker run --rm -v /tmp:/tmp docker.io/alpine/openssl:3.3.1 dgst -sha256 -c "/tmp/${BASENAME}" | awk '{print $2}')
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image-verification\"[] /tmp/post_rpc_fixed.json | grep "${SIGNATURE}"
 
 # send progress
@@ -104,13 +104,15 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image
 docker-compose ps
 
 # test go-code
-name=$(docker-compose ps | grep agent | awk '{print $1}')
-rc=$(docker wait "${name}")
-if [ "${rc}" != "0" ]; then
-    echo "agent failed:"
-    docker logs "${name}"
-    exit 1
-fi
+for name in $(docker-compose ps | grep agent | awk '{print $1}')
+do
+    rc=$(docker wait "${name}")
+    if [ "${rc}" != "0" ]; then
+        echo "agent failed:"
+        docker logs "${name}"
+        exit 1
+    fi
+done
 
 # check bootstrapping log
 docker-compose exec -T bootstrap curl --include --request GET --fail "${NBI_CREDENTIALS[@]}"  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
