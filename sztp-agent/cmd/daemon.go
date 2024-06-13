@@ -39,7 +39,7 @@ func NewDaemonCommand() *cobra.Command {
 	flags := cmd.Flags()
 	// TODO this options should be retrieved automatically instead of requests in the agent
 	// Opened discussion to define the procedure: https://github.com/opiproject/sztp/issues/2
-	flags.StringVar(&serialNumber, "serial-number", "my-serial-number", "Device's serial number")
+	flags.StringVar(&serialNumber, "serial-number", "", "Device's serial number. If empty, discover via SMBIOS")
 	flags.StringVar(&dhcpLeaseFile, "dhcp-lease-file", "/var/lib/dhclient/dhclient.leases", "Device's dhclient leases file")
 	flags.StringVar(&devicePassword, "device-password", "my-secret", "Device's password")
 	flags.StringVar(&devicePrivateKey, "device-private-key", "/certs/private_key.pem", "Device's private key")
