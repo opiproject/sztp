@@ -39,7 +39,7 @@ docker-compose run -T agent curl --insecure --fail-with-body "${CERTIFICATES[@]}
 docker-compose run -T agent curl --insecure --fail-with-body "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
 
 # read back to check configuration was set
-docker-compose exec -T redirecter curl --include --fail-with-body --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
+docker-compose exec -T redirecter curl --include --fail --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would) and see it is redirect
 docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${REDIRECT}" | tee /tmp/post_rpc_input.json
@@ -54,7 +54,7 @@ port=$(jq -r .\"ietf-sztp-conveyed-info:redirect-information\".\"bootstrap-serve
 BOOTSTRAP="${REDIRECT//redirecter:8080/$addr:$port}"
 
 # read back to check configuration was set
-docker-compose exec -T bootstrap curl --include --fail-with-body --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
+docker-compose exec -T bootstrap curl --include --fail --user my-admin@example.com:my-secret -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would)
 docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
@@ -66,10 +66,10 @@ jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_
 docker-compose run -T agent curl --request POST --fail-with-body --data '{"ietf-sztp-bootstrap-server:input":{"progress-type":"bootstrap-initiated","message":"message sent via JSON"}}' -H "Content-Type:application/yang-data+json" "${CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
 
 # check audit log
-docker-compose exec -T bootstrap curl --include --fail-with-body -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
+docker-compose exec -T bootstrap curl --include --fail -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
 
 # check bootstrapping log
-docker-compose exec -T bootstrap curl --include --fail-with-body -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
+docker-compose exec -T bootstrap curl --include --fail -X GET --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
 
 # parse the reply some more
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"configuration\" /tmp/post_rpc_fixed.json | base64 --decode
@@ -111,8 +111,8 @@ if [ "${rc}" != "0" ]; then
 fi
 
 # check bootstrapping log
-docker-compose exec -T bootstrap curl --include --request GET --fail-with-body --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
-docker-compose exec -T bootstrap curl --include --request GET --fail-with-body --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log | grep -zqv ietf-restconf:errors
-docker-compose exec -T bootstrap curl --include --request GET --fail-with-body --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log | grep bootstrap-complete
+docker-compose exec -T bootstrap curl --include --request GET --fail --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
+docker-compose exec -T bootstrap curl --include --request GET --fail --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log | grep -zqv ietf-restconf:errors
+docker-compose exec -T bootstrap curl --include --request GET --fail --user my-admin@example.com:my-secret  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log | grep bootstrap-complete
 
 echo "DONE"
