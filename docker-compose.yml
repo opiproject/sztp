@@ -103,9 +103,8 @@ services:
       -c '
         set -euxo pipefail
         env
-        apk add --no-cache --no-check-certificate make && rm -rf /var/cache/apk/*
-        wget --no-check-certificate https://watsen.net/support/sztpd-simulator-0.0.11.tgz
-        tar -zxvf sztpd-simulator-0.0.11.tgz -C /tmp
+        apk add --no-cache --no-check-certificate curl make && rm -rf /var/cache/apk/*
+        curl -kL https://watsen.net/support/sztpd-simulator-0.0.11.tgz | tar -zxvf - -C /tmp/
         cd /tmp/sztpd-simulator/pki
         echo "DNS.2 = bootstrap" >> sztpd1/sbi/end-entity/openssl.cnf
         echo "DNS.3 = web" >> sztpd1/sbi/end-entity/openssl.cnf
