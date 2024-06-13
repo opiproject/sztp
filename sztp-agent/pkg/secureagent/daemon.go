@@ -84,7 +84,7 @@ func (a *Agent) getBootstrapURL() error {
 		}
 		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
 	} else {
-		log.Printf(" File " + a.DhcpLeaseFile + " does not exist\n")
+		log.Printf("[ERROR] File " + a.DhcpLeaseFile + " does not exist\n")
 		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
 	}
 	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
