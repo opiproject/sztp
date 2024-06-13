@@ -119,6 +119,22 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 	return &postResponse, nil
 }
 
+func GetSerialNumber(givenSerialNumber string) string {
+	if givenSerialNumber != "" {
+		log.Println("[INFO] Using user provides serial number: " + givenSerialNumber)
+		return givenSerialNumber
+	}
+	serialNumber := ""
+	product, err := ghw.Product()
+	if err != nil {
+		log.Printf("Error getting products info: %v", err)
+	} else {
+		serialNumber = product.SerialNumber
+	}
+	log.Println("[None] Using discovered serial number: " + serialNumber )
+	return serialNumber
+}
+
 func generateInputJSONContent() string {
 	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
 	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])

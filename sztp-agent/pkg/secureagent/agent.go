@@ -196,7 +196,7 @@ type Agent struct {
 func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
 	return &Agent{
 		BootstrapURL:                  bootstrapURL,
-		SerialNumber:                  serialNumber,
+		SerialNumber:                  GetSerialNumber(serialNumber),
 		DevicePassword:                devicePassword,
 		DevicePrivateKey:              devicePrivateKey,
 		DeviceEndEntityCert:           deviceEndEntityCert,
