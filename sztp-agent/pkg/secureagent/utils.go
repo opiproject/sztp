@@ -127,7 +127,7 @@ func GetSerialNumber(givenSerialNumber string) string {
 	serialNumber := ""
 	product, err := ghw.Product()
 	if err != nil {
-		log.Printf("Error getting products info: %v", err)
+		log.Printf("[ERROR] Error getting products info: %v", err)
 	} else {
 		serialNumber = product.SerialNumber
 	}
@@ -141,7 +141,7 @@ func generateInputJSONContent() string {
 	hwModel := ""
 	baseboard, err := ghw.Baseboard()
 	if err != nil {
-		log.Printf("Error getting baseboard info: %v", err)
+		log.Printf("[ERROR] Error getting baseboard info: %v", err)
 	} else {
 		hwModel = baseboard.Product
 	}
