@@ -10,7 +10,7 @@ uname -a
 # check what you have curently
 docker images
 docker ps
-DOCKER_SZTP_IMAGE=opi-sztp-agen-client:latest
+DOCKER_SZTP_IMAGE=ghcr.io/opiproject/opi-sztp-client:v0.2.0
 
 # assume keys are in /mnt
 ls -l /mnt/
