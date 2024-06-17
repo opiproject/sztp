@@ -9,6 +9,9 @@ Copyright (C) 2022 Red Hat.
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/opiproject/sztp/sztp-agent/pkg/secureagent"
 	"github.com/spf13/cobra"
 )
@@ -29,6 +32,14 @@ func NewDaemonCommand() *cobra.Command {
 		Use:   "daemon",
 		Short: "Run the daemon command",
 		RunE: func(c *cobra.Command, args []string) error {
+			arrayChecker := [4]string{dhcpLeaseFile, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert}
+			for _, filePath := range arrayChecker {
+				info, err := os.Stat(filePath)
+				cobra.CheckErr(err)
+				if info.IsDir() {
+					return fmt.Errorf("must not be folder: %q", filePath)
+				}
+			}
 			err := c.Help()
 			cobra.CheckErr(err)
 			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
