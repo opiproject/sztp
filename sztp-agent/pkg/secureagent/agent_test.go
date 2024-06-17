@@ -943,6 +943,7 @@ func TestAgent_GetProgressJson(t *testing.T) {
 	}
 }
 
+// nolint:funlen
 func TestAgent_SetProgressJson(t *testing.T) {
 	type fields struct {
 		BootstrapURL             string
@@ -1039,6 +1040,7 @@ func TestAgent_SetProgressJson(t *testing.T) {
 	}
 }
 
+// nolint:funlen
 func TestProgressType_String(t *testing.T) {
 	tests := []struct {
 		name string

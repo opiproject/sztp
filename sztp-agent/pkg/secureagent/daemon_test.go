@@ -87,7 +87,8 @@ func TestAgent_getBootstrapURL(t *testing.T) {
 	deleteTempTestFile(dhcpTestFileOK)
 }
 
-func createTempTestFile(file string, ok bool) {
+func createTempTestFile(file string, _ bool) {
+	// nolint:gosec
 	f, err := os.Create(file)
 	if err != nil {
 		log.Fatal(err)
@@ -730,6 +731,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 	}
 }
 
+// nolint:funlen
 func TestAgent_copyConfigurationFile(t *testing.T) {
 	type fields struct {
 		BootstrapURL                  string
@@ -884,6 +886,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 	}
 }
 
+// nolint:funlen
 func TestAgent_launchScriptsConfiguration(t *testing.T) {
 	type fields struct {
 		BootstrapURL                  string

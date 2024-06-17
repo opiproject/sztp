@@ -21,7 +21,7 @@ func TestNewDaemonCommand(t *testing.T) {
 			want: &cobra.Command{
 				Use:   "daemon",
 				Short: "Run the daemon command",
-				RunE: func(c *cobra.Command, args []string) error {
+				RunE: func(c *cobra.Command, _ []string) error {
 					err := c.Help()
 					cobra.CheckErr(err)
 					return nil

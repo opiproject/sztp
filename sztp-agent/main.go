@@ -22,7 +22,6 @@ func main() {
 	command := newCommand()
 	if err := command.Execute(); err != nil {
 		log.Fatalf(color.InRed("[ERROR]")+"%s", err.Error())
-		os.Exit(-1)
 	}
 }
 
@@ -30,11 +29,10 @@ func newCommand() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "opi-sztp-agent",
 		Short: "opi-sztp-agent is the agent command line interface to work with the sztp workflow",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			err := cmd.Help()
 			if err != nil {
 				log.Fatalf(color.InRed("[ERROR]")+"%s", err.Error())
-				os.Exit(1)
 			}
 			os.Exit(1)
 		},

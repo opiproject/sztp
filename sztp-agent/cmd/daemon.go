@@ -31,7 +31,7 @@ func NewDaemonCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "daemon",
 		Short: "Run the daemon command",
-		RunE: func(c *cobra.Command, args []string) error {
+		RunE: func(c *cobra.Command, _ []string) error {
 			arrayChecker := [4]string{dhcpLeaseFile, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert}
 			for _, filePath := range arrayChecker {
 				info, err := os.Stat(filePath)
