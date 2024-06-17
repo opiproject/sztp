@@ -21,7 +21,7 @@ func TestNewStatusCommand(t *testing.T) {
 			want: &cobra.Command{
 				Use:   "status",
 				Short: "Run the status command",
-				RunE: func(c *cobra.Command, args []string) error {
+				RunE: func(c *cobra.Command, _ []string) error {
 					err := c.Help()
 					cobra.CheckErr(err)
 					return nil

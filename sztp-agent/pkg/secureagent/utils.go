@@ -28,6 +28,7 @@ import (
 
 // Auxiliar function to get lines from file matching with the substr
 func linesInFileContains(file string, substr string) string {
+	// nolint:gosec
 	f, _ := os.Open(file)
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -119,6 +120,7 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 	return &postResponse, nil
 }
 
+// GetSerialNumber returns the serial number of the device
 func GetSerialNumber(givenSerialNumber string) string {
 	if givenSerialNumber != "" {
 		log.Println("[INFO] Using user provides serial number: " + givenSerialNumber)
@@ -131,7 +133,7 @@ func GetSerialNumber(givenSerialNumber string) string {
 	} else {
 		serialNumber = product.SerialNumber
 	}
-	log.Println("[None] Using discovered serial number: " + serialNumber )
+	log.Println("[None] Using discovered serial number: " + serialNumber)
 	return serialNumber
 }
 

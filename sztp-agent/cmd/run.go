@@ -28,7 +28,7 @@ func NewRunCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Exec the run command",
-		RunE: func(c *cobra.Command, args []string) error {
+		RunE: func(c *cobra.Command, _ []string) error {
 			err := c.Help()
 			cobra.CheckErr(err)
 			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)

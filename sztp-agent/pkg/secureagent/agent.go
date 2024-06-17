@@ -5,6 +5,7 @@ Copyright (c) 2022 Dell Inc, or its subsidiaries.
 Copyright (C) 2022 Red Hat.
 */
 
+// nolint
 // Package secureagent implements the secure agent
 package secureagent
 

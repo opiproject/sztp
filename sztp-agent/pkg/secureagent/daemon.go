@@ -34,7 +34,9 @@ import (
 )
 
 const (
-	PRE  = "pre"
+	// PRE nolint:var-naming
+	PRE = "pre"
+	// POST nolint:var-naming
 	POST = "post"
 )
 
@@ -124,7 +126,6 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 }
 
 func (a *Agent) doHandleBootstrapRedirect() error {
-
 	if reflect.ValueOf(a.BootstrapServerRedirectInfo).IsZero() {
 		return nil
 	}
@@ -214,12 +215,13 @@ func (a *Agent) downloadAndValidateImage() error {
 		cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
 
 		check := http.Client{
-			CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			CheckRedirect: func(r *http.Request, _ []*http.Request) error {
 				r.URL.Opaque = r.URL.Path
 				return nil
 			},
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{ //nolint:gosec
+				TLSClientConfig: &tls.Config{
+					//nolint:gosec
 					InsecureSkipVerify: true, // TODO: remove skip verify
 					RootCAs:            caCertPool,
 					Certificates:       []tls.Certificate{cert},
@@ -237,7 +239,7 @@ func (a *Agent) downloadAndValidateImage() error {
 		log.Printf("[INFO] Downloading the image with size: %v", downloadSize)
 
 		if response.StatusCode != 200 {
-			return errors.New("Received non 200 response code")
+			return errors.New("received non 200 response code")
 		}
 		size, err := io.Copy(file, response.Body)
 		if err != nil {
@@ -278,13 +280,13 @@ func (a *Agent) downloadAndValidateImage() error {
 			log.Println("calculated: " + sum)
 			log.Println("expected  : " + original)
 			if sum != original {
-				return errors.New("Checksum mismatch")
+				return errors.New("checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
 			_ = a.doReportProgress(ProgressTypeBootImageComplete)
 			return nil
 		default:
-			return errors.New("Unsupported hash algorithm")
+			return errors.New("unsupported hash algorithm")
 		}
 	}
 	return nil
@@ -311,6 +313,7 @@ func (a *Agent) copyConfigurationFile() error {
 		log.Println("[ERROR] writing the configuration file", err.Error())
 		return err
 	}
+	// nolint:gosec
 	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"-config", 0744)
 	if err != nil {
 		log.Println("[ERROR] changing the configuration file permission", err.Error())
@@ -338,6 +341,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
 	_ = a.doReportProgress(reportStart)
+	// nolint:gosec
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
 		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
@@ -355,6 +359,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		log.Println("[ERROR] writing the "+scriptName+"-configuration script", err.Error())
 		return err
 	}
+	// nolint:gosec
 	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+scriptName+"configuration.sh", 0755)
 	if err != nil {
 		log.Println("[ERROR] changing the "+scriptName+"-configuration script permission", err.Error())
