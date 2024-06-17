@@ -36,12 +36,12 @@ NBI_CREDENTIALS=(--user my-admin@example.com:my-secret)
 CURL=(docker run --rm --user 0 --network sztp_opi -v /tmp:/tmp -v sztp_client-certs:/certs docker.io/curlimages/curl:8.5.0 --fail-with-body)
 
 # TODO: remove --insecure
-"${CURL[@]}" --insecure "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
-"${CURL[@]}" --insecure "${CERTIFICATES[@]}" --output /tmp/second-boot-image.tst "https://web:443/second-boot-image.img"
-"${CURL[@]}" --insecure "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
+"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
+"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output /tmp/second-boot-image.tst "https://web:443/second-boot-image.img"
+"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
 
 # read back to check configuration was set
-"${CURL[@]}" --include "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
+"${CURL[@]}" --include --request GET "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would) and see it is redirect
 "${CURL[@]}" --request POST --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${REDIRECT}" | tee /tmp/post_rpc_input.json
@@ -56,7 +56,7 @@ port=$(jq -r .\"ietf-sztp-conveyed-info:redirect-information\".\"bootstrap-serve
 BOOTSTRAP="${REDIRECT//redirecter:8080/$addr:$port}"
 
 # read back to check configuration was set
-"${CURL[@]}" --include "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
+"${CURL[@]}" --include --request GET "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:running
 
 # request onboarding info (like a DPU or IPU device would)
 "${CURL[@]}"  --request POST --data '{"ietf-sztp-bootstrap-server:input":{"hw-model":"model-x","os-name":"vendor-os","os-version":"17.3R2.1","signed-data-preferred":[null],"nonce":"BASE64VALUE="}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP}" | tee /tmp/post_rpc_input.json
@@ -68,10 +68,10 @@ jq -r .\"ietf-sztp-bootstrap-server:output\".\"conveyed-information\" /tmp/post_
 "${CURL[@]}"  --request POST --data '{"ietf-sztp-bootstrap-server:input":{"progress-type":"bootstrap-initiated","message":"message sent via JSON"}}' -H "Content-Type:application/yang-data+json" "${SBI_CREDENTIALS[@]}" "${CERTIFICATES[@]}" "${BOOTSTRAP//get-bootstrapping-data/report-progress}"
 
 # check audit log
-"${CURL[@]}" --include -X GET "${NBI_CREDENTIALS[@]}"  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
+"${CURL[@]}" --include --request GET "${NBI_CREDENTIALS[@]}"  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:audit-log
 
 # check bootstrapping log
-"${CURL[@]}" --include -X GET "${NBI_CREDENTIALS[@]}"  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
+"${CURL[@]}" --include --request GET "${NBI_CREDENTIALS[@]}"  -H "Accept:application/yang-data+json" http://bootstrap:7080/restconf/ds/ietf-datastores:operational/wn-sztpd-1:devices/device="${SERIAL_NUMBER}"/bootstrapping-log
 
 # parse the reply some more
 jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"configuration\" /tmp/post_rpc_fixed.json | base64 --decode
@@ -91,7 +91,7 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
 BASENAME=$(basename "${URL}")
-"${CURL[@]}" --insecure "${CERTIFICATES[@]}" --output "/tmp/${BASENAME}" "${URL}"
+"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output "/tmp/${BASENAME}" "${URL}"
 
 # Validate signature
 SIGNATURE=$(docker run --rm -v /tmp:/tmp docker.io/alpine/openssl:3.3.1 dgst -sha256 -c "/tmp/${BASENAME}" | awk '{print $2}')
