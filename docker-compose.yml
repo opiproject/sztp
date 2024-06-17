@@ -12,7 +12,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - server-certs:/certs
-      - ./sztp-server/images:/media
+      - ./images:/media
       - ./sztp-server/config:/mnt
       - ./sztp-server/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
     entrypoint: /usr/local/bin/docker-entrypoint.sh
@@ -147,7 +147,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - server-certs:/certs
-      - ./sztp-server/images:/usr/local/apache2/htdocs
+      - ./images:/usr/local/apache2/htdocs
     ports:
       - 443:443
     networks:
