@@ -110,4 +110,5 @@ crw-rw----. 1 tss  root  10,   224 Jun 18 23:17 /dev/tpm0
 crw-rw----. 1 root tss  253, 65536 Jun 18 23:17 /dev/tpmrm0
 
 [fedora@fed38 ~]$ sudo tpm2_clear
+[fedora@fed38 ~]$ sudo tpm2_selftest
 ```
