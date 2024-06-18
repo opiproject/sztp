@@ -3,7 +3,9 @@
 
 ## Docs
 
-- From <https://tpm2-software.github.io/2020/10/19/TPM2-Device-Emulation-With-QEMU.html>
+- See <https://en.opensuse.org/Software_TPM_Emulator_For_QEMU>
+- See <https://github.com/qemu/qemu/blob/master/docs/specs/tpm.rst#the-qemu-tpm-emulator-device>
+- See <https://tpm2-software.github.io/2020/10/19/TPM2-Device-Emulation-With-QEMU.html>
 
 ## Virtualization support
 
