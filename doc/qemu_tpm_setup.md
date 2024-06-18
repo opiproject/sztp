@@ -87,18 +87,27 @@ swtpm socket --tpmstate dir=/tmp/emulated_tpm --ctrl type=unixio,path=/tmp/emula
 ### Run qemu with TPM device
 
 ```bash
-qemu-system-x86_64 -smp 2 -cdrom init.iso -m 1G -drive file=guest_os_image.qcow2,if=none,id=disk -device ide-hd,drive=disk,bootindex=0 --nographic
+qemu-system-x86_64 -smp 2 -cdrom init.iso -m 1G \
+  -drive file=guest_os_image.qcow2,if=none,id=disk \
+  -device ide-hd,drive=disk,bootindex=0 \
+  -chardev socket,id=chrtpm,path=/tmp/emulated_tpm/swtpm-sock \
+  -tpmdev emulator,id=tpm0,chardev=chrtpm \
+  -device tpm-tis,tpmdev=tpm0 \
+  -qmp tcp:localhost:4444,server,wait=off \
+  --nographic
 ```
 
 Login using fedora/fedora and run few tests
 
 ```bash
 [fedora@fed38 ~]$ dmesg | grep -i tpm
-[    4.061037] ima: No TPM chip found, activating TPM-bypass!
-[    6.204763] systemd[1]: systemd 253.2-1.fc38 running in system mode (+PAM +AUDIT +SELINUX -APPARMOR +IMA +SMACK +SECCOMP -GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN)
-[   43.258954] systemd[1]: systemd 253.2-1.fc38 running in system mode (+PAM +AUDIT +SELINUX -APPARMOR +IMA +SMACK +SECCOMP -GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN)
-[   51.961877] systemd[1]: systemd-pcrmachine.service - TPM2 PCR Machine ID Measurement was skipped because of an unmet condition check (ConditionPathExists=/sys/firmware/efi/efivars/StubP.
+[    0.055889] ACPI: TPM2 0x000000003FFD1EED 00004C (v04 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.056104] ACPI: Reserving TPM2 table memory at [mem 0x3ffd1eed-0x3ffd1f38]
+[    3.401305] tpm_tis MSFT0101:00: 2.0 TPM (device-id 0x1, rev-id 1)
 
 [fedora@fed38 ~]$ ls -l /dev/tpm*
-ls: cannot access '/dev/tpm*': No such file or directory
+crw-rw----. 1 tss  root  10,   224 Jun 18 23:17 /dev/tpm0
+crw-rw----. 1 root tss  253, 65536 Jun 18 23:17 /dev/tpmrm0
+
+[fedora@fed38 ~]$ sudo tpm2_clear
 ```
