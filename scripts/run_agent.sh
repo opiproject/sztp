@@ -19,8 +19,8 @@ ls -l /mnt/
 DHCLIENT_LEASE_FILE=/var/lib/NetworkManager/dhclient-eth0.lease
 docker run --rm -it --network=host -v /mnt/:/mnt \
     --mount type=bind,source=/etc/ssh,target=/etc/ssh,readonly \
-    --mount type=bind,source=/etc/os-release,target=/etc/os-release \
-    --mount type=bind,source=${DHCLIENT_LEASE_FILE},target=/var/lib/dhclient/dhclient.leases \
+    --mount type=bind,source=/etc/os-release,target=/etc/os-release,readonly \
+    --mount type=bind,source=${DHCLIENT_LEASE_FILE},target=/var/lib/dhclient/dhclient.leases,readonly \
     ${DOCKER_SZTP_IMAGE} \
     /opi-sztp-agent daemon \
     --bootstrap-trust-anchor-cert /mnt/opi.pem \
