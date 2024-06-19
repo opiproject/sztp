@@ -17,7 +17,7 @@ import (
 //nolint:funlen
 func TestAgent_getBootstrapURL(t *testing.T) {
 	dhcpTestFileOK := "/tmp/test.dhcp"
-	createTempTestFile(dhcpTestFileOK, true)
+	createTempTestFile(dhcpTestFileOK, "", true)
 
 	type fields struct {
 		BootstrapURL             string
@@ -87,7 +87,8 @@ func TestAgent_getBootstrapURL(t *testing.T) {
 	deleteTempTestFile(dhcpTestFileOK)
 }
 
-func createTempTestFile(file string, _ bool) {
+func createTempTestFile(file string, content string, _ bool) {
+	log.Println("Creating file " + file)
 	// nolint:gosec
 	f, err := os.Create(file)
 	if err != nil {
@@ -109,6 +110,9 @@ func createTempTestFile(file string, _ bool) {
   expire 1 2022/08/15 19:22:05;
 }`
 
+	if content != "" {
+		mydhcpresponse = content
+	}
 	_, err2 := f.WriteString(mydhcpresponse)
 
 	if err2 != nil {
@@ -117,6 +121,7 @@ func createTempTestFile(file string, _ bool) {
 }
 
 func deleteTempTestFile(file string) {
+	log.Println("Deleting file " + file)
 	err := os.RemoveAll(file)
 
 	if err != nil {

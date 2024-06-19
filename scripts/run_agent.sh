@@ -18,6 +18,7 @@ ls -l /mnt/
 # run docker (not compose) in host network
 DHCLIENT_LEASE_FILE=/var/lib/NetworkManager/dhclient-eth0.lease
 docker run --rm -it --network=host -v /mnt/:/mnt \
+    --mount type=bind,source=/etc/ssh,target=/etc/ssh,readonly \
     --mount type=bind,source=/etc/os-release,target=/etc/os-release \
     --mount type=bind,source=${DHCLIENT_LEASE_FILE},target=/var/lib/dhclient/dhclient.leases \
     ${DOCKER_SZTP_IMAGE} \
