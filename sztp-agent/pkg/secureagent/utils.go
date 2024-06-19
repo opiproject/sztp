@@ -173,6 +173,7 @@ func readSSHHostKeyPublicFiles(pattern string) []publicKey {
 	for _, f := range files {
 		// nolint:gosec
 		data, _ := os.ReadFile(f)
+		// TODO: consider switching to https://pkg.go.dev/golang.org/x/crypto/ssh#ParseAuthorizedKey
 		parts := strings.Fields(string(data))
 		// [type-name] [base64-encoded-ssh-public-key] [comment]
 		if len(parts) < 2 {
