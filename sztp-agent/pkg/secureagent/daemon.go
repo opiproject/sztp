@@ -100,17 +100,17 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 	p.IetfSztpBootstrapServerInput.ProgressType = s.String()
 	p.IetfSztpBootstrapServerInput.Message = "message sent via JSON"
 	if s == ProgressTypeBootstrapComplete {
-		// TODO: generate real key here
+		// TODO: use/generate real TA cert here
 		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
 		p.IetfSztpBootstrapServerInput.TrustAnchorCerts.TrustAnchorCert = []string{encodedKey}
-		p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey = []struct {
-			Algorithm string `json:"algorithm"`
-			KeyData   string `json:"key-data"`
-		}{
-			{
-				Algorithm: "ssh-rsa",
-				KeyData:   encodedKey,
-			},
+		for _, key := range readSSHHostKeyPublicFiles("/etc/ssh/ssh_host_*key.pub") {
+			p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey = append(p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey, struct {
+				Algorithm string `json:"algorithm"`
+				KeyData   string `json:"key-data"`
+			}{
+				Algorithm: key.Algorithm,
+				KeyData:   key.KeyData,
+			})
 		}
 	}
 	a.SetProgressJSON(p)

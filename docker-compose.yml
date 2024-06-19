@@ -198,6 +198,7 @@ services:
       - client-certs:/certs
       - dhcp-leases-folder:/var/lib/dhclient/
       - /etc/os-release:/etc/os-release
+      - /etc/ssh:/etc/ssh
     networks:
       - opi
     command: ['/opi-sztp-agent', 'daemon',
