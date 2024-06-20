@@ -393,6 +393,20 @@ func TestAgent_GetSerialNumber(t *testing.T) {
 			},
 			want: "testSerialNumber",
 		},
+		{
+			name: "Test SMBIOS GetSerialNumber ",
+			fields: fields{
+				BootstrapURL:             "test",
+				SerialNumber:             "",
+				DevicePassword:           "test",
+				DevicePrivateKey:         "test",
+				DeviceEndEntityCert:      "test",
+				BootstrapTrustAnchorCert: "test",
+				ContentTypeReq:           "test",
+				InputJSONContent:         "test",
+			},
+			want: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
