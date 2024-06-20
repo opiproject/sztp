@@ -42,9 +42,12 @@ const (
 
 // RunCommandDaemon runs the command in the background
 func (a *Agent) RunCommandDaemon() error {
-	err := a.getBootstrapURL()
-	if err != nil {
-		return err
+	var err error
+	if a.GetBootstrapURL() == "" {
+		err = a.getBootstrapURL()
+		if err != nil {
+			return err
+		}
 	}
 	err = a.doRequestBootstrapServerOnboardingInfo()
 	if err != nil {
