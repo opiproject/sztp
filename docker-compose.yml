@@ -202,6 +202,7 @@ services:
     networks:
       - opi
     command: ['/opi-sztp-agent', 'daemon',
+              '--dhcp-lease-file', '/var/lib/dhclient/dhclient.leases',
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/third_my_cert.pem',
               '--device-private-key', '/certs/third_private_key.pem',
@@ -210,6 +211,7 @@ services:
   agent2:
     <<: *agent
     command: ['/opi-sztp-agent', 'daemon',
+              '--dhcp-lease-file', '/var/lib/dhclient/dhclient.leases',
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/second_my_cert.pem',
               '--device-private-key', '/certs/second_private_key.pem',
@@ -218,6 +220,16 @@ services:
   agent1:
     <<: *agent
     command: ['/opi-sztp-agent', 'daemon',
+              '--dhcp-lease-file', '/var/lib/dhclient/dhclient.leases',
+              '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
+              '--device-end-entity-cert', '/certs/first_my_cert.pem',
+              '--device-private-key', '/certs/first_private_key.pem',
+              '--serial-number', 'first-serial-number']
+
+  agent4:
+    <<: *agent
+    command: ['/opi-sztp-agent', 'daemon',
+              '--bootstrap-url', 'https://redirecter:8080/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data',
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/first_my_cert.pem',
               '--device-private-key', '/certs/first_private_key.pem',
