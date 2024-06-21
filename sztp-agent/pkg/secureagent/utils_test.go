@@ -141,7 +141,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 				keyType: "ssh-ed25519",
 			},
-			want: []publicKey{{Type: "ssh-ed25519",
+			want: []publicKey{{Algorithm: "ssh-ed25519",
 				Data: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
 		},
 		{
@@ -151,7 +151,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment",
 				keyType: "ssh-ed25519",
 			},
-			want: []publicKey{{Type: "ssh-ed25519",
+			want: []publicKey{{Algorithm: "ssh-ed25519",
 				Data:    "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 				Comment: "comment"}},
 		},
@@ -162,7 +162,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment error",
 				keyType: "ssh-ed25519",
 			},
-			want: []publicKey{{Type: "ssh-ed25519",
+			want: []publicKey{{Algorithm: "ssh-ed25519",
 				Data: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
 		},
 		{

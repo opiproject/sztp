@@ -159,9 +159,9 @@ func generateInputJSONContent() string {
 }
 
 type publicKey struct {
-	Type    string
-	Data    string
-	Comment string
+	Algorithm string
+	Data      string
+	Comment   string
 }
 
 func readSSHHostKeyPublicFiles(pattern string) []publicKey {
@@ -185,12 +185,12 @@ func readSSHHostKeyPublicFiles(pattern string) []publicKey {
 				"Check the key file has the correct format", f, err.Error())
 			continue
 		}
-		
+
 		keyParts := strings.Fields(string(data))
 
 		results = append(results, publicKey{
-			Type: key.Type(),
-			Data: keyParts[1],
+			Algorithm: key.Type(),
+			Data:      keyParts[1],
 			Comment: func() string {
 				if len(keyParts) == 3 {
 					return keyParts[2]
