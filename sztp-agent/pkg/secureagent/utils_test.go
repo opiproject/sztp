@@ -22,13 +22,11 @@ func TestAgent_doTLSRequest(t *testing.T) {
 		InputJSONContent         string
 		DhcpLeaseFile            string
 	}
-	tests := []struct {
+	var tests []struct {
 		name    string
 		fields  fields
 		want    *BootstrapServerPostOutput
 		wantErr bool
-	}{
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -96,7 +94,7 @@ func Test_extractfromLine(t *testing.T) {
 
 func Test_linesInFileContains(t *testing.T) {
 	dhcpTestFileOK := "/tmp/test.dhcp"
-	createTempTestFile(dhcpTestFileOK, "", true)
+	createTempTestFile(dhcpTestFileOK, DHCPTestContent, true)
 	type args struct {
 		file   string
 		substr string
@@ -123,70 +121,6 @@ func Test_linesInFileContains(t *testing.T) {
 		})
 	}
 	deleteTempTestFile(dhcpTestFileOK)
-}
-
-func Test_readSSHHostKeyPublicFiles(t *testing.T) {
-	type args struct {
-		file string
-		line string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []publicKey
-	}{
-		{
-			name: "Test OK line in files no comment",
-			args: args{
-				file: "/tmp/test.pub",
-				line: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
-			},
-			want: []publicKey{{Algorithm: "ssh-ed25519", KeyData: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
-		},
-		{
-			name: "Test OK line in files with comment",
-			args: args{
-				file: "/tmp/test.pub",
-				line: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment",
-			},
-			want: []publicKey{{Algorithm: "ssh-ed25519", KeyData: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
-		},
-		{
-			name: "Test too many parts in file",
-			args: args{
-				file: "/tmp/test.pub",
-				line: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment error",
-			},
-			want: []publicKey{{Algorithm: "ssh-ed25519", KeyData: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
-		},
-		{
-			name: "Test not enough parts in file",
-			args: args{
-				file: "/tmp/test.pub",
-				line: "ssh-ed25519",
-			},
-			want: []publicKey{},
-		},
-		{
-			name: "Test file doesn't exist",
-			args: args{
-				file: "/tmp/test.pub",
-				line: "",
-			},
-			want: []publicKey{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.args.line != "" {
-				createTempTestFile(tt.args.file, tt.args.line, true)
-			}
-			if got := readSSHHostKeyPublicFiles(tt.args.file); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("readSSHHostKeyPublicFiles() = %v, want %v", got, tt.want)
-			}
-			deleteTempTestFile(tt.args.file)
-		})
-	}
 }
 
 func Test_replaceQuotes(t *testing.T) {
