@@ -111,8 +111,8 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 				Algorithm string `json:"algorithm"`
 				KeyData   string `json:"key-data"`
 			}{
-				Algorithm: key.Algorithm,
-				KeyData:   key.KeyData,
+				Algorithm: key.Type(),
+				KeyData:   getSSHHostKeyString(key, false),
 			})
 		}
 	}
