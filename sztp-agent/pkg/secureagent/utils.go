@@ -185,10 +185,18 @@ func readSSHHostKeyPublicFiles(pattern string) []publicKey {
 				"Check the key file has the correct format", f, err.Error())
 			continue
 		}
+		
+		keyParts := strings.Fields(string(data))
+
 		results = append(results, publicKey{
-			Type:    key.Type(),
-			Data:    strings.Fields(string(data))[1],
-			Comment: "",
+			Type: key.Type(),
+			Data: keyParts[1],
+			Comment: func() string {
+				if len(keyParts) == 3 {
+					return keyParts[2]
+				}
+				return ""
+			}(),
 		})
 	}
 	return results
