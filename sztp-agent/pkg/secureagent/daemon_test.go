@@ -108,12 +108,12 @@ func createTempTestFile(file string, content string, _ bool) {
 	// nolint:gosec
 	f, err := os.Create(file)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	defer f.Close()
 	_, err = f.WriteString(content)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
