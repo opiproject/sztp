@@ -14,10 +14,26 @@ import (
 	"testing"
 )
 
+const DHCPTestContent = `lease {
+  interface "eth0";
+  fixed-address 10.127.127.100;
+  filename "grubx64.efi";
+  option subnet-mask 255.255.255.0;
+  option sztp-redirect-urls "http://mymock/test";
+  option dhcp-lease-time 600;
+  option tftp-server-name "w.x.y.z";
+  option bootfile-name "test.cfg";
+  option dhcp-message-type 5;
+  option dhcp-server-identifier 10.127.127.2;
+  renew 1 2022/08/15 19:16:40;
+  rebind 1 2022/08/15 19:20:50;
+  expire 1 2022/08/15 19:22:05;
+}`
+
 //nolint:funlen
 func TestAgent_getBootstrapURL(t *testing.T) {
 	dhcpTestFileOK := "/tmp/test.dhcp"
-	createTempTestFile(dhcpTestFileOK, "", true)
+	createTempTestFile(dhcpTestFileOK, DHCPTestContent, true)
 
 	type fields struct {
 		BootstrapURL             string
@@ -92,31 +108,12 @@ func createTempTestFile(file string, content string, _ bool) {
 	// nolint:gosec
 	f, err := os.Create(file)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	mydhcpresponse := `lease {
-  interface "eth0";
-  fixed-address 10.127.127.100;
-  filename "grubx64.efi";
-  option subnet-mask 255.255.255.0;
-  option sztp-redirect-urls "http://mymock/test";
-  option dhcp-lease-time 600;
-  option tftp-server-name "w.x.y.z";
-  option bootfile-name "test.cfg";
-  option dhcp-message-type 5;
-  option dhcp-server-identifier 10.127.127.2;
-  renew 1 2022/08/15 19:16:40;
-  rebind 1 2022/08/15 19:20:50;
-  expire 1 2022/08/15 19:22:05;
-}`
-
-	if content != "" {
-		mydhcpresponse = content
-	}
-	_, err2 := f.WriteString(mydhcpresponse)
-
-	if err2 != nil {
-		log.Fatal(err2)
+	defer f.Close()
+	_, err = f.WriteString(content)
+	if err != nil {
+		log.Println(err)
 	}
 }
 
