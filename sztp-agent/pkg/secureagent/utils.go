@@ -15,6 +15,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"log"
 	"net/http"
@@ -158,30 +159,37 @@ func generateInputJSONContent() string {
 }
 
 type publicKey struct {
-	Algorithm string
-	KeyData   string
-	Comment   string
+	Type    string
+	Data    string
+	Comment string
 }
 
 func readSSHHostKeyPublicFiles(pattern string) []publicKey {
 	results := []publicKey{}
 	files, err := filepath.Glob(pattern)
 	if err != nil {
-		log.Printf("[ERROR] Error getting ssh host public keys file list : %v", err)
+		log.Printf("[ERROR] Error getting ssh host public keys file list: %v", err)
 		return results
 	}
 	for _, f := range files {
 		// nolint:gosec
-		data, _ := os.ReadFile(f)
-		// TODO: consider switching to https://pkg.go.dev/golang.org/x/crypto/ssh#ParseAuthorizedKey
-		parts := strings.Fields(string(data))
-		// [type-name] [base64-encoded-ssh-public-key] [comment]
-		if len(parts) < 2 {
-			log.Printf("[ERROR] Error parsing pub key, should contain at least 2 parts with spaces : %v", f)
+		data, err := os.ReadFile(f)
+		if err != nil {
+			log.Printf("[ERROR] Error reading public key file %s: %v", f, err)
+			return results
+		}
+
+		key, _, _, _, err := ssh.ParseAuthorizedKey(data)
+		if err != nil {
+			log.Printf("[ERROR] Problem parsing public key file %s: %v\n"+
+				"Check the key file has the correct format", f, err.Error())
 			continue
 		}
-		// ignore comment for now
-		results = append(results, publicKey{Algorithm: parts[0], KeyData: parts[1]})
+		results = append(results, publicKey{
+			Type:    key.Type(),
+			Data:    strings.Fields(string(data))[1],
+			Comment: "",
+		})
 	}
 	return results
 }
