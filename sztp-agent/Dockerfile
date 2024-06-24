@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2022 Dell Inc, or its subsidiaries.
 
-FROM docker.io/library/golang:1.21.3-alpine as builder
+FROM docker.io/library/golang:1.22.4-alpine as builder
 
 WORKDIR /app
 
