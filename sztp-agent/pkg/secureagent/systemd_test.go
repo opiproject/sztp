@@ -16,8 +16,8 @@ Description=SZTP Agent
 After=network.target
 
 [Service]
-ExecStart=sztp-agent %[1]s
-ExecReload=sztp-agent %[1]s
+ExecStart=opi-sztp-agent %[1]s
+ExecReload=opi-sztp-agent %[1]s
 Type=notify
 Restart=always
 
