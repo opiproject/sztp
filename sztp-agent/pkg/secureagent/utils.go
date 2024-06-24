@@ -15,12 +15,10 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
-	"golang.org/x/crypto/ssh"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -156,50 +154,6 @@ func generateInputJSONContent() string {
 	input.IetfSztpBootstrapServerInput.Nonce = ""
 	inputJSON, _ := json.Marshal(input)
 	return string(inputJSON)
-}
-
-type publicKey struct {
-	Algorithm string
-	Data      string
-	Comment   string
-}
-
-func readSSHHostKeyPublicFiles(pattern string) []publicKey {
-	results := []publicKey{}
-	files, err := filepath.Glob(pattern)
-	if err != nil {
-		log.Printf("[ERROR] Error getting ssh host public keys file list: %v", err)
-		return results
-	}
-	for _, f := range files {
-		// nolint:gosec
-		data, err := os.ReadFile(f)
-		if err != nil {
-			log.Printf("[ERROR] Error reading public key file %s: %v", f, err)
-			return results
-		}
-
-		key, _, _, _, err := ssh.ParseAuthorizedKey(data)
-		if err != nil {
-			log.Printf("[ERROR] Problem parsing public key file %s: %v\n"+
-				"Check the key file has the correct format", f, err.Error())
-			continue
-		}
-
-		keyParts := strings.Fields(string(data))
-
-		results = append(results, publicKey{
-			Algorithm: key.Type(),
-			Data:      keyParts[1],
-			Comment: func() string {
-				if len(keyParts) == 3 {
-					return keyParts[2]
-				}
-				return ""
-			}(),
-		})
-	}
-	return results
 }
 
 func replaceQuotes(input string) string {
