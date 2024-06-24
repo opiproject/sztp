@@ -106,13 +106,13 @@ func (a *Agent) doReportProgress(s ProgressType) error {
 		// TODO: use/generate real TA cert here
 		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
 		p.IetfSztpBootstrapServerInput.TrustAnchorCerts.TrustAnchorCert = []string{encodedKey}
-		for _, key := range readSSHHostKeyPublicFiles("/etc/ssh/ssh_host_*key.pub") {
+		for _, key := range ReadSSHHostKeyPublicFiles("/etc/ssh/ssh_host_*key.pub") {
 			p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey = append(p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey, struct {
 				Algorithm string `json:"algorithm"`
 				KeyData   string `json:"key-data"`
 			}{
-				Algorithm: key.Algorithm,
-				KeyData:   key.Data,
+				Algorithm: key.Type(),
+				KeyData:   GetSSHHostKeyString(key, false),
 			})
 		}
 	}
