@@ -17,8 +17,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewRunCommand returns the run command
-func NewRunCommand() *cobra.Command {
+//nolint:gochecknoinits
+func init() {
+	commands = append(commands, Run())
+}
+
+// Run returns the run command
+func Run() *cobra.Command {
 	var (
 		bootstrapURL             string
 		serialNumber             string
@@ -32,7 +37,7 @@ func NewRunCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Exec the run command",
-		RunE: func(c *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			arrayChecker := []string{devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert}
 			if bootstrapURL != "" && dhcpLeaseFile != "" {
 				return fmt.Errorf("'--bootstrap-url' and '--dhcp-lease-file' are mutualy exclusive")
@@ -54,8 +59,6 @@ func NewRunCommand() *cobra.Command {
 					return fmt.Errorf("must not be folder: %q", filePath)
 				}
 			}
-			err := c.Help()
-			cobra.CheckErr(err)
 			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommand()
 		},

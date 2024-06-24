@@ -13,8 +13,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewDisableCommand returns the disable command
-func NewDisableCommand() *cobra.Command {
+//nolint:gochecknoinits
+func init() {
+	commands = append(commands, Disable())
+}
+
+// Disable returns the disable command
+func Disable() *cobra.Command {
 	var (
 		bootstrapURL             string
 		serialNumber             string
@@ -28,9 +33,7 @@ func NewDisableCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "disable",
 		Short: "Run the disable command",
-		RunE: func(c *cobra.Command, _ []string) error {
-			err := c.Help()
-			cobra.CheckErr(err)
+		RunE: func(_ *cobra.Command, _ []string) error {
 			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommandDisable()
 		},

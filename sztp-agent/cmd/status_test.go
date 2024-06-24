@@ -11,19 +11,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func TestNewStatusCommand(t *testing.T) {
+func TestStatusCommand(t *testing.T) {
 	tests := []struct {
 		name string
 		want *cobra.Command
 	}{
 		{
-			name: "TestNewStatusCommand",
+			name: "TestStatusCommand",
 			want: &cobra.Command{
 				Use:   "status",
 				Short: "Run the status command",
-				RunE: func(c *cobra.Command, _ []string) error {
-					err := c.Help()
-					cobra.CheckErr(err)
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			},
@@ -31,8 +29,8 @@ func TestNewStatusCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewStatusCommand(); !reflect.DeepEqual(got.Commands(), tt.want.Commands()) {
-				t.Errorf("NewStatusCommand() = %v, want %v", got, tt.want)
+			if got := Status(); !reflect.DeepEqual(got.Commands(), tt.want.Commands()) {
+				t.Errorf("Status() = %v, want %v", got, tt.want)
 			}
 		})
 	}
