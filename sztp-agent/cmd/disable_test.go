@@ -11,19 +11,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func TestNewDisableCommand(t *testing.T) {
+func TestDisableCommand(t *testing.T) {
 	tests := []struct {
 		name string
 		want *cobra.Command
 	}{
 		{
-			name: "TestNewDisableCommand",
+			name: "TestDisableCommand",
 			want: &cobra.Command{
 				Use:   "disable",
 				Short: "Run the disable command",
-				RunE: func(c *cobra.Command, _ []string) error {
-					err := c.Help()
-					cobra.CheckErr(err)
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			},
@@ -31,8 +29,8 @@ func TestNewDisableCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewDisableCommand(); !reflect.DeepEqual(got.Commands(), tt.want.Commands()) {
-				t.Errorf("NewDisableCommand() = %v, want %v", got, tt.want)
+			if got := Disable(); !reflect.DeepEqual(got.Commands(), tt.want.Commands()) {
+				t.Errorf("Disable() = %v, want %v", got, tt.want)
 			}
 		})
 	}

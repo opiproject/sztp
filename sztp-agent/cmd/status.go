@@ -13,8 +13,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewStatusCommand returns the status command
-func NewStatusCommand() *cobra.Command {
+//nolint:gochecknoinits
+func init() {
+	commands = append(commands, Status())
+}
+
+// Status returns the status command
+func Status() *cobra.Command {
 	var (
 		bootstrapURL             string
 		serialNumber             string
@@ -28,9 +33,7 @@ func NewStatusCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Run the status command",
-		RunE: func(c *cobra.Command, _ []string) error {
-			err := c.Help()
-			cobra.CheckErr(err)
+		RunE: func(_ *cobra.Command, _ []string) error {
 			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommandStatus()
 		},

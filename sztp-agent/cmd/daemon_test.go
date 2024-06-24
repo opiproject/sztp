@@ -11,19 +11,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func TestNewDaemonCommand(t *testing.T) {
+func TestDaemonCommand(t *testing.T) {
 	tests := []struct {
 		name string
 		want *cobra.Command
 	}{
 		{
-			name: "TestNewDaemonCommand",
+			name: "TestDaemonCommand",
 			want: &cobra.Command{
 				Use:   "daemon",
 				Short: "Run the daemon command",
-				RunE: func(c *cobra.Command, _ []string) error {
-					err := c.Help()
-					cobra.CheckErr(err)
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			},
@@ -31,8 +29,8 @@ func TestNewDaemonCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewDaemonCommand(); !reflect.DeepEqual(got.Commands(), tt.want.Commands()) {
-				t.Errorf("NewDaemonCommand() = %v, want %v", got, tt.want)
+			if got := Daemon(); !reflect.DeepEqual(got.Commands(), tt.want.Commands()) {
+				t.Errorf("Daemon() = %v, want %v", got, tt.want)
 			}
 		})
 	}
