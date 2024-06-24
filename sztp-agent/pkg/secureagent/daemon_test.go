@@ -110,7 +110,14 @@ func createTempTestFile(file string, content string, _ bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
+
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Fatalf("Unable to close file %s: %v", f.Name(), err)
+		}
+	}(f)
+
 	_, err = f.WriteString(content)
 	if err != nil {
 		log.Fatal(err)
