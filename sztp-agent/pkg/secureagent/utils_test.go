@@ -125,45 +125,41 @@ func Test_linesInFileContains(t *testing.T) {
 
 func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 	type args struct {
-		file    string
-		content string
-		keyType string
+		file      string
+		content   string
+		Algorithm string
 	}
 	tests := []struct {
 		name string
 		args args
-		want []publicKey
+		want string
 	}{
 		{
 			name: "Test OK line in files no comment",
 			args: args{
-				file:    "/tmp/test.pub",
-				content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
-				keyType: "ssh-ed25519",
+				file:      "/tmp/test.pub",
+				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
+				Algorithm: "ssh-ed25519",
 			},
-			want: []publicKey{{Algorithm: "ssh-ed25519",
-				Data: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
+			want: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
 		{
 			name: "Test OK line in files with comment",
 			args: args{
-				file:    "/tmp/test.pub",
-				content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment",
-				keyType: "ssh-ed25519",
+				file:      "/tmp/test.pub",
+				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment",
+				Algorithm: "ssh-ed25519",
 			},
-			want: []publicKey{{Algorithm: "ssh-ed25519",
-				Data:    "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
-				Comment: "comment"}},
+			want: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
 		{
 			name: "Test too many parts in file",
 			args: args{
-				file:    "/tmp/test.pub",
-				content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment error",
-				keyType: "ssh-ed25519",
+				file:      "/tmp/test.pub",
+				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment error",
+				Algorithm: "ssh-ed25519",
 			},
-			want: []publicKey{{Algorithm: "ssh-ed25519",
-				Data: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR"}},
+			want: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
 		{
 			name: "Test not enough parts in file",
@@ -171,7 +167,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				file:    "/tmp/test.pub",
 				content: "ssh-ed25519",
 			},
-			want: []publicKey{},
+			want: "ssh-ed25519",
 		},
 		{
 			name: "Test file doesn't exist",
@@ -179,7 +175,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				file:    "/tmp/test.pub",
 				content: "",
 			},
-			want: []publicKey{},
+			want: "",
 		},
 	}
 	for _, tt := range tests {
@@ -187,8 +183,10 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 			if tt.args.content != "" {
 				createTempTestFile(tt.args.file, tt.args.content, true)
 			}
-			if got := readSSHHostKeyPublicFiles(tt.args.file); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("readSSHHostKeyPublicFiles() - got: %v, want %v", got, tt.want)
+			for _, key := range ReadSSHHostKeyPublicFiles(tt.args.file) {
+				if got := GetSSHHostKeyString(key, true); !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("readSSHHostKeyPublicFiles() - got: %v, want %v", got, tt.want)
+				}
 			}
 			deleteTempTestFile(tt.args.file)
 		})
