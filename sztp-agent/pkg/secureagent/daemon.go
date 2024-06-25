@@ -42,6 +42,19 @@ const (
 
 // RunCommandDaemon runs the command in the background
 func (a *Agent) RunCommandDaemon() error {
+	for {
+		err := a.performBootstrapSequence()
+		if err != nil {
+			log.Println("[ERROR] Failed to perform the bootstrap sequence: ", err.Error())
+			log.Println("[INFO] Retrying in 5 seconds")
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return nil
+	}
+}
+
+func (a *Agent) performBootstrapSequence() error {
 	var err error
 	if a.GetBootstrapURL() == "" {
 		err = a.getBootstrapURL()
