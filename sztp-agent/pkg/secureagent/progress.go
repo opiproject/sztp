@@ -9,6 +9,13 @@ Copyright (C) 2022 Red Hat.
 // Package secureagent implements the secure agent
 package secureagent
 
+import (
+	"encoding/base64"
+	"encoding/json"
+	"log"
+	"strings"
+)
+
 type ProgressType int64
 
 const (
@@ -100,6 +107,38 @@ func (s ProgressType) String() string {
 		return "informational"
 	}
 	return "unknown"
+}
+
+func (a *Agent) doReportProgress(s ProgressType, message string) error {
+	log.Println("[INFO] Starting the Report Progress request.")
+	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
+	var p ProgressJSON
+	p.IetfSztpBootstrapServerInput.ProgressType = s.String()
+	p.IetfSztpBootstrapServerInput.Message = message
+	if s == ProgressTypeBootstrapComplete {
+		// TODO: use/generate real TA cert here
+		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
+		p.IetfSztpBootstrapServerInput.TrustAnchorCerts.TrustAnchorCert = []string{encodedKey}
+		for _, key := range readSSHHostKeyPublicFiles("/etc/ssh/ssh_host_*key.pub") {
+			p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey = append(p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey, struct {
+				Algorithm string `json:"algorithm"`
+				KeyData   string `json:"key-data"`
+			}{
+				Algorithm: key.Type(),
+				KeyData:   getSSHHostKeyString(key, false),
+			})
+		}
+	}
+	a.SetProgressJSON(p)
+	inputJSON, _ := json.Marshal(a.GetProgressJSON())
+	res, err := a.doTLSRequest(string(inputJSON), url, true)
+	if err != nil {
+		log.Println("[ERROR] ", err.Error())
+		return err
+	}
+	log.Println(res)
+	log.Println("[INFO] Response retrieved successfully")
+	return nil
 }
 
 type ProgressJSON struct {

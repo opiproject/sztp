@@ -86,7 +86,7 @@ func (a *Agent) performBootstrapSequence() error {
 	if err != nil {
 		return err
 	}
-	_ = a.doReportProgress(ProgressTypeBootstrapComplete)
+	_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete")
 	return nil
 }
 
@@ -106,38 +106,6 @@ func (a *Agent) getBootstrapURL() error {
 		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
 	}
 	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
-	return nil
-}
-
-func (a *Agent) doReportProgress(s ProgressType) error {
-	log.Println("[INFO] Starting the Report Progress request.")
-	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
-	var p ProgressJSON
-	p.IetfSztpBootstrapServerInput.ProgressType = s.String()
-	p.IetfSztpBootstrapServerInput.Message = "message sent via JSON"
-	if s == ProgressTypeBootstrapComplete {
-		// TODO: use/generate real TA cert here
-		encodedKey := base64.StdEncoding.EncodeToString([]byte("mysshpass"))
-		p.IetfSztpBootstrapServerInput.TrustAnchorCerts.TrustAnchorCert = []string{encodedKey}
-		for _, key := range readSSHHostKeyPublicFiles("/etc/ssh/ssh_host_*key.pub") {
-			p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey = append(p.IetfSztpBootstrapServerInput.SSHHostKeys.SSHHostKey, struct {
-				Algorithm string `json:"algorithm"`
-				KeyData   string `json:"key-data"`
-			}{
-				Algorithm: key.Type(),
-				KeyData:   getSSHHostKeyString(key, false),
-			})
-		}
-	}
-	a.SetProgressJSON(p)
-	inputJSON, _ := json.Marshal(a.GetProgressJSON())
-	res, err := a.doTLSRequest(string(inputJSON), url, true)
-	if err != nil {
-		log.Println("[ERROR] ", err.Error())
-		return err
-	}
-	log.Println(res)
-	log.Println("[INFO] Response retrieved successfully")
 	return nil
 }
 
@@ -173,7 +141,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
-	_ = a.doReportProgress(ProgressTypeBootstrapInitiated)
+	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated")
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {
@@ -213,7 +181,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 //nolint:funlen
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
-	_ = a.doReportProgress(ProgressTypeBootImageInitiated)
+	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated")
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -299,7 +267,7 @@ func (a *Agent) downloadAndValidateImage() error {
 				return errors.New("checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
-			_ = a.doReportProgress(ProgressTypeBootImageComplete)
+			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete")
 			return nil
 		default:
 			return errors.New("unsupported hash algorithm")
@@ -310,7 +278,7 @@ func (a *Agent) downloadAndValidateImage() error {
 
 func (a *Agent) copyConfigurationFile() error {
 	log.Println("[INFO] Starting the Copy Configuration.")
-	_ = a.doReportProgress(ProgressTypeConfigInitiated)
+	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated")
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -336,7 +304,7 @@ func (a *Agent) copyConfigurationFile() error {
 		return err
 	}
 	log.Println("[INFO] Configuration file copied successfully")
-	_ = a.doReportProgress(ProgressTypeConfigComplete)
+	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete")
 	return nil
 }
 
@@ -356,7 +324,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		reportEnd = ProgressTypePreScriptComplete
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
-	_ = a.doReportProgress(reportStart)
+	_ = a.doReportProgress(reportStart, "Report starting")
 	// nolint:gosec
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
@@ -389,7 +357,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		return err
 	}
 	log.Println(string(out)) // remove it
-	_ = a.doReportProgress(reportEnd)
+	_ = a.doReportProgress(reportEnd, "Report end")
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }
