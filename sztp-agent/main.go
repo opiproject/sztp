@@ -39,6 +39,7 @@ func newCommand() *cobra.Command {
 	}
 
 	c.AddCommand(cmd.NewDaemonCommand())
+	c.AddCommand(cmd.NewRunCommand())
 	c.AddCommand(cmd.NewStatusCommand())
 	c.AddCommand(cmd.NewEnableCommand())
 	c.AddCommand(cmd.NewDisableCommand())
