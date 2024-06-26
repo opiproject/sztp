@@ -36,9 +36,9 @@ NBI_CREDENTIALS=(--user my-admin@example.com:my-secret)
 CURL=(docker run --rm --user 0 --network sztp_opi -v /tmp:/tmp -v sztp_client-certs:/certs docker.io/curlimages/curl:8.5.0 --fail-with-body)
 
 # TODO: remove --insecure
-"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
-"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output /tmp/second-boot-image.tst "https://web:443/second-boot-image.img"
-"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
+"${CURL[@]}" --request GET "${CERTIFICATES[@]}" --output /tmp/first-boot-image.tst  "https://web:443/first-boot-image.img"
+"${CURL[@]}" --request GET "${CERTIFICATES[@]}" --output /tmp/second-boot-image.tst "https://web:443/second-boot-image.img"
+"${CURL[@]}" --request GET "${CERTIFICATES[@]}" --output /tmp/third-boot-image.tst  "https://web:443/third-boot-image.img"
 
 # read back to check configuration was set
 "${CURL[@]}" --include --request GET "${NBI_CREDENTIALS[@]}" -H "Accept:application/yang-data+json" http://redirecter:7070/restconf/ds/ietf-datastores:running
@@ -91,7 +91,7 @@ jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"image
 # actually go and download the image from the web server
 URL=$(jq -r .\"ietf-sztp-conveyed-info:onboarding-information\".\"boot-image\".\"download-uri\"[0] /tmp/post_rpc_fixed.json)
 BASENAME=$(basename "${URL}")
-"${CURL[@]}" --insecure --request GET "${CERTIFICATES[@]}" --output "/tmp/${BASENAME}" "${URL}"
+"${CURL[@]}" --request GET "${CERTIFICATES[@]}" --output "/tmp/${BASENAME}" "${URL}"
 
 # Validate signature
 SIGNATURE=$(docker run --rm -v /tmp:/tmp docker.io/alpine/openssl:3.3.1 dgst -sha256 -c "/tmp/${BASENAME}" | awk '{print $2}')

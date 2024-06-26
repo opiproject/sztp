@@ -225,9 +225,8 @@ func (a *Agent) downloadAndValidateImage() error {
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					//nolint:gosec
-					InsecureSkipVerify: true, // TODO: remove skip verify
-					RootCAs:            caCertPool,
-					Certificates:       []tls.Certificate{cert},
+					RootCAs:      caCertPool,
+					Certificates: []tls.Certificate{cert},
 				},
 			},
 		}
