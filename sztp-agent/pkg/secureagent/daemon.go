@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/github/smimesign/ietf-cms/protocol"
+	"github.com/opiproject/sztp/sztp-agent/pkg/dhcp"
 )
 
 const (
@@ -102,8 +103,13 @@ func (a *Agent) getBootstrapURL() error {
 		}
 		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
 	} else {
-		log.Printf("[ERROR] File " + a.DhcpLeaseFile + " does not exist\n")
-		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
+		log.Println("[INFO] File " + a.DhcpLeaseFile + " does not exist, trying to get the URL from NetworkManager")
+		url, err := dhcp.GetBootstrapURLViaNetworkManager()
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			return err
+		}
+		a.SetBootstrapURL(url)
 	}
 	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
 	return nil
