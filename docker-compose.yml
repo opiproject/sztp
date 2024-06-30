@@ -199,10 +199,8 @@ services:
       - dhcp-leases-folder:/var/lib/dhclient/
       - /etc/os-release:/etc/os-release
       - /etc/ssh:/etc/ssh
-      - /var/run/dbus:/var/run/dbus
     networks:
       - opi
-    privileged: true
     command: ['/opi-sztp-agent', 'daemon',
               '--dhcp-lease-file', '/var/lib/dhclient/dhclient.leases',
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
@@ -247,6 +245,12 @@ services:
               '--serial-number', 'first-serial-number']
   agent6:
     <<: *agent
+    volumes:
+      - client-certs:/certs
+      - dhcp-leases-folder:/var/lib/dhclient/
+      - /etc/os-release:/etc/os-release
+      - /etc/ssh:/etc/ssh
+      - /var/run/dbus:/var/run/dbus
     privileged: true
     command: ['/opi-sztp-agent', 'run',
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',

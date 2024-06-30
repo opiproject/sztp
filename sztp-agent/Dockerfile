@@ -12,15 +12,12 @@ RUN go mod download
 
 # build an app
 COPY . .
-RUN CGO_ENABLED=0 go build -v -o /opi-sztp-agent
-
-# Run tests
-RUN go test -v ./...
+RUN go build -v -o /opi-sztp-agent && CGO_ENABLED=0 go test -v ./...
 
 # second stage to reduce image size
 FROM alpine:3.20
 
-RUN apk add --no-cache --no-check-certificate dbus curl && rm -rf /var/cache/apk/*
+RUN apk add --no-cache --no-check-certificate curl dbus networkmanager && rm -rf /var/cache/apk/*
 
 COPY --from=builder /opi-sztp-agent /
 

@@ -24,37 +24,44 @@ func GetBootstrapURLViaNetworkManager() (string, error) {
 
 	nm := conn.Object("org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager")
 
-	var primaryConnPath dbus.ObjectPath
-	err = nm.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager", "PrimaryConnection").Store(&primaryConnPath)
+	var activeConnections []dbus.ObjectPath
+	err = nm.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager", "ActiveConnections").Store(&activeConnections)
 	if err != nil {
-		return "", fmt.Errorf("failed to get PrimaryConnection property: %v", err)
+		return "", fmt.Errorf("failed to get ActiveConnections property: %v", err)
 	}
 
-	connActive := conn.Object("org.freedesktop.NetworkManager", primaryConnPath)
-
-	var dhcpPath dbus.ObjectPath
-	err = connActive.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager.Connection.Active", "Dhcp4Config").Store(&dhcpPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to get Dhcp4Config property: %v", err)
+	if len(activeConnections) == 0 {
+		return "", fmt.Errorf("no active connections found")
 	}
 
-	dhcp := conn.Object("org.freedesktop.NetworkManager", dhcpPath)
-	var options map[string]dbus.Variant
-	err = dhcp.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager.DHCP4Config", "Options").Store(&options)
-	if err != nil {
-		return "", fmt.Errorf("failed to get Options property: %v", err)
-	}
+	for _, activeConnPath := range activeConnections {
+		connActive := conn.Object("org.freedesktop.NetworkManager", activeConnPath)
 
-	if variant, ok := options["sztp_redirect_urls"]; ok {
-		if variant.Signature().String() == "s" {
-			sztpRedirectURLs := variant.Value().(string)
-			log.Println(sztpRedirectURLs)
-			return sztpRedirectURLs, nil
+		var dhcpPath dbus.ObjectPath
+		err = connActive.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager.Connection.Active", "Dhcp4Config").Store(&dhcpPath)
+		if err != nil {
+			log.Println("[INFO] failed to get Dhcp4Config property: ", err)
+			continue
 		}
-		log.Println("sztp_redirect_urls is not a string")
-		return "", fmt.Errorf("sztp_redirect_urls is not a string")
-	}
 
-	log.Println("sztp_redirect_urls option not found")
-	return "", fmt.Errorf("sztp_redirect_urls option not found")
+		dhcp := conn.Object("org.freedesktop.NetworkManager", dhcpPath)
+		var options map[string]dbus.Variant
+		err = dhcp.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager.DHCP4Config", "Options").Store(&options)
+		if err != nil {
+			log.Println("[INFO] failed to get Options property in DHCP4Config ", dhcpPath, ": ", err)
+			continue
+		}
+
+		if variant, ok := options["sztp_redirect_urls"]; ok {
+			if variant.Signature().String() == "s" {
+				sztpRedirectURLs := variant.Value().(string)
+				log.Println("[SUCCESS] sztp_redirect_urls: ", sztpRedirectURLs)
+				return sztpRedirectURLs, nil
+			}
+			log.Println("[INFO] sztp_redirect_urls is not a string in DHCP4Config ", dhcpPath)
+		} else {
+			log.Println("[INFO] sztp_redirect_urls not found in DHCP4Config ", dhcpPath)
+		}
+	}
+	return "", fmt.Errorf("sztp_redirect_urls not found in any active connection")
 }

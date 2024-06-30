@@ -96,12 +96,12 @@ func (a *Agent) getBootstrapURL() error {
 	var line string
 	if _, err := os.Stat(a.DhcpLeaseFile); err == nil {
 		for {
-			line = linesInFileContains(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
+			line = dhcp.LinesInFileContains(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
 			if line != "" {
 				break
 			}
 		}
-		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
+		a.SetBootstrapURL(dhcp.ExtractfromLine(line, `(?m)[^"]*`, 1))
 	} else {
 		log.Println("[INFO] File " + a.DhcpLeaseFile + " does not exist, trying to get the URL from NetworkManager")
 		url, err := dhcp.GetBootstrapURLViaNetworkManager()
