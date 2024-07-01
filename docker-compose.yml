@@ -13,8 +13,8 @@ services:
     volumes:
       - server-certs:/certs
       - ./images:/media
-      - ./sztp-server/config:/mnt
-      - ./sztp-server/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      - ./config:/mnt
+      - ./scripts/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
     entrypoint: /usr/local/bin/docker-entrypoint.sh
     environment:
       SZTPD_INIT_PORT: 6080
@@ -40,8 +40,8 @@ services:
         condition: service_completed_successfully
     volumes:
       - server-certs:/certs
-      - ./sztp-server/config/sztpd.redirect.json.template:/mnt/sztpd.redirect.json.template
-      - ./sztp-server/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      - ./config/sztpd.redirect.json.template:/mnt/sztpd.redirect.json.template
+      - ./scripts/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
     entrypoint: /usr/local/bin/docker-entrypoint.sh
     environment:
       SZTPD_INIT_PORT: 6080
