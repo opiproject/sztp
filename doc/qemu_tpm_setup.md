@@ -99,7 +99,11 @@ qemu-system-x86_64 -smp 2 -cdrom init.iso -m 1G \
   --nographic
 ```
 
-Login using fedora/fedora and run few tests
+Login using `fedora/fedora` and run few tests
+
+### Testing TPM device
+
+Sanity checks
 
 ```bash
 [fedora@fed38 ~]$ dmesg | grep -i tpm
@@ -113,4 +117,39 @@ crw-rw----. 1 root tss  253, 65536 Jun 18 23:17 /dev/tpmrm0
 
 [fedora@fed38 ~]$ sudo tpm2_clear
 [fedora@fed38 ~]$ sudo tpm2_selftest
+
+[fedora@fed38 ~]$ sudo tpm2_getcap algorithms | grep -A 9 'sha384'
+sha384:
+  value:      0xC
+  asymmetric: 0
+  symmetric:  0
+  hash:       1
+  object:     0
+  reserved:   0x0
+  signing:    0
+  encrypting: 0
+  method:     0
+```
+
+Working with Keys, from <https://github.com/tpm2-software/tpm2-openssl/blob/master/docs/keys.md>
+
+```bash
+[fedora@fed38 ~]$ sudo tpm2_createek -G rsa -c ek_rsa.ctx
+[fedora@fed38 ~]$ sudo tpm2_createak -C ek_rsa.ctx -G rsa -g sha256 -s rsassa -c ak_rsa.ctx
+loaded-key:
+  name: 000b42319d115beaaa57c3f2b385d8cb1e2e6834b65e5da97be1e8339a74a053d7ff
+  qualified name: 000b1f2b91b573baeb8d3e37b9ce48eafb0542bde0ff2fac9366f31bf178680440e6
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol -c ak_rsa.ctx 0x81000000
+persistent-handle: 0x81000000
+action: persisted
+
+[fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
+- 0x81000000
+
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol -C o -c 0x81000000
+persistent-handle: 0x81000000
+action: evicted
+[fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
+[fedora@fed38 ~]$
+
 ```
