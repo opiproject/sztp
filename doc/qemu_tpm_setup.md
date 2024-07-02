@@ -152,4 +152,45 @@ action: evicted
 [fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
 [fedora@fed38 ~]$
 
+[fedora@fed38 ~]$ sudo tpm2_createprimary --hierarchy=o --hash-algorithm=sha256 --key-algorithm=ecc256:aes128cfb --key-context=tpm_primary_key.ctx --attributes="decrypt|fixedtpm|fixedparent|sensitivedataorigin|userwithauth|noda|restricted" -V
+name-alg:
+  value: sha256
+  raw: 0xb
+attributes:
+  value: fixedtpm|fixedparent|sensitivedataorigin|userwithauth|noda|restricted|decrypt
+  raw: 0x30472
+type:
+  value: ecc
+  raw: 0x23
+curve-id:
+  value: NIST p256
+  raw: 0x3
+kdfa-alg:
+  value: null
+  raw: 0x10
+kdfa-halg:
+  value: (null)
+  raw: 0x0
+scheme:
+  value: null
+  raw: 0x10
+scheme-halg:
+  value: (null)
+  raw: 0x0
+sym-alg:
+  value: aes
+  raw: 0x6
+sym-mode:
+  value: cfb
+  raw: 0x43
+sym-keybits: 128
+x: 50ae5635be637d617fb1d9499fda0b618b63e8f27cc750ec65bcb9d9655e08e2
+y: 531a72b1039f2441bfb59f9086119b0c50d3fa7acd86d432325dd8726b4b22e6
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol -C o 0x81020004 -c tpm_primary_key.ctx -V
+persistent-handle: 0x81020004
+action: persisted
+[fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
+- 0x81000000
+- 0x81020004
+
 ```
