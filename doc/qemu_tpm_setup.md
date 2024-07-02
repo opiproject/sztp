@@ -135,22 +135,24 @@ Working with Keys, from <https://github.com/tpm2-software/tpm2-openssl/blob/mast
 
 ```bash
 [fedora@fed38 ~]$ sudo tpm2_createek -G rsa -c ek_rsa.ctx
-[fedora@fed38 ~]$ sudo tpm2_createak -C ek_rsa.ctx -G rsa -g sha256 -s rsassa -c ak_rsa.ctx
+[fedora@fed38 ~]$ sudo tpm2_createak -C ek_rsa.ctx -G rsa -g sha256 -s rsassa --ak-context ak_rsa.ctx
 loaded-key:
   name: 000b42319d115beaaa57c3f2b385d8cb1e2e6834b65e5da97be1e8339a74a053d7ff
   qualified name: 000b1f2b91b573baeb8d3e37b9ce48eafb0542bde0ff2fac9366f31bf178680440e6
-[fedora@fed38 ~]$ sudo tpm2_evictcontrol -c ak_rsa.ctx 0x81000000
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol --object-context=ak_rsa.ctx 0x81000000
 persistent-handle: 0x81000000
 action: persisted
 
 [fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
 - 0x81000000
 
-[fedora@fed38 ~]$ sudo tpm2_evictcontrol -C o -c 0x81000000
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol --hierarchy=o --object-context=0x81000000
 persistent-handle: 0x81000000
 action: evicted
 [fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
 [fedora@fed38 ~]$
+
+# Primary key generation
 
 [fedora@fed38 ~]$ sudo tpm2_createprimary --hierarchy=o --hash-algorithm=sha256 --key-algorithm=ecc256:aes128cfb --key-context=tpm_primary_key.ctx --attributes="decrypt|fixedtpm|fixedparent|sensitivedataorigin|userwithauth|noda|restricted" -V
 name-alg:
@@ -186,11 +188,60 @@ sym-mode:
 sym-keybits: 128
 x: 50ae5635be637d617fb1d9499fda0b618b63e8f27cc750ec65bcb9d9655e08e2
 y: 531a72b1039f2441bfb59f9086119b0c50d3fa7acd86d432325dd8726b4b22e6
-[fedora@fed38 ~]$ sudo tpm2_evictcontrol -C o 0x81020004 -c tpm_primary_key.ctx -V
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol --hierarchy=o 0x81020004 --object-context=tpm_primary_key.ctx -V
 persistent-handle: 0x81020004
 action: persisted
 [fedora@fed38 ~]$ sudo tpm2_getcap handles-persistent
 - 0x81000000
 - 0x81020004
+
+# TPM ECDSA key generation (Device attestation key)
+
+[fedora@fed38 ~]$ sudo tpm2_create --parent-context=0x81020004 --hash-algorithm=sha256 --key-algorithm=ecc256:ecdsa-sha256 --public=tpm_ecdsa_pub.key --private=tpm_ecdsa_priv.key --attributes="sign|fixedtpm|fixedparent|sensitivedataorigin|userwithauth|noda"
+name-alg:
+  value: sha256
+  raw: 0xb
+attributes:
+  value: fixedtpm|fixedparent|sensitivedataorigin|userwithauth|noda|sign
+  raw: 0x40472
+type:
+  value: ecc
+  raw: 0x23
+curve-id:
+  value: NIST p256
+  raw: 0x3
+kdfa-alg:
+  value: null
+  raw: 0x10
+kdfa-halg:
+  value: (null)
+  raw: 0x0
+scheme:
+  value: ecdsa
+  raw: 0x18
+scheme-halg:
+  value: sha256
+  raw: 0xb
+sym-alg:
+  value: null
+  raw: 0x10
+sym-mode:
+  value: (null)
+  raw: 0x0
+sym-keybits: 0
+x: 66d3f05041cd5b39ee5bb191ea1b1b61dfdb1d31040a3742c47db1395eb997e9
+y: 6a70ed0b486dd094a4bf37a2ef8051cc71c81c6e760025086f8bd44751bb690f
+
+[fedora@fed38 ~]$ sudo tpm2_load --public=tpm_ecdsa_pub.key --private=tpm_ecdsa_priv.key --key-context tpm_ecdsa_key.ctx --parent-context=0x81020004
+name: 000b47b51aa53335f1521b45382f194d4ca9291daee4ba3d4f9191bbdf56e789c61f
+
+[fedora@fed38 ~]$ sudo tpm2_evictcontrol --hierarchy=o 0x81000002 --object-context=tpm_ecdsa_key.ctx -V
+persistent-handle: 0x81000002
+action: persisted
+
+# Flushing memory
+
+[fedora@fed38 ~]$ sudo tpm2_flushcontext --transient-object -V
+INFO on line: "44" in file: "lib/tpm2_capability.c": GetCapability: capability: 0x1, property: 0x80000000
 
 ```
