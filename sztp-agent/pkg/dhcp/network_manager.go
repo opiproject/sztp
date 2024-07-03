@@ -15,11 +15,11 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-// GetBootstrapURLViaNetworkManager returns the sztp redirect URL via NetworkManager
-func GetBootstrapURLViaNetworkManager() (string, error) {
+// getBootstrapURLViaNetworkManager returns the sztp redirect URL via NetworkManager
+func getBootstrapURLViaNetworkManager() ([]string, error) {
 	conn, err := dbus.SystemBus()
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to system bus: %v", err)
+		return nil, fmt.Errorf("failed to connect to system bus: %v", err)
 	}
 
 	nm := conn.Object("org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager")
@@ -27,13 +27,14 @@ func GetBootstrapURLViaNetworkManager() (string, error) {
 	var activeConnections []dbus.ObjectPath
 	err = nm.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager", "ActiveConnections").Store(&activeConnections)
 	if err != nil {
-		return "", fmt.Errorf("failed to get ActiveConnections property: %v", err)
+		return nil, fmt.Errorf("failed to get ActiveConnections property: %v", err)
 	}
 
 	if len(activeConnections) == 0 {
-		return "", fmt.Errorf("no active connections found")
+		return nil, fmt.Errorf("no active connections found")
 	}
 
+	var sztpRedirectURLs []string
 	for _, activeConnPath := range activeConnections {
 		connActive := conn.Object("org.freedesktop.NetworkManager", activeConnPath)
 
@@ -54,14 +55,15 @@ func GetBootstrapURLViaNetworkManager() (string, error) {
 
 		if variant, ok := options["sztp_redirect_urls"]; ok {
 			if variant.Signature().String() == "s" {
-				sztpRedirectURLs := variant.Value().(string)
-				log.Println("[SUCCESS] sztp_redirect_urls: ", sztpRedirectURLs)
-				return sztpRedirectURLs, nil
+				sztpRedirectURL := variant.Value().(string)
+				log.Println("[INFO] sztp_redirect_url found: ", sztpRedirectURLs)
+				sztpRedirectURLs = append(sztpRedirectURLs, sztpRedirectURL)
+				continue
 			}
 			log.Println("[INFO] sztp_redirect_urls is not a string in DHCP4Config ", dhcpPath)
 		} else {
 			log.Println("[INFO] sztp_redirect_urls not found in DHCP4Config ", dhcpPath)
 		}
 	}
-	return "", fmt.Errorf("sztp_redirect_urls not found in any active connection")
+	return sztpRedirectURLs, fmt.Errorf("sztp_redirect_urls not found in any active connection")
 }

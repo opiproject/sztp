@@ -21,7 +21,7 @@ func TestAgent_getBootstrapURL(t *testing.T) {
 	dhcp.CreateTempTestFile(dhcpTestFileOK, dhcp.DHCPTestContent, true)
 
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -39,7 +39,7 @@ func TestAgent_getBootstrapURL(t *testing.T) {
 		{
 			name: "Test OK Case file exists and get url successfully",
 			fields: fields{
-				BootstrapURL:             "http://localhost",
+				BootstrapURL:             []string{"http://localhost"},
 				SerialNumber:             "my-serial-number",
 				DevicePassword:           "my-password",
 				DevicePrivateKey:         "",
@@ -54,7 +54,7 @@ func TestAgent_getBootstrapURL(t *testing.T) {
 		{
 			name: "Test KO when not file found",
 			fields: fields{
-				BootstrapURL:             "http://localhost",
+				BootstrapURL:             []string{"http://localhost"},
 				SerialNumber:             "my-serial-number",
 				DevicePassword:           "my-password",
 				DevicePrivateKey:         "",
@@ -162,7 +162,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 	defer svr.Close()
 
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -180,7 +180,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test OK passing all the Onboarding information",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "USER",
 				DevicePassword:           "PASS",
 				DevicePrivateKey:         "",
@@ -195,7 +195,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test OK passing all the Redirect information",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "REDIRECT",
 				DevicePassword:           "PASS",
 				DevicePrivateKey:         "",
@@ -210,7 +210,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test KO getting error with basic auth",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "KO",
 				DevicePassword:           "KO",
 				DevicePrivateKey:         "",
@@ -225,7 +225,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test KO getting error with wrong Base64 output",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "KOBASE64",
 				DevicePassword:           "KO",
 				DevicePrivateKey:         "",
@@ -240,7 +240,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test KO pointint to wrong url",
 			fields: fields{
-				BootstrapURL:             "http://wrongURL",
+				BootstrapURL:             []string{"http://wrongURL"},
 				SerialNumber:             "KOBASE64",
 				DevicePassword:           "KO",
 				DevicePrivateKey:         "",
@@ -266,7 +266,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 			}
-			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
+			if err := a.doRequestBootstrapServerOnboardingInfo(&(tt.fields.BootstrapURL[0])); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -285,7 +285,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 	defer svr.Close()
 
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -306,7 +306,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "error writing file",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -355,7 +355,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "Image wrong",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -402,9 +402,9 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Image wrong",
+			name: "Image wrong 2",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -453,7 +453,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "OK Case but with error due to hash checksum",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -508,7 +508,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "OK Case but with error due to hash checksum",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -577,7 +577,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.downloadAndValidateImage(); (err != nil) != tt.wantErr {
+			if err := a.downloadAndValidateImage(&(tt.fields.BootstrapURL[0])); (err != nil) != tt.wantErr {
 				t.Errorf("downloadAndValidateImage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -587,7 +587,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 // nolint:funlen
 func TestAgent_copyConfigurationFile(t *testing.T) {
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -608,7 +608,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 		{
 			name: "Error Writing file",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -663,7 +663,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 		{
 			name: "OK Case",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -732,7 +732,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.copyConfigurationFile(); (err != nil) != tt.wantErr {
+			if err := a.copyConfigurationFile(&(tt.fields.BootstrapURL[0])); (err != nil) != tt.wantErr {
 				t.Errorf("copyConfigurationFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -742,7 +742,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 // nolint:funlen
 func TestAgent_launchScriptsConfiguration(t *testing.T) {
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -768,7 +768,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 			args: args{typeOf: "default or pre"},
 			name: "OK Case with PRE",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -824,7 +824,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 			args: args{typeOf: "post"},
 			name: "OK Case with POST",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -880,7 +880,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 			args: args{typeOf: "post"},
 			name: "OK Case with POST",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -949,7 +949,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.launchScriptsConfiguration(tt.args.typeOf); (err != nil) != tt.wantErr {
+			if err := a.launchScriptsConfiguration(tt.args.typeOf, &(tt.fields.BootstrapURL[0])); (err != nil) != tt.wantErr {
 				t.Errorf("launchScriptsConfiguration() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

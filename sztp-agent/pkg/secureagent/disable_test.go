@@ -8,7 +8,7 @@ import "testing"
 
 func TestAgent_RunCommandDisable(t *testing.T) {
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -29,7 +29,7 @@ func TestAgent_RunCommandDisable(t *testing.T) {
 		{
 			name: "TestAgent_RunCommandDisable",
 			fields: fields{
-				BootstrapURL:                  "https://localhost:8443",
+				BootstrapURL:                  []string{"https://localhost:8443"},
 				SerialNumber:                  "1234567890",
 				DevicePassword:                "password",
 				DevicePrivateKey:              "privateKey",

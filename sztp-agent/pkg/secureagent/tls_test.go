@@ -11,7 +11,7 @@ import (
 
 func TestAgent_doTLSRequest(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -40,7 +40,7 @@ func TestAgent_doTLSRequest(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 			}
-			got, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL(), false)
+			got, err := a.doTLSRequest(a.GetInputJSONContent(), tt.fields.BootstrapURL[0], false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("doTLSRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return

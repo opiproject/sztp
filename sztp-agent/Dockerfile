@@ -17,8 +17,8 @@ RUN go build -v -o /opi-sztp-agent && CGO_ENABLED=0 go test -v ./...
 # second stage to reduce image size
 FROM alpine:3.20
 
-RUN apk add --no-cache --no-check-certificate curl dbus networkmanager && rm -rf /var/cache/apk/*
+RUN apk add --no-cache --no-check-certificate curl && rm -rf /var/cache/apk/*
 
 COPY --from=builder /opi-sztp-agent /
 
-CMD ["sh", "-c", "dbus-daemon --system && /opi-sztp-agent"]
+CMD ["/opi-sztp-agent"]

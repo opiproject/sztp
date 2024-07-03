@@ -34,7 +34,7 @@ func Disable() *cobra.Command {
 		Use:   "disable",
 		Short: "Run the disable command",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			a := secureagent.NewAgent([]string{bootstrapURL}, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommandDisable()
 		},
 	}
