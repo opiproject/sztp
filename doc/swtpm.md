@@ -20,7 +20,7 @@ use TCP to connect to this emulation
 ```bash
 mkdir /tmp/emulated_tpm
 swtpm socket --tpm2 \
-    --server port=2321  \
+    --server type=tcp,port=2321 \
     --ctrl type=tcp,port=2322 \
     --tpmstate dir=/tmp/emulated_tpm \
     --log file="swtpm.log" \
