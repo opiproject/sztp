@@ -1,5 +1,6 @@
-
 # OPI QEMU TPM2 setup
+
+Without QEMU, check [this page](./swtpm.md)
 
 ## Docs
 
