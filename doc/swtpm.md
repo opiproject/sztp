@@ -13,7 +13,7 @@ For QEMU, check [this page](./qemu_tpm_setup.md)
 sudo apt-get install swtpm tpm2-tools -y
 ```
 
-## Run SWTPM Emulation
+## Run SWTPM Emulation TCP
 
 use TCP to connect to this emulation
 
@@ -28,13 +28,34 @@ swtpm socket --tpm2 \
     --flags not-need-init,startup-clear
 ```
 
-## Testing TPM2
-
 Set Transmission Interface (TCTI) swtpm socket, so tpm2-tools use it instead of the default char device interface.
 
 ```bash
 export TPM2TOOLS_TCTI="swtpm:host=localhost,port=2321"
 ```
+
+## Run SWTPM Emulation Unix socket
+
+use unix socket to connect to this emulation
+
+```bash
+mkdir /tmp/emulated_tpm
+swtpm socket --tpm2 \
+    --server type=unixio,path=/tpm/emulated_tpm/swtpm.sock \
+    --ctrl type=tcp,port=2322 \
+    --tpmstate dir=/tmp/emulated_tpm \
+    --log file="swtpm.log" \
+    --log level=20 \
+    --flags not-need-init,startup-clear
+```
+
+Set Transmission Interface (TCTI) swtpm socket, so tpm2-tools use it instead of the default char device interface.
+
+```bash
+export TPM2TOOLS_TCTI="swtpm:path=/tpm/emulated_tpm/swtpm.sock"
+```
+
+## Testing TPM2
 
 keys
 
