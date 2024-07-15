@@ -260,7 +260,7 @@ services:
       - opi
     command: ['socket', '--tpm2',
               '--server', 'type=unixio,path=/swtpm/swtpm.sock',
-              '--ctrl', 'type=tcp,port=2322',
+              '--ctrl', 'type=unixio,path=/swtpm/swtpm.sock.ctrl',
               '--tpmstate', 'dir=/swtpm',
               '--log', 'file=swtpm.log',
               '--log', 'level=20',
