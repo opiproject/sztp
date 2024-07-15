@@ -29,9 +29,7 @@ docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases | grep sztp-
 REDIRECT=$(docker-compose exec -T client cat /var/lib/dhclient/dhclient.leases | grep sztp-redirect-urls | head -n 1 | awk '{print $3}' | tr -d '";')
 
 # tests TPM
-docker-compose exec --rm -T swtpm apt update
-docker-compose exec --rm -T swtpm apt install -y tpm2-tools
-docker-compose exec --rm -T -e TPM2TOOLS_TCTI="swtpm:path=/swtpm/swtpm.sock" swtpm tpm2 clear
+docker run --rm -v sztp_tpm-data:/swtpm -e TPM2TOOLS_TCTI="swtpm:path=/swtpm/swtpm.sock" docker.io/strongx509/tpm:5.9.13 tpm2 clear
 
 # reusable variables
 CERTIFICATES=(--key /certs/third_private_key.pem --cert /certs/third_my_cert.pem --cacert /certs/opi.pem)
