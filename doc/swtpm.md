@@ -41,8 +41,8 @@ use unix socket to connect to this emulation
 ```bash
 mkdir /tmp/emulated_tpm
 swtpm socket --tpm2 \
-    --server type=unixio,path=/tpm/emulated_tpm/swtpm-cmd.sock \
-    --ctrl type=unixio,path=/tpm/emulated_tpm/swtpm-ctrl.sock \
+    --server type=unixio,path=/tmp/emulated_tpm/swtpm.sock \
+    --ctrl type=unixio,path=/tmp/emulated_tpm/swtpm.sock.ctrl \
     --ctrl type=tcp,port=2322 \
     --tpmstate dir=/tmp/emulated_tpm \
     --log file="swtpm.log" \
@@ -53,7 +53,7 @@ swtpm socket --tpm2 \
 Set Transmission Interface (TCTI) swtpm socket, so tpm2-tools use it instead of the default char device interface.
 
 ```bash
-export TPM2TOOLS_TCTI="swtpm:path=/tpm/emulated_tpm/swtpm-cmd.sock"
+export TPM2TOOLS_TCTI="swtpm:path=/tmp/emulated_tpm/swtpm.sock"
 ```
 
 ## Testing TPM2
