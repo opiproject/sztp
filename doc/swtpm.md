@@ -43,7 +43,6 @@ mkdir /tmp/emulated_tpm
 swtpm socket --tpm2 \
     --server type=unixio,path=/tmp/emulated_tpm/swtpm.sock \
     --ctrl type=unixio,path=/tmp/emulated_tpm/swtpm.sock.ctrl \
-    --ctrl type=tcp,port=2322 \
     --tpmstate dir=/tmp/emulated_tpm \
     --log file="swtpm.log" \
     --log level=20 \
