@@ -266,6 +266,18 @@ services:
               '--log', 'level=20',
               '--flags', 'not-need-init,startup-clear']
 
+  swtpm-test:
+    image: docker.io/strongx509/tpm:5.9.13
+    depends_on:
+      - swtpm
+    volumes:
+      - tpm-data:/swtpm
+    networks:
+      - opi
+    environment:
+      TPM2TOOLS_TCTI: swtpm:path=/swtpm/swtpm.sock
+    command: ['tpm2', 'clear']
+
 volumes:
   tpm-data:
   server-certs:
