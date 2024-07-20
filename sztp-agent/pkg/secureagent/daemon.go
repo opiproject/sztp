@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/github/smimesign/ietf-cms/protocol"
+	"github.com/opiproject/sztp/sztp-agent/pkg/dhcp"
 )
 
 const (
@@ -45,7 +46,7 @@ func (a *Agent) RunCommandDaemon() error {
 	for {
 		err := a.performBootstrapSequence()
 		if err != nil {
-			log.Println("[ERROR] Failed to perform the bootstrap sequence: ", err.Error())
+			log.Println("[ERROR] ", err.Error())
 			log.Println("[INFO] Retrying in 5 seconds")
 			time.Sleep(5 * time.Second)
 			continue
@@ -56,60 +57,73 @@ func (a *Agent) RunCommandDaemon() error {
 
 func (a *Agent) performBootstrapSequence() error {
 	var err error
-	if a.GetBootstrapURL() == "" {
+	// check if the bootstrap URL is already set
+	if len(a.GetBootstrapURL()) == 1 && a.GetBootstrapURL()[0] == "" {
 		err = a.getBootstrapURL()
 		if err != nil {
 			return err
 		}
 	}
-	err = a.doRequestBootstrapServerOnboardingInfo()
-	if err != nil {
-		return err
+	bootstrapURLs := a.GetBootstrapURL()
+	log.Println("Bootstrap URL: ", bootstrapURLs)
+	for _, bootstrapURL := range bootstrapURLs {
+		bootstrapURLCopy := bootstrapURL
+		err = a.doRequestBootstrapServerOnboardingInfo(&bootstrapURLCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			continue
+		}
+		err = a.doHandleBootstrapRedirect(&bootstrapURLCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			continue
+		}
+		err = a.downloadAndValidateImage(&bootstrapURLCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			continue
+		}
+		err = a.copyConfigurationFile(&bootstrapURLCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			continue
+		}
+		err = a.launchScriptsConfiguration(PRE, &bootstrapURLCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			continue
+		}
+		err = a.launchScriptsConfiguration(POST, &bootstrapURLCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			continue
+		}
+		_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete", bootstrapURLCopy)
+		return nil
 	}
-	err = a.doHandleBootstrapRedirect()
-	if err != nil {
-		return err
-	}
-	err = a.downloadAndValidateImage()
-	if err != nil {
-		return err
-	}
-	err = a.copyConfigurationFile()
-	if err != nil {
-		return err
-	}
-	err = a.launchScriptsConfiguration(PRE)
-	if err != nil {
-		return err
-	}
-	err = a.launchScriptsConfiguration(POST)
-	if err != nil {
-		return err
-	}
-	_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete")
-	return nil
+	return errors.New("failed to perform the bootstrap sequence")
 }
 
 func (a *Agent) getBootstrapURL() error {
-	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
-	var line string
-	if _, err := os.Stat(a.DhcpLeaseFile); err == nil {
-		for {
-			line = linesInFileContains(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
-			if line != "" {
-				break
-			}
+	if a.DhcpLeaseFile != "" {
+		log.Println("[INFO] Get the Bootstrap URL from DHCP client")
+		bootstrapURL, err := dhcp.GetBootstrapURLViaLeaseFile(a.DhcpLeaseFile)
+		if err != nil {
+			return err
 		}
-		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
-	} else {
-		log.Printf("[ERROR] File " + a.DhcpLeaseFile + " does not exist\n")
-		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
+		a.SetBootstrapURL([]string{bootstrapURL})
+		return nil
 	}
-	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+	log.Println("[INFO] Get the Bootstrap URL Via Network Manager")
+	bootstrapURLs, err := dhcp.GetBootstrapURLViaNetworkManager()
+	if err != nil {
+		return err
+	}
+	a.SetBootstrapURL(bootstrapURLs)
 	return nil
 }
 
-func (a *Agent) doHandleBootstrapRedirect() error {
+func (a *Agent) doHandleBootstrapRedirect(bootstrapURL *string) error {
 	if reflect.ValueOf(a.BootstrapServerRedirectInfo).IsZero() {
 		return nil
 	}
@@ -122,26 +136,27 @@ func (a *Agent) doHandleBootstrapRedirect() error {
 	port := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Port
 
 	// Change URL to point to new redirect IP and PORT
-	u, err := url.Parse(a.GetBootstrapURL())
+	u, err := url.Parse(*bootstrapURL)
 	if err != nil {
 		return err
 	}
 	u.Host = fmt.Sprintf("%s:%d", addr, port)
-	a.SetBootstrapURL(u.String())
+	// a.SetBootstrapURL(u.String())
+	*bootstrapURL = u.String()
 
 	// Request onboard ino again (with new URL now)
-	return a.doRequestBootstrapServerOnboardingInfo()
+	return a.doRequestBootstrapServerOnboardingInfo(bootstrapURL)
 }
 
-func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
+func (a *Agent) doRequestBootstrapServerOnboardingInfo(bootstrapURL *string) error {
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
-	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL(), false)
+	res, err := a.doTLSRequest(a.GetInputJSONContent(), *bootstrapURL, false)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
-	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated")
+	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated", *bootstrapURL)
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {
@@ -179,9 +194,9 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 }
 
 //nolint:funlen
-func (a *Agent) downloadAndValidateImage() error {
+func (a *Agent) downloadAndValidateImage(bootstrapURL *string) error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
-	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated")
+	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated", *bootstrapURL)
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -267,7 +282,7 @@ func (a *Agent) downloadAndValidateImage() error {
 				return errors.New("checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
-			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete")
+			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete", *bootstrapURL)
 			return nil
 		default:
 			return errors.New("unsupported hash algorithm")
@@ -276,9 +291,9 @@ func (a *Agent) downloadAndValidateImage() error {
 	return nil
 }
 
-func (a *Agent) copyConfigurationFile() error {
+func (a *Agent) copyConfigurationFile(bootstrapURL *string) error {
 	log.Println("[INFO] Starting the Copy Configuration.")
-	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated")
+	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated", *bootstrapURL)
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -304,11 +319,11 @@ func (a *Agent) copyConfigurationFile() error {
 		return err
 	}
 	log.Println("[INFO] Configuration file copied successfully")
-	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete")
+	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete", *bootstrapURL)
 	return nil
 }
 
-func (a *Agent) launchScriptsConfiguration(typeOf string) error {
+func (a *Agent) launchScriptsConfiguration(typeOf string, bootstrapURL *string) error {
 	var script, scriptName string
 	var reportStart, reportEnd ProgressType
 	switch typeOf {
@@ -324,7 +339,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		reportEnd = ProgressTypePreScriptComplete
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
-	_ = a.doReportProgress(reportStart, "Report starting")
+	_ = a.doReportProgress(reportStart, "Report starting", *bootstrapURL)
 	// nolint:gosec
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
@@ -357,7 +372,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		return err
 	}
 	log.Println(string(out)) // remove it
-	_ = a.doReportProgress(reportEnd, "Report end")
+	_ = a.doReportProgress(reportEnd, "Report end", *bootstrapURL)
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }

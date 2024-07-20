@@ -9,38 +9,13 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
-	"bufio"
 	"encoding/json"
 	"log"
-	"os"
-	"regexp"
 	"strings"
 
 	"github.com/jaypipes/ghw"
+	"github.com/opiproject/sztp/sztp-agent/pkg/dhcp"
 )
-
-// Auxiliar function to get lines from file matching with the substr
-func linesInFileContains(file string, substr string) string {
-	// nolint:gosec
-	f, _ := os.Open(file)
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, substr) {
-			return line
-		}
-	}
-	return ""
-}
-
-func extractfromLine(line, regex string, index int) string {
-	re := regexp.MustCompile(regex)
-	res := re.FindAllString(line, -1)
-	if len(res) == 1 {
-		return ""
-	}
-	return re.FindAllString(line, -1)[index]
-}
 
 // GetSerialNumber returns the serial number of the device
 func GetSerialNumber(givenSerialNumber string) string {
@@ -60,8 +35,8 @@ func GetSerialNumber(givenSerialNumber string) string {
 }
 
 func generateInputJSONContent() string {
-	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
-	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
+	osName := replaceQuotes(strings.Split(dhcp.LinesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
+	osVersion := replaceQuotes(strings.Split(dhcp.LinesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
 	hwModel := ""
 	baseboard, err := ghw.Baseboard()
 	if err != nil {

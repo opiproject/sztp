@@ -5,6 +5,8 @@ package secureagent
 import (
 	"reflect"
 	"testing"
+
+	"github.com/opiproject/sztp/sztp-agent/pkg/dhcp"
 )
 
 func Test_readSSHHostKeyPublicFiles(t *testing.T) {
@@ -65,14 +67,14 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.args.content != "" {
-				createTempTestFile(tt.args.file, tt.args.content, true)
+				dhcp.CreateTempTestFile(tt.args.file, tt.args.content, true)
 			}
 			for _, key := range readSSHHostKeyPublicFiles(tt.args.file) {
 				if got := getSSHHostKeyString(key, true); !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("readSSHHostKeyPublicFiles() - got: %v, want %v", got, tt.want)
 				}
 			}
-			deleteTempTestFile(tt.args.file)
+			dhcp.DeleteTempTestFile(tt.args.file)
 		})
 	}
 }
