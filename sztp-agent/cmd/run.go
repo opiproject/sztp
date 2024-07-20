@@ -43,7 +43,7 @@ func Run() *cobra.Command {
 				return fmt.Errorf("'--bootstrap-url' and '--dhcp-lease-file' are mutualy exclusive")
 			}
 			if bootstrapURL == "" && dhcpLeaseFile == "" {
-				fmt.Println("both '--bootstrap-url' and '--dhcp-lease-file' were not provided, trying to get the bootstrap URL via NetworkManager")
+				fmt.Println("both '--bootstrap-url' and '--dhcp-lease-file' were not provided, will try to get the bootstrap URL via NetworkManager")
 			}
 			if dhcpLeaseFile != "" {
 				arrayChecker = append(arrayChecker, dhcpLeaseFile)
@@ -59,7 +59,7 @@ func Run() *cobra.Command {
 					return fmt.Errorf("must not be folder: %q", filePath)
 				}
 			}
-			a := secureagent.NewAgent([]string{bootstrapURL}, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
 			return a.RunCommand()
 		},
 	}

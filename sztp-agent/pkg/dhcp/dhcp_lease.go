@@ -14,14 +14,14 @@ import (
 	"os"
 )
 
-const sztpRedirectUrls = "sztp-redirect-urls"
+const sztpRedirectURL = "sztp-redirect-urls"
 
-// getBootstrapURLViaLeaseFile returns the sztp redirect URL via DHCP lease file
-func getBootstrapURLViaLeaseFile(dhcpLeaseFile string) (string, error) {
+// GetBootstrapURLViaLeaseFile returns the sztp redirect URL via DHCP lease file
+func GetBootstrapURLViaLeaseFile(dhcpLeaseFile string) (string, error) {
 	var line string
 	if _, err := os.Stat(dhcpLeaseFile); err == nil {
 		for {
-			line = LinesInFileContains(dhcpLeaseFile, sztpRedirectUrls)
+			line = LinesInFileContains(dhcpLeaseFile, sztpRedirectURL)
 			if line != "" {
 				break
 			}

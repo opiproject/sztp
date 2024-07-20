@@ -57,16 +57,15 @@ func (a *Agent) RunCommandDaemon() error {
 
 func (a *Agent) performBootstrapSequence() error {
 	var err error
-	// check if empty
+	// check if the bootstrap URL is already set
 	if len(a.GetBootstrapURL()) == 1 && a.GetBootstrapURL()[0] == "" {
-		log.Println("lmao")
 		err = a.getBootstrapURL()
 		if err != nil {
 			return err
 		}
 	}
-	log.Println("Bootstrap URL: ", a.GetBootstrapURL())
 	bootstrapURLs := a.GetBootstrapURL()
+	log.Println("Bootstrap URL: ", bootstrapURLs)
 	for _, bootstrapURL := range bootstrapURLs {
 		bootstrapURLCopy := bootstrapURL
 		err = a.doRequestBootstrapServerOnboardingInfo(&bootstrapURLCopy)
@@ -106,16 +105,21 @@ func (a *Agent) performBootstrapSequence() error {
 }
 
 func (a *Agent) getBootstrapURL() error {
-	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
-
-	sztpRedirectUrls, err := dhcp.GetBootstrapURL(a.DhcpLeaseFile)
+	if a.DhcpLeaseFile != "" {
+		log.Println("[INFO] Get the Bootstrap URL from DHCP client")
+		bootstrapURL, err := dhcp.GetBootstrapURLViaLeaseFile(a.DhcpLeaseFile)
+		if err != nil {
+			return err
+		}
+		a.SetBootstrapURL([]string{bootstrapURL})
+		return nil
+	}
+	log.Println("[INFO] Get the Bootstrap URL Via Network Manager")
+	bootstrapURLs, err := dhcp.GetBootstrapURLViaNetworkManager()
 	if err != nil {
-		log.Println("[ERROR] ", err.Error())
 		return err
 	}
-	a.SetBootstrapURL(sztpRedirectUrls)
-	// log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
-	log.Println("[INFO] Bootstrap URL retrieved successfully")
+	a.SetBootstrapURL(bootstrapURLs)
 	return nil
 }
 

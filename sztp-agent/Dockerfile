@@ -21,4 +21,4 @@ RUN apk add --no-cache --no-check-certificate curl && rm -rf /var/cache/apk/*
 
 COPY --from=builder /opi-sztp-agent /
 
-CMD ["/opi-sztp-agent"]
+CMD [ "/opi-sztp-agent" ]

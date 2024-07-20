@@ -84,9 +84,9 @@ type Agent struct {
 
 }
 
-func NewAgent(bootstrapURL []string, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
+func NewAgent(bootstrapURL string, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
 	return &Agent{
-		BootstrapURL:                  bootstrapURL,
+		BootstrapURL:                  []string{bootstrapURL},
 		SerialNumber:                  GetSerialNumber(serialNumber),
 		DevicePassword:                devicePassword,
 		DevicePrivateKey:              devicePrivateKey,

@@ -42,7 +42,7 @@ func TestGetBootstrapURLViaLeaseFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getBootstrapURLViaLeaseFile(tt.fields.DhcpLeaseFile)
+			got, err := GetBootstrapURLViaLeaseFile(tt.fields.DhcpLeaseFile)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetBootstrapURLViaLeaseFile() error = %v, wantErr %v", err, tt.wantErr)
 			} else if got != tt.want {

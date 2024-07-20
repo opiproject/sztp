@@ -821,7 +821,7 @@ func TestAgent_SetSerialNumber(t *testing.T) {
 
 func TestNewAgent(t *testing.T) {
 	type args struct {
-		bootstrapURL             []string
+		bootstrapURL             string
 		serialNumber             string
 		dhcpLeaseFile            string
 		devicePassword           string
@@ -837,7 +837,7 @@ func TestNewAgent(t *testing.T) {
 		{
 			name: "Test Constructor",
 			args: args{
-				bootstrapURL:             []string{"TestBootstrap"},
+				bootstrapURL:             "TestBootstrap",
 				serialNumber:             "TestSerialNumber",
 				dhcpLeaseFile:            "TestDhcpLeaseFile",
 				devicePassword:           "TestDevicePassword",
