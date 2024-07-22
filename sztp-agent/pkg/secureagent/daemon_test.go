@@ -36,7 +36,7 @@ func TestAgent_discoverBootstrapURLs(t *testing.T) {
 	createTempTestFile(dhcpTestFileOK, DHCPTestContent, true)
 
 	type fields struct {
-		BootstrapURL             string
+		InputBootstrapURL        string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -52,9 +52,39 @@ func TestAgent_discoverBootstrapURLs(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test OK Case file exists and get url successfully",
+			name: "Test OK Case dhcp leases file exists and get url successfully",
 			fields: fields{
-				BootstrapURL:             "http://localhost",
+				InputBootstrapURL:        "",
+				SerialNumber:             "my-serial-number",
+				DevicePassword:           "my-password",
+				DevicePrivateKey:         "",
+				DeviceEndEntityCert:      "",
+				BootstrapTrustAnchorCert: "",
+				ContentTypeReq:           CONTENT_TYPE_YANG,
+				InputJSONContent:         "",
+				DhcpLeasesFile:           dhcpTestFileOK,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test OK Case url given by user while leases file is not",
+			fields: fields{
+				InputBootstrapURL:        "http://user/given",
+				SerialNumber:             "my-serial-number",
+				DevicePassword:           "my-password",
+				DevicePrivateKey:         "",
+				DeviceEndEntityCert:      "",
+				BootstrapTrustAnchorCert: "",
+				ContentTypeReq:           CONTENT_TYPE_YANG,
+				InputJSONContent:         "",
+				DhcpLeasesFile:           "",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test OK Case url given by user and leases file given by user as well",
+			fields: fields{
+				InputBootstrapURL:        "http://user/given",
 				SerialNumber:             "my-serial-number",
 				DevicePassword:           "my-password",
 				DevicePrivateKey:         "",
@@ -69,7 +99,7 @@ func TestAgent_discoverBootstrapURLs(t *testing.T) {
 		{
 			name: "Test KO when not file found",
 			fields: fields{
-				BootstrapURL:             "http://localhost",
+				InputBootstrapURL:        "",
 				SerialNumber:             "my-serial-number",
 				DevicePassword:           "my-password",
 				DevicePrivateKey:         "",
@@ -85,7 +115,7 @@ func TestAgent_discoverBootstrapURLs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Agent{
-				BootstrapURL:             tt.fields.BootstrapURL,
+				InputBootstrapURL:        tt.fields.InputBootstrapURL,
 				SerialNumber:             tt.fields.SerialNumber,
 				DevicePassword:           tt.fields.DevicePassword,
 				DevicePrivateKey:         tt.fields.DevicePrivateKey,
