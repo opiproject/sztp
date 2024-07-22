@@ -56,11 +56,9 @@ func (a *Agent) RunCommandDaemon() error {
 
 func (a *Agent) performBootstrapSequence() error {
 	var err error
-	if a.GetBootstrapURL() == "" {
-		err = a.discoverBootstrapURLs()
-		if err != nil {
-			return err
-		}
+	err = a.discoverBootstrapURLs()
+	if err != nil {
+		return err
 	}
 	err = a.doRequestBootstrapServerOnboardingInfo()
 	if err != nil {
@@ -91,6 +89,31 @@ func (a *Agent) performBootstrapSequence() error {
 }
 
 func (a *Agent) discoverBootstrapURLs() error {
+	log.Println("[INFO] Discovering the Bootstrap URL")
+	if a.InputBootstrapURL != "" {
+		log.Println("[INFO] User gave us the Bootstrap URL: " + a.InputBootstrapURL)
+		a.SetBootstrapURL(a.InputBootstrapURL)
+		log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+		return nil
+	}
+	if a.DhcpLeaseFile != "" {
+		log.Println("[INFO] User gave us the DHCP Lease File: " + a.DhcpLeaseFile)
+		url, err := a.getBootstrapURLsViaLeaseFile()
+		if err != nil {
+			return err
+		}
+		a.SetBootstrapURL(url)
+		log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+		return nil
+	}
+	log.Println("[INFO] User gave us nothing, discover the Bootstrap URL from Network Manager via dbus")
+	// TODO: fetch the Bootstrap URL from Network Manager via dbus in the future
+	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+	return nil
+}
+
+// TODO: move this function into DHCP package folder
+func (a *Agent) getBootstrapURLsViaLeaseFile() (string, error) {
 	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
 	var line string
 	if _, err := os.Stat(a.DhcpLeaseFile); err == nil {
@@ -100,13 +123,10 @@ func (a *Agent) discoverBootstrapURLs() error {
 				break
 			}
 		}
-		a.SetBootstrapURL(extractfromLine(line, `(?m)[^"]*`, 1))
-	} else {
-		log.Printf("[ERROR] File " + a.DhcpLeaseFile + " does not exist\n")
-		return errors.New(" File " + a.DhcpLeaseFile + " does not exist\n")
+		return extractfromLine(line, `(?m)[^"]*`, 1), nil
 	}
-	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
-	return nil
+	log.Println("[Error] File " + a.DhcpLeaseFile + " does not exist")
+	return "", errors.New("File " + a.DhcpLeaseFile + " does not exist")
 }
 
 func (a *Agent) doHandleBootstrapRedirect() error {

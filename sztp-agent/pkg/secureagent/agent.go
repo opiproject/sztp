@@ -70,6 +70,7 @@ type BootstrapServerErrorOutput struct {
 
 // Agent is the basic structure to define an agent instance
 type Agent struct {
+	InputBootstrapURL             string                        // Bootstrap complete URL given by USER
 	BootstrapURL                  string                        // Bootstrap complete URL
 	SerialNumber                  string                        // Device's Serial Number
 	DevicePassword                string                        // Device's Password
@@ -87,7 +88,8 @@ type Agent struct {
 
 func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
 	return &Agent{
-		BootstrapURL:                  bootstrapURL,
+		InputBootstrapURL:             bootstrapURL,
+		BootstrapURL:                  "",
 		SerialNumber:                  GetSerialNumber(serialNumber),
 		DevicePassword:                devicePassword,
 		DevicePrivateKey:              devicePrivateKey,

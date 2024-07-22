@@ -846,7 +846,8 @@ func TestNewAgent(t *testing.T) {
 				bootstrapTrustAnchorCert: "TestBootstrapTrustCert",
 			},
 			want: &Agent{
-				BootstrapURL:             "TestBootstrap",
+				InputBootstrapURL:        "TestBootstrap",
+				BootstrapURL:             "",
 				SerialNumber:             "TestSerialNumber",
 				DevicePassword:           "TestDevicePassword",
 				DevicePrivateKey:         "TestDevicePrivateKey",
