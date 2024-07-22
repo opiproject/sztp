@@ -31,7 +31,7 @@ const DHCPTestContent = `lease {
 }`
 
 //nolint:funlen
-func TestAgent_getBootstrapURL(t *testing.T) {
+func TestAgent_discoverBootstrapURLs(t *testing.T) {
 	dhcpTestFileOK := "/tmp/test.dhcp"
 	createTempTestFile(dhcpTestFileOK, DHCPTestContent, true)
 
@@ -95,7 +95,7 @@ func TestAgent_getBootstrapURL(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeasesFile,
 			}
-			if err := a.getBootstrapURL(); (err != nil) != tt.wantErr {
+			if err := a.discoverBootstrapURLs(); (err != nil) != tt.wantErr {
 				t.Errorf("runDaemon() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
