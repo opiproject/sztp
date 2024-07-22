@@ -813,7 +813,7 @@ func TestAgent_SetSerialNumber(t *testing.T) {
 			}
 			a.SetSerialNumber(tt.args.serialNumber)
 			if a.GetSerialNumber() != tt.args.serialNumber {
-				t.Errorf("SetBootstrapURL = %v, want %v", a.GetSerialNumber(), tt.args.serialNumber)
+				t.Errorf("SetSerialNumber = %v, want %v", a.GetSerialNumber(), tt.args.serialNumber)
 			}
 		})
 	}
