@@ -57,7 +57,7 @@ func (a *Agent) RunCommandDaemon() error {
 func (a *Agent) performBootstrapSequence() error {
 	var err error
 	if a.GetBootstrapURL() == "" {
-		err = a.getBootstrapURL()
+		err = a.discoverBootstrapURLs()
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func (a *Agent) performBootstrapSequence() error {
 	return nil
 }
 
-func (a *Agent) getBootstrapURL() error {
+func (a *Agent) discoverBootstrapURLs() error {
 	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
 	var line string
 	if _, err := os.Stat(a.DhcpLeaseFile); err == nil {
