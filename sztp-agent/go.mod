@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/TwiN/go-color v1.4.1
 	github.com/github/smimesign v0.2.0
+	github.com/go-ini/ini v1.67.0
 	github.com/jaypipes/ghw v0.12.0
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/crypto v0.24.0
