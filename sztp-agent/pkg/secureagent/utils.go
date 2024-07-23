@@ -16,6 +16,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/go-ini/ini"
 	"github.com/jaypipes/ghw"
 )
 
@@ -60,8 +61,15 @@ func GetSerialNumber(givenSerialNumber string) string {
 }
 
 func generateInputJSONContent() string {
-	osName := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "NAME"), "=")[1])
-	osVersion := replaceQuotes(strings.Split(linesInFileContains(OS_RELEASE_FILE, "VERSION"), "=")[1])
+	osName := ""
+	osVersion := ""
+	cfg, err := ini.Load(OS_RELEASE_FILE)
+	if err != nil {
+		log.Printf("[ERROR] Error loading os-release file: %v", err)
+	} else {
+		osName = cfg.Section("").Key("NAME").String()
+		osVersion = cfg.Section("").Key("VERSION").String()
+	}
 	hwModel := ""
 	baseboard, err := ghw.Baseboard()
 	if err != nil {
