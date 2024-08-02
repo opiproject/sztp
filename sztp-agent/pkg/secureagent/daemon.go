@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/github/smimesign/ietf-cms/protocol"
+	"github.com/opiproject/sztp/sztp-agent/pkg/dhcp"
 )
 
 const (
@@ -98,11 +99,11 @@ func (a *Agent) discoverBootstrapURLs() error {
 	}
 	if a.DhcpLeaseFile != "" {
 		log.Println("[INFO] User gave us the DHCP Lease File: " + a.DhcpLeaseFile)
-		url, err := a.getBootstrapURLsViaLeaseFile()
+		urls, err := dhcp.GetBootstrapURLsViaLeaseFile(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
 		if err != nil {
 			return err
 		}
-		a.SetBootstrapURL(url)
+		a.SetBootstrapURL(urls[0])
 		log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
 		return nil
 	}
@@ -110,23 +111,6 @@ func (a *Agent) discoverBootstrapURLs() error {
 	// TODO: fetch the Bootstrap URL from Network Manager via dbus in the future
 	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
 	return nil
-}
-
-// TODO: move this function into DHCP package folder
-func (a *Agent) getBootstrapURLsViaLeaseFile() (string, error) {
-	log.Println("[INFO] Get the Bootstrap URL from DHCP client")
-	var line string
-	if _, err := os.Stat(a.DhcpLeaseFile); err == nil {
-		for {
-			line = linesInFileContains(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
-			if line != "" {
-				break
-			}
-		}
-		return extractfromLine(line, `(?m)[^"]*`, 1), nil
-	}
-	log.Println("[Error] File " + a.DhcpLeaseFile + " does not exist")
-	return "", errors.New("File " + a.DhcpLeaseFile + " does not exist")
 }
 
 func (a *Agent) doHandleBootstrapRedirect() error {
