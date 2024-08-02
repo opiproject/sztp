@@ -9,8 +9,13 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-ini/ini"
@@ -62,4 +67,24 @@ func generateInputJSONContent() string {
 
 func replaceQuotes(input string) string {
 	return strings.ReplaceAll(input, "\"", "")
+}
+
+func calculateSHA256File(filePath string) (string, error) {
+	cleanPath := filepath.Clean(filePath)
+	f, err := os.Open(cleanPath)
+	if err != nil {
+		log.Panic(err)
+		return "", err
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Println("[ERROR] Error when closing:", err)
+		}
+	}()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	checkSum := fmt.Sprintf("%x", h.Sum(nil))
+	return checkSum, nil
 }

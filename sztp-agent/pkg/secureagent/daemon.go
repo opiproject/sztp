@@ -10,7 +10,6 @@ package secureagent
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/asn1"
@@ -246,28 +245,17 @@ func (a *Agent) downloadAndValidateImage() error {
 
 		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
 		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
-		// TODO: maybe need to move sha calculatinos to a function in util.go
 		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
 		case "ietf-sztp-conveyed-info:sha-256":
-			f, err := os.Open(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
-			if err != nil {
-				log.Panic(err)
-				return err
-			}
-			defer func() {
-				if err := f.Close(); err != nil {
-					log.Println("[ERROR] Error when closing:", err)
-				}
-			}()
-			h := sha256.New()
-			if _, err := io.Copy(h, f); err != nil {
-				return err
-			}
-			sum := fmt.Sprintf("%x", h.Sum(nil))
+			filePath := ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item)
+			checksum, err := calculateSHA256File(filePath)
 			original := strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "")
-			log.Println("calculated: " + sum)
+			if err != nil {
+				log.Println("[ERROR] Could not calculate checksum", err)
+			}
+			log.Println("calculated: " + checksum)
 			log.Println("expected  : " + original)
-			if sum != original {
+			if checksum != original {
 				return errors.New("checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
