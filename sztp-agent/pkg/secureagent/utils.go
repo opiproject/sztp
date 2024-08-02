@@ -9,8 +9,12 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/go-ini/ini"
@@ -32,6 +36,30 @@ func GetSerialNumber(givenSerialNumber string) string {
 	}
 	log.Println("[None] Using discovered serial number: " + serialNumber)
 	return serialNumber
+}
+
+// CalculateFileSHA256 computes the SHA-256 checksum of a file specified by its path.
+func CalculateFileSHA256(filePath string) (string, error) {
+	// Open the file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Create a new SHA256 hash object
+	hash := sha256.New()
+
+	// Copy the file content to the hash object
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	// Get the final SHA256 hash result
+	checksum := hash.Sum(nil)
+
+	// Convert the result to a hexadecimal string
+	return fmt.Sprintf("%x", checksum), nil
 }
 
 func generateInputJSONContent() string {
