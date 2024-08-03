@@ -47,7 +47,7 @@ func GetBootstrapURLsViaLeaseFile(leaseFile, key string) ([]string, error) {
 			if len(url) == 1 {
 				continue
 			}
-			sztpRedirectURLs = append(sztpRedirectURLs, url[0])
+			sztpRedirectURLs = append(sztpRedirectURLs, url[1])
 		}
 	}
 
