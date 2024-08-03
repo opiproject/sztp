@@ -73,7 +73,7 @@ jobs:
       run: ./scripts/tests.sh
 
     - name: Logs
-      if: failure()
+      if: always()
       run: docker compose logs
 
     - name: Stop containers
