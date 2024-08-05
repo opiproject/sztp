@@ -10,8 +10,6 @@ package secureagent
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
@@ -19,7 +17,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -196,27 +193,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			return err
 		}
 
-		caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
-		cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
-
-		check := http.Client{
-			CheckRedirect: func(r *http.Request, _ []*http.Request) error {
-				r.URL.Opaque = r.URL.Path
-				return nil
-			},
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					//nolint:gosec
-					InsecureSkipVerify: true, // TODO: remove skip verify
-					RootCAs:            caCertPool,
-					Certificates:       []tls.Certificate{cert},
-				},
-			},
-		}
-
-		response, err := check.Get(item)
+		response, err := a.HttpClient.Get(item)
 		if err != nil {
 			return err
 		}

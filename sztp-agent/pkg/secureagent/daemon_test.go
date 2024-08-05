@@ -341,6 +341,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 				ContentTypeReq:           tt.fields.ContentTypeReq,
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
+				HttpClient:               &http.Client{},
 			}
 			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
@@ -359,7 +360,6 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		}
 	}))
 	defer svr.Close()
-
 	type fields struct {
 		BootstrapURL                  string
 		SerialNumber                  string
@@ -638,6 +638,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		deleteTempTestFile(ARTIFACTS_PATH + "/imageOK")
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Agent{
 				BootstrapURL:                  tt.fields.BootstrapURL,
@@ -652,6 +653,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    svr.Client(),
 			}
 			if err := a.downloadAndValidateImage(); (err != nil) != tt.wantErr {
 				t.Errorf("downloadAndValidateImage() error = %v, wantErr %v", err, tt.wantErr)
@@ -807,6 +809,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.copyConfigurationFile(); (err != nil) != tt.wantErr {
 				t.Errorf("copyConfigurationFile() error = %v, wantErr %v", err, tt.wantErr)
@@ -1024,6 +1027,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.launchScriptsConfiguration(tt.args.typeOf); (err != nil) != tt.wantErr {
 				t.Errorf("launchScriptsConfiguration() error = %v, wantErr %v", err, tt.wantErr)

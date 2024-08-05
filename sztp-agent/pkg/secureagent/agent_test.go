@@ -9,6 +9,7 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
 )
@@ -829,6 +830,7 @@ func TestNewAgent(t *testing.T) {
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
 	}
+	client := http.Client{}
 	tests := []struct {
 		name string
 		args args
@@ -856,12 +858,13 @@ func TestNewAgent(t *testing.T) {
 				ContentTypeReq:           "application/yang-data+json",
 				InputJSONContent:         generateInputJSONContent(),
 				DhcpLeaseFile:            "TestDhcpLeaseFile",
+				HttpClient:               &client,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewAgent(tt.args.bootstrapURL, tt.args.serialNumber, tt.args.dhcpLeaseFile, tt.args.devicePassword, tt.args.devicePrivateKey, tt.args.deviceEndEntityCert, tt.args.bootstrapTrustAnchorCert); !reflect.DeepEqual(got, tt.want) {
+			if got := NewAgent(tt.args.bootstrapURL, tt.args.serialNumber, tt.args.dhcpLeaseFile, tt.args.devicePassword, tt.args.devicePrivateKey, tt.args.deviceEndEntityCert, tt.args.bootstrapTrustAnchorCert, &client); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewAgent() = %v, want %v", got, tt.want)
 			}
 		})

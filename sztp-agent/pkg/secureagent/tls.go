@@ -10,14 +10,11 @@ package secureagent
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -38,20 +35,7 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 	r.SetBasicAuth(a.GetSerialNumber(), a.GetDevicePassword())
 	r.Header.Add("Content-Type", a.GetContentTypeReq())
 
-	caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-	cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
-
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{ //nolint:gosec
-				RootCAs:      caCertPool,
-				Certificates: []tls.Certificate{cert},
-			},
-		},
-	}
-	res, err := client.Do(r)
+	res, err := a.HttpClient.Do(r)
 	if err != nil {
 		log.Println("Error doing the request", err.Error())
 		return nil, err

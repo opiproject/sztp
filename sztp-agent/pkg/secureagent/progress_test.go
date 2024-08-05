@@ -158,6 +158,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 				ProgressJSON:             tt.fields.ProgressJSON,
+				HttpClient:               &http.Client{},
 			}
 			if err := a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated"); (err != nil) != tt.wantErr {
 				t.Errorf("doReportProgress() error = %v, wantErr %v", err, tt.wantErr)
