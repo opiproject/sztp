@@ -7,10 +7,12 @@ package secureagent
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -341,12 +343,26 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 				ContentTypeReq:           tt.fields.ContentTypeReq,
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
+				HttpClient:               &http.Client{},
 			}
 			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
+}
+
+type MockClient struct {
+	GetFunc func(uri string) (*http.Response, error)
+	DoFunc  func(req *http.Request) (*http.Response, error)
+}
+
+func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
+	return m.DoFunc(req)
+}
+
+func (m *MockClient) Get(uri string) (*http.Response, error) {
+	return m.GetFunc(uri)
 }
 
 //nolint:funlen
@@ -359,7 +375,6 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		}
 	}))
 	defer svr.Close()
-
 	type fields struct {
 		BootstrapURL                  string
 		SerialNumber                  string
@@ -638,6 +653,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		deleteTempTestFile(ARTIFACTS_PATH + "/imageOK")
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Agent{
 				BootstrapURL:                  tt.fields.BootstrapURL,
@@ -652,12 +668,98 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    svr.Client(),
 			}
 			if err := a.downloadAndValidateImage(); (err != nil) != tt.wantErr {
 				t.Errorf("downloadAndValidateImage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
+	calls := 0
+	httpClient := MockClient{
+		GetFunc: func(_ string) (*http.Response, error) {
+			calls++
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(""))}, nil
+		},
+		DoFunc: func(_ *http.Request) (*http.Response, error) {
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(""))}, nil
+		},
+	}
+	a := &Agent{
+		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
+			IetfSztpConveyedInfoOnboardingInformation: struct {
+				InfoTimestampReference string
+				BootImage              struct {
+					DownloadURI       []string `json:"download-uri"`
+					ImageVerification []struct {
+						HashAlgorithm string `json:"hash-algorithm"`
+						HashValue     string `json:"hash-value"`
+					} `json:"image-verification"`
+				} `json:"boot-image"`
+				PreConfigurationScript  string `json:"pre-configuration-script"`
+				ConfigurationHandling   string `json:"configuration-handling"`
+				Configuration           string `json:"configuration"`
+				PostConfigurationScript string `json:"post-configuration-script"`
+			}{
+				InfoTimestampReference: "TIMESTAMP",
+				BootImage: struct {
+					DownloadURI       []string `json:"download-uri"`
+					ImageVerification []struct {
+						HashAlgorithm string `json:"hash-algorithm"`
+						HashValue     string `json:"hash-value"`
+					} `json:"image-verification"`
+				}{
+					DownloadURI: []string{svr.URL + "/imageOK"},
+					ImageVerification: []struct {
+						HashAlgorithm string `json:"hash-algorithm"`
+						HashValue     string `json:"hash-value"`
+					}{{
+						HashAlgorithm: "ietf-sztp-conveyed-info:sha-256",
+						HashValue:     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					}},
+				},
+				PreConfigurationScript:  "",
+				ConfigurationHandling:   "",
+				Configuration:           "",
+				PostConfigurationScript: "",
+			},
+		},
+		BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
+		HttpClient:                  &httpClient,
+	}
+	t.Run("OK case with cached file", func(t *testing.T) {
+		calls = 0
+		deleteTempTestFile(ARTIFACTS_PATH + "/imageOK")
+		// Initiate cache download
+		err := a.downloadAndValidateImage()
+		if err != nil {
+			t.Errorf("downloadAndValidateImage() error = %v", err)
+		}
+		err = a.downloadAndValidateImage()
+		if err != nil {
+			t.Errorf("downloadAndValidateImage() error = %v", err)
+		}
+		if calls != 1 {
+			t.Errorf("downloadAndValidateImage() called httpclient more than 1 times, Called %d", calls)
+		}
+	})
+	t.Run("OK case with cached file with different signature", func(t *testing.T) {
+		calls = 0
+		deleteTempTestFile(ARTIFACTS_PATH + "/imageOK")
+		// Initiate cache download
+		err := a.downloadAndValidateImage()
+		if err != nil {
+			t.Errorf("downloadAndValidateImage() error = %v", err)
+		}
+		_ = os.WriteFile(ARTIFACTS_PATH+"/imageOK", []byte("test"), 0600)
+		err = a.downloadAndValidateImage()
+		if err != nil {
+			t.Errorf("downloadAndValidateImage() error = %v", err)
+		}
+		if calls != 2 {
+			t.Errorf("downloadAndValidateImage() should call httpclient two time, Called %d", calls)
+		}
+	})
 }
 
 // nolint:funlen
@@ -807,6 +909,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.copyConfigurationFile(); (err != nil) != tt.wantErr {
 				t.Errorf("copyConfigurationFile() error = %v, wantErr %v", err, tt.wantErr)
@@ -1024,6 +1127,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.launchScriptsConfiguration(tt.args.typeOf); (err != nil) != tt.wantErr {
 				t.Errorf("launchScriptsConfiguration() error = %v, wantErr %v", err, tt.wantErr)

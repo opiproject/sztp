@@ -10,8 +10,6 @@ package secureagent
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
@@ -19,7 +17,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -181,88 +178,106 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	return errri
 }
 
+func (a *Agent) downloadArtifact(uri string) (*os.File, error) {
+	file, err := os.CreateTemp("", filepath.Base(uri))
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := a.HttpClient.Get(uri)
+	if err != nil {
+		return nil, err
+	}
+	sizeorigin, _ := strconv.Atoi(response.Header.Get("Content-Length"))
+	downloadSize := int64(sizeorigin)
+	log.Printf("[INFO] Downloading the image with size: %v", downloadSize)
+
+	if response.StatusCode != 200 {
+		return nil, errors.New("received non 200 response code")
+	}
+	size, err := io.Copy(file, response.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Println("[ERROR] Error when closing:", err)
+		}
+	}()
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			log.Println("[ERROR] Error when closing:", err)
+		}
+	}()
+	log.Printf("[INFO] Downloaded file: %s with size: %d", file.Name(), size)
+	return file, nil
+}
+
+func (a *Agent) validateImage(filePath string, algorithm string, expected string) error {
+	switch algorithm {
+	case "ietf-sztp-conveyed-info:sha-256":
+		checksum, err := calculateSHA256File(filePath)
+
+		if err != nil {
+			log.Println("[ERROR] Could not calculate checksum", err)
+		}
+		log.Println("calculated: " + checksum)
+		log.Println("expected  : " + expected)
+
+		if checksum != expected {
+			return errors.New("checksum mismatch")
+		}
+		log.Println("[INFO] Checksum verified successfully")
+		return nil
+	default:
+		return errors.New("unsupported hash algorithm")
+	}
+}
+
+func (a *Agent) artifactExists(item string, algorithm string, expected string) bool {
+	filePath := ARTIFACTS_PATH + filepath.Base(item)
+	_, err := os.Stat(filePath)
+	if err != nil {
+		return false
+	}
+	err = a.validateImage(filePath, algorithm, expected)
+	return err == nil
+}
+
 //nolint:funlen
 func (a *Agent) downloadAndValidateImage() error {
-	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
+	bootImage := a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage
+	log.Printf("[INFO] Starting the Download Image: %v", bootImage.DownloadURI)
 	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated")
 	// Download the image from DownloadURI and save it to a file
-	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
-	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
-		// TODO: maybe need to file download to a function in util.go
-		log.Printf("[INFO] Downloading Image %v", item)
-		// Create a empty file
-		file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
-		if err != nil {
-			return err
+	for i, item := range bootImage.DownloadURI {
+		if len(bootImage.ImageVerification) <= i {
+			return errors.New("invalid verification")
 		}
 
-		caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
-		cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
+		imageVerification := bootImage.ImageVerification[i]
+		expected := strings.ReplaceAll(imageVerification.HashValue, ":", "")
+		algorithm := imageVerification.HashAlgorithm
 
-		check := http.Client{
-			CheckRedirect: func(r *http.Request, _ []*http.Request) error {
-				r.URL.Opaque = r.URL.Path
-				return nil
-			},
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					//nolint:gosec
-					InsecureSkipVerify: true, // TODO: remove skip verify
-					RootCAs:            caCertPool,
-					Certificates:       []tls.Certificate{cert},
-				},
-			},
-		}
-
-		response, err := check.Get(item)
-		if err != nil {
-			return err
-		}
-
-		sizeorigin, _ := strconv.Atoi(response.Header.Get("Content-Length"))
-		downloadSize := int64(sizeorigin)
-		log.Printf("[INFO] Downloading the image with size: %v", downloadSize)
-
-		if response.StatusCode != 200 {
-			return errors.New("received non 200 response code")
-		}
-		size, err := io.Copy(file, response.Body)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if err := file.Close(); err != nil {
-				log.Println("[ERROR] Error when closing:", err)
-			}
-		}()
-		defer func() {
-			if err := response.Body.Close(); err != nil {
-				log.Println("[ERROR] Error when closing:", err)
-			}
-		}()
-
-		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
-		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
-		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
-		case "ietf-sztp-conveyed-info:sha-256":
-			filePath := ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item)
-			checksum, err := calculateSHA256File(filePath)
-			original := strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "")
+		if a.artifactExists(item, algorithm, expected) {
+			log.Printf("[INFO] Image %v already exists", item)
+		} else {
+			log.Printf("[INFO] Downloading Image %v", item)
+			file, err := a.downloadArtifact(item)
 			if err != nil {
-				log.Println("[ERROR] Could not calculate checksum", err)
+				return err
 			}
-			log.Println("calculated: " + checksum)
-			log.Println("expected  : " + original)
-			if checksum != original {
-				return errors.New("checksum mismatch")
+			log.Println("[INFO] Verify the file checksum: ", file.Name())
+			err = a.validateImage(file.Name(), algorithm, expected)
+			if err != nil {
+				return err
 			}
-			log.Println("[INFO] Checksum verified successfully")
+
+			log.Printf("[INFO] Moving file %s to %s", file.Name(), ARTIFACTS_PATH+filepath.Base(item))
+			_ = os.Rename(file.Name(), ARTIFACTS_PATH+filepath.Base(item))
 			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete")
+
 			return nil
-		default:
-			return errors.New("unsupported hash algorithm")
 		}
 	}
 	return nil
