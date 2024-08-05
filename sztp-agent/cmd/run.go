@@ -59,7 +59,8 @@ func Run() *cobra.Command {
 					return fmt.Errorf("must not be folder: %q", filePath)
 				}
 			}
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			client := secureagent.NewHttpClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, &client)
 			return a.RunCommand()
 		},
 	}

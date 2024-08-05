@@ -9,6 +9,13 @@ Copyright (C) 2022 Red Hat.
 // Package secureagent implements the secure agent
 package secureagent
 
+import (
+	"crypto/tls"
+	"crypto/x509"
+	"net/http"
+	"os"
+)
+
 const (
 	CONTENT_TYPE_YANG = "application/yang-data+json"
 	OS_RELEASE_FILE   = "/etc/os-release"
@@ -68,6 +75,11 @@ type BootstrapServerErrorOutput struct {
 	} `json:"ietf-restconf:errors"`
 }
 
+type HttpClient interface {
+	Get(uri string) (*http.Response, error)
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // Agent is the basic structure to define an agent instance
 type Agent struct {
 	InputBootstrapURL             string                        // Bootstrap complete URL given by USER
@@ -83,10 +95,10 @@ type Agent struct {
 	ProgressJSON                  ProgressJSON                  // ProgressJson structure
 	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo // BootstrapServerOnboardingInfo structure
 	BootstrapServerRedirectInfo   BootstrapServerRedirectInfo   // BootstrapServerRedirectInfo structure
-
+	HttpClient                    HttpClient
 }
 
-func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
+func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string, httpClient HttpClient) *Agent {
 	return &Agent{
 		InputBootstrapURL:             bootstrapURL,
 		BootstrapURL:                  "",
@@ -101,6 +113,7 @@ func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, deviceP
 		ProgressJSON:                  ProgressJSON{},
 		BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+		HttpClient:                    httpClient,
 	}
 }
 
@@ -170,4 +183,26 @@ func (a *Agent) SetContentTypeReq(ct string) {
 
 func (a *Agent) SetProgressJSON(p ProgressJSON) {
 	a.ProgressJSON = p
+}
+
+func NewHttpClient(bootstrapTrustAnchorCert string, deviceEndEntityCert string, devicePrivateKey string) http.Client {
+	caCert, _ := os.ReadFile(bootstrapTrustAnchorCert)
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	cert, _ := tls.LoadX509KeyPair(deviceEndEntityCert, devicePrivateKey)
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, _ []*http.Request) error {
+			r.URL.Opaque = r.URL.Path
+			return nil
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				//nolint:gosec
+				InsecureSkipVerify: true, // TODO: remove skip verify
+				RootCAs:            caCertPool,
+				Certificates:       []tls.Certificate{cert},
+			},
+		},
+	}
+	return client
 }
