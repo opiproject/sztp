@@ -13,6 +13,7 @@ import (
 	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -114,6 +115,12 @@ func (a *Agent) doHandleBootstrapRedirect() error {
 	addr := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Address
 	port := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Port
 
+	if addr == "" {
+		return errors.New("invalid redirect address")
+	}
+	if port <= 0 {
+		return errors.New("invalid port")
+	}
 	// Change URL to point to new redirect IP and PORT
 	u, err := url.Parse(a.GetBootstrapURL())
 	if err != nil {
