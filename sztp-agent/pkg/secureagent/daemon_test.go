@@ -164,6 +164,83 @@ func deleteTempTestFile(file string) {
 	}
 }
 
+func TestAgent_doHandleBootstrapRedirect(t *testing.T) {
+	type fields struct {
+		InputBootstrapURL           string
+		BootstrapServerRedirectInfo BootstrapServerRedirectInfo
+	}
+	tests := []struct {
+		name                 string
+		fields               fields
+		wantErr              bool
+		expectedBootstrapURL string
+	}{
+		{
+			name: "Fail test with invalid address",
+			fields: fields{
+				InputBootstrapURL: "",
+				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{
+					IetfSztpConveyedInfoRedirectInformation: struct {
+						BootstrapServer []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						} `json:"bootstrap-server"`
+					}{
+						BootstrapServer: []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						}{{
+							Address: "",
+							Port:    0,
+						}},
+					},
+				},
+			},
+			wantErr:              true,
+			expectedBootstrapURL: "",
+		},
+		{
+			name: "Fail test with invalid port",
+			fields: fields{
+				InputBootstrapURL: "",
+				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{
+					IetfSztpConveyedInfoRedirectInformation: struct {
+						BootstrapServer []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						} `json:"bootstrap-server"`
+					}{
+						BootstrapServer: []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						}{{
+							Address: "8.8.8.8",
+							Port:    -1000,
+						}},
+					},
+				},
+			},
+			wantErr:              true,
+			expectedBootstrapURL: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &Agent{
+				BootstrapURL:                tt.fields.InputBootstrapURL,
+				BootstrapServerRedirectInfo: tt.fields.BootstrapServerRedirectInfo,
+			}
+			if err := a.doHandleBootstrapRedirect(); (err != nil) != tt.wantErr {
+				t.Errorf("doHandleBootstrapRedirect() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 //nolint:funlen
 func TestAgent_doReqBootstrap(t *testing.T) {
 	var output []byte
