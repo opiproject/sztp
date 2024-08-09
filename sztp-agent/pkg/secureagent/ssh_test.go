@@ -12,6 +12,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 		file      string
 		content   string
 		Algorithm string
+		KeyOnly   bool
 	}
 	tests := []struct {
 		name string
@@ -24,6 +25,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				file:      "/tmp/test.pub",
 				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 				Algorithm: "ssh-ed25519",
+				KeyOnly:   false,
 			},
 			want: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
@@ -33,6 +35,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				file:      "/tmp/test.pub",
 				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment",
 				Algorithm: "ssh-ed25519",
+				KeyOnly:   false,
 			},
 			want: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
@@ -42,6 +45,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				file:      "/tmp/test.pub",
 				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR comment error",
 				Algorithm: "ssh-ed25519",
+				KeyOnly:   false,
 			},
 			want: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
@@ -50,6 +54,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 			args: args{
 				file:    "/tmp/test.pub",
 				content: "ssh-ed25519",
+				KeyOnly: false,
 			},
 			want: "ssh-ed25519",
 		},
@@ -58,8 +63,19 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 			args: args{
 				file:    "/tmp/test.pub",
 				content: "",
+				KeyOnly: false,
 			},
 			want: "",
+		},
+		{
+			name: "Test file only key",
+			args: args{
+				file:      "/tmp/test.pub",
+				content:   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
+				Algorithm: "ssh-ed25519",
+				KeyOnly:   true,
+			},
+			want: "AAAAC3NzaC1lZDI1NTE5AAAAID0mjQXlOvkM2HO5vTrSOdHOl3BGOqDiHrx8yYdbP8xR",
 		},
 	}
 	for _, tt := range tests {
@@ -68,7 +84,7 @@ func Test_readSSHHostKeyPublicFiles(t *testing.T) {
 				createTempTestFile(tt.args.file, tt.args.content, true)
 			}
 			for _, key := range readSSHHostKeyPublicFiles(tt.args.file) {
-				if got := getSSHHostKeyString(key, true); !reflect.DeepEqual(got, tt.want) {
+				if got := getSSHHostKeyString(key, !tt.args.KeyOnly); !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("readSSHHostKeyPublicFiles() - got: %v, want %v", got, tt.want)
 				}
 			}
