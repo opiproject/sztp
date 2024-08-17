@@ -34,7 +34,7 @@ func Enable() *cobra.Command {
 		Use:   "enable",
 		Short: "Run the enable command",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			client := secureagent.NewHttpClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
+			client := secureagent.NewHTTPClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
 			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, &client)
 			return a.RunCommandEnable()
 		},

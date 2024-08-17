@@ -10,14 +10,42 @@ package secureagent
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
+
+// NewHTTPClient instantiate a new HTTP Client
+func NewHTTPClient(bootstrapTrustAnchorCert string, deviceEndEntityCert string, devicePrivateKey string) http.Client {
+	certPath := filepath.Clean(bootstrapTrustAnchorCert)
+	caCert, _ := os.ReadFile(certPath)
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	cert, _ := tls.LoadX509KeyPair(deviceEndEntityCert, devicePrivateKey)
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, _ []*http.Request) error {
+			r.URL.Opaque = r.URL.Path
+			return nil
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				//nolint:gosec
+				InsecureSkipVerify: true, // TODO: remove skip verify
+				RootCAs:            caCertPool,
+				Certificates:       []tls.Certificate{cert},
+			},
+		},
+	}
+	return client
+}
 
 func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapServerPostOutput, error) {
 	var postResponse BootstrapServerPostOutput

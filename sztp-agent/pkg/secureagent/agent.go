@@ -10,10 +10,7 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"net/http"
-	"os"
 )
 
 const (
@@ -183,26 +180,4 @@ func (a *Agent) SetContentTypeReq(ct string) {
 
 func (a *Agent) SetProgressJSON(p ProgressJSON) {
 	a.ProgressJSON = p
-}
-
-func NewHttpClient(bootstrapTrustAnchorCert string, deviceEndEntityCert string, devicePrivateKey string) http.Client {
-	caCert, _ := os.ReadFile(bootstrapTrustAnchorCert)
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-	cert, _ := tls.LoadX509KeyPair(deviceEndEntityCert, devicePrivateKey)
-	client := http.Client{
-		CheckRedirect: func(r *http.Request, _ []*http.Request) error {
-			r.URL.Opaque = r.URL.Path
-			return nil
-		},
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				//nolint:gosec
-				InsecureSkipVerify: true, // TODO: remove skip verify
-				RootCAs:            caCertPool,
-				Certificates:       []tls.Certificate{cert},
-			},
-		},
-	}
-	return client
 }

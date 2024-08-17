@@ -164,6 +164,83 @@ func deleteTempTestFile(file string) {
 	}
 }
 
+func TestAgent_doHandleBootstrapRedirect(t *testing.T) {
+	type fields struct {
+		InputBootstrapURL           string
+		BootstrapServerRedirectInfo BootstrapServerRedirectInfo
+	}
+	tests := []struct {
+		name                 string
+		fields               fields
+		wantErr              bool
+		expectedBootstrapURL string
+	}{
+		{
+			name: "Fail test with invalid address",
+			fields: fields{
+				InputBootstrapURL: "",
+				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{
+					IetfSztpConveyedInfoRedirectInformation: struct {
+						BootstrapServer []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						} `json:"bootstrap-server"`
+					}{
+						BootstrapServer: []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						}{{
+							Address: "",
+							Port:    0,
+						}},
+					},
+				},
+			},
+			wantErr:              true,
+			expectedBootstrapURL: "",
+		},
+		{
+			name: "Fail test with invalid port",
+			fields: fields{
+				InputBootstrapURL: "",
+				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{
+					IetfSztpConveyedInfoRedirectInformation: struct {
+						BootstrapServer []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						} `json:"bootstrap-server"`
+					}{
+						BootstrapServer: []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						}{{
+							Address: "8.8.8.8",
+							Port:    -1000,
+						}},
+					},
+				},
+			},
+			wantErr:              true,
+			expectedBootstrapURL: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &Agent{
+				BootstrapURL:                tt.fields.InputBootstrapURL,
+				BootstrapServerRedirectInfo: tt.fields.BootstrapServerRedirectInfo,
+			}
+			if err := a.doHandleBootstrapRedirect(); (err != nil) != tt.wantErr {
+				t.Errorf("doHandleBootstrapRedirect() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 //nolint:funlen
 func TestAgent_doReqBootstrap(t *testing.T) {
 	var output []byte
@@ -345,692 +422,6 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 			}
 			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-//nolint:funlen
-func TestAgent_downloadAndValidateImage(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/imageOK" {
-			w.WriteHeader(200)
-		} else {
-			w.WriteHeader(400)
-		}
-	}))
-	defer svr.Close()
-	type fields struct {
-		BootstrapURL                  string
-		SerialNumber                  string
-		DevicePassword                string
-		DevicePrivateKey              string
-		DeviceEndEntityCert           string
-		BootstrapTrustAnchorCert      string
-		ContentTypeReq                string
-		InputJSONContent              string
-		DhcpLeaseFile                 string
-		ProgressJSON                  ProgressJSON
-		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
-		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-	}{
-		{
-			name: "error writing file",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI:       []string{"WrongURL"},
-							ImageVerification: nil,
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Image wrong",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "TIMESTAMP",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI:       []string{svr.URL + "/imageWRONG"},
-							ImageVerification: nil,
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Image wrong",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "TIMESTAMP",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI:       []string{},
-							ImageVerification: nil,
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "OK Case but with error due to hash checksum",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "TIMESTAMP",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{svr.URL + "/imageOK"},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "ietf-sztp-conveyed-info:sha-256",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "OK Case but with error due to hash checksum",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "TIMESTAMP",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{svr.URL + "/imageOK"},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "WRONG HASH ALGORITHM",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		deleteTempTestFile(ARTIFACTS_PATH + "/imageOK")
-		t.Run(tt.name, func(t *testing.T) {
-			a := &Agent{
-				BootstrapURL:                  tt.fields.BootstrapURL,
-				SerialNumber:                  tt.fields.SerialNumber,
-				DevicePassword:                tt.fields.DevicePassword,
-				DevicePrivateKey:              tt.fields.DevicePrivateKey,
-				DeviceEndEntityCert:           tt.fields.DeviceEndEntityCert,
-				BootstrapTrustAnchorCert:      tt.fields.BootstrapTrustAnchorCert,
-				ContentTypeReq:                tt.fields.ContentTypeReq,
-				InputJSONContent:              tt.fields.InputJSONContent,
-				DhcpLeaseFile:                 tt.fields.DhcpLeaseFile,
-				ProgressJSON:                  tt.fields.ProgressJSON,
-				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
-				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
-				HttpClient:                    svr.Client(),
-			}
-			if err := a.downloadAndValidateImage(); (err != nil) != tt.wantErr {
-				t.Errorf("downloadAndValidateImage() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-// nolint:funlen
-func TestAgent_copyConfigurationFile(t *testing.T) {
-	type fields struct {
-		BootstrapURL                  string
-		SerialNumber                  string
-		DevicePassword                string
-		DevicePrivateKey              string
-		DeviceEndEntityCert           string
-		BootstrapTrustAnchorCert      string
-		ContentTypeReq                string
-		InputJSONContent              string
-		DhcpLeaseFile                 string
-		ProgressJSON                  ProgressJSON
-		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
-		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-	}{
-		{
-			name: "Error Writing file",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: " ../ ",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "md5",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "OK Case",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "PATHOK",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "md5",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			a := &Agent{
-				BootstrapURL:                  tt.fields.BootstrapURL,
-				SerialNumber:                  tt.fields.SerialNumber,
-				DevicePassword:                tt.fields.DevicePassword,
-				DevicePrivateKey:              tt.fields.DevicePrivateKey,
-				DeviceEndEntityCert:           tt.fields.DeviceEndEntityCert,
-				BootstrapTrustAnchorCert:      tt.fields.BootstrapTrustAnchorCert,
-				ContentTypeReq:                tt.fields.ContentTypeReq,
-				InputJSONContent:              tt.fields.InputJSONContent,
-				DhcpLeaseFile:                 tt.fields.DhcpLeaseFile,
-				ProgressJSON:                  tt.fields.ProgressJSON,
-				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
-				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
-				HttpClient:                    &http.Client{},
-			}
-			if err := a.copyConfigurationFile(); (err != nil) != tt.wantErr {
-				t.Errorf("copyConfigurationFile() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-// nolint:funlen
-func TestAgent_launchScriptsConfiguration(t *testing.T) {
-	type fields struct {
-		BootstrapURL                  string
-		SerialNumber                  string
-		DevicePassword                string
-		DevicePrivateKey              string
-		DeviceEndEntityCert           string
-		BootstrapTrustAnchorCert      string
-		ContentTypeReq                string
-		InputJSONContent              string
-		DhcpLeaseFile                 string
-		ProgressJSON                  ProgressJSON
-		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
-		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
-	}
-	type args struct {
-		typeOf string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			args: args{typeOf: "default or pre"},
-			name: "OK Case with PRE",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "PATHOK",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "md5",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: false,
-		},
-		{
-			args: args{typeOf: "post"},
-			name: "OK Case with POST",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: "PATHOK",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "md5",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: false,
-		},
-		{
-			args: args{typeOf: "post"},
-			name: "OK Case with POST",
-			fields: fields{
-				BootstrapURL:             "",
-				SerialNumber:             "",
-				DevicePassword:           "",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
-				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{
-					IetfSztpConveyedInfoOnboardingInformation: struct {
-						InfoTimestampReference string
-						BootImage              struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						} `json:"boot-image"`
-						PreConfigurationScript  string `json:"pre-configuration-script"`
-						ConfigurationHandling   string `json:"configuration-handling"`
-						Configuration           string `json:"configuration"`
-						PostConfigurationScript string `json:"post-configuration-script"`
-					}{
-						InfoTimestampReference: " ../",
-						BootImage: struct {
-							DownloadURI       []string `json:"download-uri"`
-							ImageVerification []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							} `json:"image-verification"`
-						}{
-							DownloadURI: []string{},
-							ImageVerification: []struct {
-								HashAlgorithm string `json:"hash-algorithm"`
-								HashValue     string `json:"hash-value"`
-							}{{
-								HashAlgorithm: "md5",
-								HashValue:     "d41d8cd98f00b204e9800998ecf8427e",
-							}},
-						},
-						PreConfigurationScript:  "",
-						ConfigurationHandling:   "",
-						Configuration:           "",
-						PostConfigurationScript: "",
-					},
-				},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			a := &Agent{
-				BootstrapURL:                  tt.fields.BootstrapURL,
-				SerialNumber:                  tt.fields.SerialNumber,
-				DevicePassword:                tt.fields.DevicePassword,
-				DevicePrivateKey:              tt.fields.DevicePrivateKey,
-				DeviceEndEntityCert:           tt.fields.DeviceEndEntityCert,
-				BootstrapTrustAnchorCert:      tt.fields.BootstrapTrustAnchorCert,
-				ContentTypeReq:                tt.fields.ContentTypeReq,
-				InputJSONContent:              tt.fields.InputJSONContent,
-				DhcpLeaseFile:                 tt.fields.DhcpLeaseFile,
-				ProgressJSON:                  tt.fields.ProgressJSON,
-				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
-				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
-				HttpClient:                    &http.Client{},
-			}
-			if err := a.launchScriptsConfiguration(tt.args.typeOf); (err != nil) != tt.wantErr {
-				t.Errorf("launchScriptsConfiguration() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -15,15 +15,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/url"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"reflect"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/github/smimesign/ietf-cms/protocol"
@@ -121,6 +115,12 @@ func (a *Agent) doHandleBootstrapRedirect() error {
 	addr := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Address
 	port := a.BootstrapServerRedirectInfo.IetfSztpConveyedInfoRedirectInformation.BootstrapServer[0].Port
 
+	if addr == "" {
+		return errors.New("invalid redirect address")
+	}
+	if port <= 0 {
+		return errors.New("invalid port")
+	}
 	// Change URL to point to new redirect IP and PORT
 	u, err := url.Parse(a.GetBootstrapURL())
 	if err != nil {
@@ -176,157 +176,4 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 		return nil
 	}
 	return errri
-}
-
-//nolint:funlen
-func (a *Agent) downloadAndValidateImage() error {
-	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
-	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated")
-	// Download the image from DownloadURI and save it to a file
-	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
-	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
-		// TODO: maybe need to file download to a function in util.go
-		log.Printf("[INFO] Downloading Image %v", item)
-		// Create a empty file
-		file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item))
-		if err != nil {
-			return err
-		}
-
-		response, err := a.HttpClient.Get(item)
-		if err != nil {
-			return err
-		}
-
-		sizeorigin, _ := strconv.Atoi(response.Header.Get("Content-Length"))
-		downloadSize := int64(sizeorigin)
-		log.Printf("[INFO] Downloading the image with size: %v", downloadSize)
-
-		if response.StatusCode != 200 {
-			return errors.New("received non 200 response code")
-		}
-		size, err := io.Copy(file, response.Body)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if err := file.Close(); err != nil {
-				log.Println("[ERROR] Error when closing:", err)
-			}
-		}()
-		defer func() {
-			if err := response.Body.Close(); err != nil {
-				log.Println("[ERROR] Error when closing:", err)
-			}
-		}()
-
-		log.Printf("[INFO] Downloaded file: %s with size: %d", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item), size)
-		log.Println("[INFO] Verify the file checksum: ", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+filepath.Base(item))
-		switch a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashAlgorithm {
-		case "ietf-sztp-conveyed-info:sha-256":
-			filePath := ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + filepath.Base(item)
-			checksum, err := calculateSHA256File(filePath)
-			original := strings.ReplaceAll(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.ImageVerification[i].HashValue, ":", "")
-			if err != nil {
-				log.Println("[ERROR] Could not calculate checksum", err)
-			}
-			log.Println("calculated: " + checksum)
-			log.Println("expected  : " + original)
-			if checksum != original {
-				return errors.New("checksum mismatch")
-			}
-			log.Println("[INFO] Checksum verified successfully")
-			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete")
-			return nil
-		default:
-			return errors.New("unsupported hash algorithm")
-		}
-	}
-	return nil
-}
-
-func (a *Agent) copyConfigurationFile() error {
-	log.Println("[INFO] Starting the Copy Configuration.")
-	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated")
-	// Copy the configuration file to the device
-	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
-	if err != nil {
-		log.Println("[ERROR] creating the configuration file", err.Error())
-		return err
-	}
-	defer func() {
-		if err := file.Close(); err != nil {
-			log.Println("[ERROR] Error when closing:", err)
-		}
-	}()
-
-	plainTest, _ := base64.StdEncoding.DecodeString(a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.Configuration)
-	_, err = file.WriteString(string(plainTest))
-	if err != nil {
-		log.Println("[ERROR] writing the configuration file", err.Error())
-		return err
-	}
-	// nolint:gosec
-	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+"-config", 0744)
-	if err != nil {
-		log.Println("[ERROR] changing the configuration file permission", err.Error())
-		return err
-	}
-	log.Println("[INFO] Configuration file copied successfully")
-	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete")
-	return nil
-}
-
-func (a *Agent) launchScriptsConfiguration(typeOf string) error {
-	var script, scriptName string
-	var reportStart, reportEnd ProgressType
-	switch typeOf {
-	case "post":
-		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PostConfigurationScript
-		scriptName = "post"
-		reportStart = ProgressTypePostScriptInitiated
-		reportEnd = ProgressTypePostScriptComplete
-	default: // pre or default
-		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript
-		scriptName = "pre"
-		reportStart = ProgressTypePreScriptInitiated
-		reportEnd = ProgressTypePreScriptComplete
-	}
-	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
-	_ = a.doReportProgress(reportStart, "Report starting")
-	// nolint:gosec
-	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
-	if err != nil {
-		log.Println("[ERROR] creating the "+scriptName+"-configuration script", err.Error())
-		return err
-	}
-	defer func() {
-		if err := file.Close(); err != nil {
-			log.Println("[ERROR] Error when closing:", err)
-		}
-	}()
-
-	plainTest, _ := base64.StdEncoding.DecodeString(script)
-	_, err = file.WriteString(string(plainTest))
-	if err != nil {
-		log.Println("[ERROR] writing the "+scriptName+"-configuration script", err.Error())
-		return err
-	}
-	// nolint:gosec
-	err = os.Chmod(ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+scriptName+"configuration.sh", 0755)
-	if err != nil {
-		log.Println("[ERROR] changing the "+scriptName+"-configuration script permission", err.Error())
-		return err
-	}
-	log.Println("[INFO] " + scriptName + "-configuration script created successfully")
-	cmd := exec.Command("/bin/sh", ARTIFACTS_PATH+a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference+scriptName+"configuration.sh") //nolint:gosec
-	out, err := cmd.Output()
-	if err != nil {
-		log.Println("[ERROR] running the "+scriptName+"-configuration script", err.Error())
-		return err
-	}
-	log.Println(string(out)) // remove it
-	_ = a.doReportProgress(reportEnd, "Report end")
-	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
-	return nil
 }
