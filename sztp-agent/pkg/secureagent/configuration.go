@@ -7,9 +7,9 @@ import (
 	"os/exec"
 )
 
-func (a *Agent) copyConfigurationFile() error {
+func (a *Agent) copyConfigurationFile(bootstrapURL *string) error {
 	log.Println("[INFO] Starting the Copy Configuration.")
-	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated")
+	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated", bootstrapURL)
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -35,11 +35,11 @@ func (a *Agent) copyConfigurationFile() error {
 		return err
 	}
 	log.Println("[INFO] Configuration file copied successfully")
-	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete")
+	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete", bootstrapURL)
 	return nil
 }
 
-func (a *Agent) launchScriptsConfiguration(typeOf string) error {
+func (a *Agent) launchScriptsConfiguration(typeOf string, bootstrapURL *string) error {
 	var script, scriptName string
 	var reportStart, reportEnd ProgressType
 	switch typeOf {
@@ -55,7 +55,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		reportEnd = ProgressTypePreScriptComplete
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
-	_ = a.doReportProgress(reportStart, "Report starting")
+	_ = a.doReportProgress(reportStart, "Report starting", bootstrapURL)
 	// nolint:gosec
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
@@ -88,7 +88,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 		return err
 	}
 	log.Println(string(out)) // remove it
-	_ = a.doReportProgress(reportEnd, "Report end")
+	_ = a.doReportProgress(reportEnd, "Report end", bootstrapURL)
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }

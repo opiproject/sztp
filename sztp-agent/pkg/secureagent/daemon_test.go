@@ -231,10 +231,10 @@ func TestAgent_doHandleBootstrapRedirect(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Agent{
-				BootstrapURL:                tt.fields.InputBootstrapURL,
+				BootstrapURL:                []string{tt.fields.InputBootstrapURL},
 				BootstrapServerRedirectInfo: tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.doHandleBootstrapRedirect(); (err != nil) != tt.wantErr {
+			if err := a.doHandleBootstrapRedirect(&(tt.fields.InputBootstrapURL)); (err != nil) != tt.wantErr {
 				t.Errorf("doHandleBootstrapRedirect() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -315,7 +315,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 	defer svr.Close()
 
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -333,7 +333,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test OK passing all the Onboarding information",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "USER",
 				DevicePassword:           "PASS",
 				DevicePrivateKey:         "",
@@ -348,7 +348,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test OK passing all the Redirect information",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "REDIRECT",
 				DevicePassword:           "PASS",
 				DevicePrivateKey:         "",
@@ -363,7 +363,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test KO getting error with basic auth",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "KO",
 				DevicePassword:           "KO",
 				DevicePrivateKey:         "",
@@ -378,7 +378,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test KO getting error with wrong Base64 output",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "KOBASE64",
 				DevicePassword:           "KO",
 				DevicePrivateKey:         "",
@@ -393,7 +393,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		{
 			name: "Test KO pointint to wrong url",
 			fields: fields{
-				BootstrapURL:             "http://wrongURL",
+				BootstrapURL:             []string{"http://wrongURL"},
 				SerialNumber:             "KOBASE64",
 				DevicePassword:           "KO",
 				DevicePrivateKey:         "",
@@ -419,7 +419,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 			}
-			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
+			if err := a.doRequestBootstrapServerOnboardingInfo(&tt.fields.BootstrapURL[0]); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

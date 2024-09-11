@@ -43,7 +43,7 @@ func Daemon() *cobra.Command {
 				return fmt.Errorf("'--bootstrap-url' and '--dhcp-lease-file' are mutualy exclusive")
 			}
 			if bootstrapURL == "" && dhcpLeaseFile == "" {
-				return fmt.Errorf("'--bootstrap-url' or '--dhcp-lease-file' is required")
+				fmt.Println("both '--bootstrap-url' and '--dhcp-lease-file' were not provided, will discover the bootstrap URL(s) via NetworkManager")
 			}
 			if dhcpLeaseFile != "" {
 				arrayChecker = append(arrayChecker, dhcpLeaseFile)

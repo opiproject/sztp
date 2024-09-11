@@ -96,7 +96,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 	}))
 	defer svr.Close()
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -115,7 +115,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 		{
 			name: "OK",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "USER",
 				DevicePassword:           "PASS",
 				DevicePrivateKey:         "PRIVATEKEY",
@@ -131,7 +131,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 		{
 			name: "KO",
 			fields: fields{
-				BootstrapURL:             svr.URL,
+				BootstrapURL:             []string{svr.URL},
 				SerialNumber:             "USER",
 				DevicePassword:           "PASSWORDWRONG",
 				DevicePrivateKey:         "PRIVATEKEY",
@@ -159,7 +159,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
 				ProgressJSON:             tt.fields.ProgressJSON,
 			}
-			if err := a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated"); (err != nil) != tt.wantErr {
+			if err := a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated", &tt.fields.BootstrapURL[0]); (err != nil) != tt.wantErr {
 				t.Errorf("doReportProgress() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -51,31 +51,54 @@ func (a *Agent) performBootstrapSequence() error {
 	if err != nil {
 		return err
 	}
-	err = a.doRequestBootstrapServerOnboardingInfo()
-	if err != nil {
-		return err
+	var hasErrorOccurred bool
+	urls := a.GetBootstrapURL()
+	log.Println("[INFO] Performing the Bootstrap Sequence on each URL")
+	for _, url := range urls {
+		urlCopy := url
+		err = a.doRequestBootstrapServerOnboardingInfo(&urlCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			hasErrorOccurred = true
+			continue
+		}
+		err = a.doHandleBootstrapRedirect(&urlCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			hasErrorOccurred = true
+			continue
+		}
+		err = a.downloadAndValidateImage(&urlCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			hasErrorOccurred = true
+			continue
+		}
+		err = a.copyConfigurationFile(&urlCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			hasErrorOccurred = true
+			continue
+		}
+		err = a.launchScriptsConfiguration(PRE, &urlCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			hasErrorOccurred = true
+			continue
+		}
+		err = a.launchScriptsConfiguration(POST, &urlCopy)
+		if err != nil {
+			log.Println("[ERROR] ", err.Error())
+			hasErrorOccurred = true
+			continue
+		}
+		_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete", &urlCopy)
 	}
-	err = a.doHandleBootstrapRedirect()
-	if err != nil {
-		return err
+
+	if hasErrorOccurred {
+		return errors.New("error occurred during bootstrap sequence")
 	}
-	err = a.downloadAndValidateImage()
-	if err != nil {
-		return err
-	}
-	err = a.copyConfigurationFile()
-	if err != nil {
-		return err
-	}
-	err = a.launchScriptsConfiguration(PRE)
-	if err != nil {
-		return err
-	}
-	err = a.launchScriptsConfiguration(POST)
-	if err != nil {
-		return err
-	}
-	_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete")
+
 	return nil
 }
 
@@ -83,27 +106,38 @@ func (a *Agent) discoverBootstrapURLs() error {
 	log.Println("[INFO] Discovering the Bootstrap URL")
 	if a.InputBootstrapURL != "" {
 		log.Println("[INFO] User gave us the Bootstrap URL: " + a.InputBootstrapURL)
-		a.SetBootstrapURL(a.InputBootstrapURL)
-		log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+		a.SetBootstrapURL([]string{a.InputBootstrapURL})
+		log.Println("[INFO] Bootstrap URL retrieved successfully: ", a.GetBootstrapURL())
 		return nil
 	}
 	if a.DhcpLeaseFile != "" {
 		log.Println("[INFO] User gave us the DHCP Lease File: " + a.DhcpLeaseFile)
-		urls, err := dhcp.GetBootstrapURLsViaLeaseFile(a.DhcpLeaseFile, SZTP_REDIRECT_URL)
+		urls, err := dhcp.GetBootstrapURLsViaLeaseFile(a.DhcpLeaseFile, dhcp.SZTP_REDIRECT_URLs)
 		if err != nil {
 			return err
 		}
-		a.SetBootstrapURL(urls[0])
-		log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+		a.SetBootstrapURL(urls)
+		log.Println("[INFO] Bootstrap URL retrieved successfully: ", a.GetBootstrapURL())
 		return nil
 	}
 	log.Println("[INFO] User gave us nothing, discover the Bootstrap URL from Network Manager via dbus")
-	// TODO: fetch the Bootstrap URL from Network Manager via dbus in the future
-	log.Println("[INFO] Bootstrap URL retrieved successfully: " + a.GetBootstrapURL())
+	urls, err := dhcp.GetBootstrapURLsViaNetworkManager()
+	if err != nil {
+		log.Println("[ERROR] ", err.Error())
+		return err
+	}
+	// TODO: get from networkd as well
+
+	if urls == nil {
+		return errors.New("no bootstrap was URL found")
+	}
+	a.SetBootstrapURL(urls)
+	log.Println("[INFO] Bootstrap URL retrieved successfully: ")
+	log.Println(a.GetBootstrapURL())
 	return nil
 }
 
-func (a *Agent) doHandleBootstrapRedirect() error {
+func (a *Agent) doHandleBootstrapRedirect(bootstrapURL *string) error {
 	if reflect.ValueOf(a.BootstrapServerRedirectInfo).IsZero() {
 		return nil
 	}
@@ -122,26 +156,26 @@ func (a *Agent) doHandleBootstrapRedirect() error {
 		return errors.New("invalid port")
 	}
 	// Change URL to point to new redirect IP and PORT
-	u, err := url.Parse(a.GetBootstrapURL())
+	u, err := url.Parse(*bootstrapURL)
 	if err != nil {
 		return err
 	}
 	u.Host = fmt.Sprintf("%s:%d", addr, port)
-	a.SetBootstrapURL(u.String())
+	*bootstrapURL = u.String()
 
-	// Request onboard ino again (with new URL now)
-	return a.doRequestBootstrapServerOnboardingInfo()
+	// Request onboard info again (with new URL now)
+	return a.doRequestBootstrapServerOnboardingInfo(bootstrapURL)
 }
 
-func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
+func (a *Agent) doRequestBootstrapServerOnboardingInfo(bootstrapURL *string) error {
 	log.Println("[INFO] Starting the Request to get On-boarding Information.")
-	res, err := a.doTLSRequest(a.GetInputJSONContent(), a.GetBootstrapURL(), false)
+	res, err := a.doTLSRequest(a.GetInputJSONContent(), *bootstrapURL, false)
 	if err != nil {
 		log.Println("[ERROR] ", err.Error())
 		return err
 	}
 	log.Println("[INFO] Response retrieved successfully")
-	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated")
+	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated", bootstrapURL)
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {

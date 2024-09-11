@@ -7,7 +7,7 @@ import (
 // nolint:funlen
 func TestAgent_copyConfigurationFile(t *testing.T) {
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -28,7 +28,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 		{
 			name: "Error Writing file",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -83,7 +83,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 		{
 			name: "OK Case",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -152,7 +152,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.copyConfigurationFile(); (err != nil) != tt.wantErr {
+			if err := a.copyConfigurationFile(&tt.fields.BootstrapURL[0]); (err != nil) != tt.wantErr {
 				t.Errorf("copyConfigurationFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -162,7 +162,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 // nolint:funlen
 func TestAgent_launchScriptsConfiguration(t *testing.T) {
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -188,7 +188,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 			args: args{typeOf: "default or pre"},
 			name: "OK Case with PRE",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -244,7 +244,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 			args: args{typeOf: "post"},
 			name: "OK Case with POST",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -300,7 +300,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 			args: args{typeOf: "post"},
 			name: "OK Case with POST",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -369,7 +369,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.launchScriptsConfiguration(tt.args.typeOf); (err != nil) != tt.wantErr {
+			if err := a.launchScriptsConfiguration(tt.args.typeOf, &tt.fields.BootstrapURL[0]); (err != nil) != tt.wantErr {
 				t.Errorf("launchScriptsConfiguration() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

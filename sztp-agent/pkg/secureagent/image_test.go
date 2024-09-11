@@ -18,7 +18,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 	defer svr.Close()
 
 	type fields struct {
-		BootstrapURL                  string
+		BootstrapURL                  []string
 		SerialNumber                  string
 		DevicePassword                string
 		DevicePrivateKey              string
@@ -39,7 +39,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "error writing file",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -88,7 +88,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "Image wrong",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -137,7 +137,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "Image wrong",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -186,7 +186,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "OK Case but with error due to hash checksum",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -241,7 +241,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 		{
 			name: "OK Case but with error due to hash checksum",
 			fields: fields{
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "",
 				DevicePassword:           "",
 				DevicePrivateKey:         "",
@@ -310,7 +310,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
 			}
-			if err := a.downloadAndValidateImage(); (err != nil) != tt.wantErr {
+			if err := a.downloadAndValidateImage(&tt.fields.BootstrapURL[0]); (err != nil) != tt.wantErr {
 				t.Errorf("downloadAndValidateImage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
