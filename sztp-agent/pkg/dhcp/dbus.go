@@ -19,7 +19,7 @@ import (
 func GetBootstrapURLsViaNetworkManager() ([]string, error) {
 	conn, err := dbus.SystemBus()
 	if err != nil {
-		panic(fmt.Errorf("failed to connect to system bus: %v", err))
+		return nil, fmt.Errorf("failed to connect to system bus: %v", err)
 	}
 
 	// Get NetworkManager object
@@ -28,7 +28,7 @@ func GetBootstrapURLsViaNetworkManager() ([]string, error) {
 	var activeConnPaths []dbus.ObjectPath
 	err = nm.Call("org.freedesktop.DBus.Properties.Get", 0, "org.freedesktop.NetworkManager", "ActiveConnections").Store(&activeConnPaths)
 	if err != nil {
-		panic(fmt.Errorf("failed to get ActiveConnections property: %v", err))
+		return nil, fmt.Errorf("failed to get ActiveConnections property: %v", err)
 	}
 
 	log.Println("[INFO] active connection paths: ", activeConnPaths)

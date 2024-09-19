@@ -55,7 +55,7 @@ func (a *Agent) performBootstrapSequence() error {
 	urls := a.GetBootstrapURL()
 	log.Println("[INFO] Performing the Bootstrap Sequence on each URL")
 	for _, url := range urls {
-		urlCopy := url
+		urlCopy := url // found no other way to escape golangci-lint
 		err = a.doRequestBootstrapServerOnboardingInfo(&urlCopy)
 		if err != nil {
 			log.Println("[ERROR] ", err.Error())
