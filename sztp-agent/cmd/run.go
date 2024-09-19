@@ -32,13 +32,16 @@ func Run() *cobra.Command {
 		devicePrivateKey         string
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
+		statusFilePath           string
+		resultFilePath		     string
+		symLinkDir			     string
 	)
 
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Exec the run command",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			arrayChecker := []string{devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert}
+			arrayChecker := []string{devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath}
 			if bootstrapURL != "" && dhcpLeaseFile != "" {
 				return fmt.Errorf("'--bootstrap-url' and '--dhcp-lease-file' are mutualy exclusive")
 			}
@@ -52,6 +55,15 @@ func Run() *cobra.Command {
 				_, err := url.ParseRequestURI(bootstrapURL)
 				cobra.CheckErr(err)
 			}
+			if statusFilePath == "" {
+				return fmt.Errorf("'--status-file-path' is required")
+			}
+			if resultFilePath == "" {
+				return fmt.Errorf("'--result-file-path' is required")
+			}
+			if symLinkDir == "" {
+				return fmt.Errorf("'--symlink-dir' is required")
+			}
 			for _, filePath := range arrayChecker {
 				info, err := os.Stat(filePath)
 				cobra.CheckErr(err)
@@ -60,7 +72,7 @@ func Run() *cobra.Command {
 				}
 			}
 			client := secureagent.NewHTTPClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, &client)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath, symLinkDir, &client)
 			return a.RunCommand()
 		},
 	}
@@ -75,6 +87,9 @@ func Run() *cobra.Command {
 	flags.StringVar(&devicePrivateKey, "device-private-key", "/certs/private_key.pem", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/certs/my_cert.pem", "Device's End Entity cert")
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/certs/opi.pem", "Bootstrap server trust anchor Cert")
+	flags.StringVar(&statusFilePath, "status-file-path", "/var/lib/sztp/status.json", "Status file path")
+	flags.StringVar(&resultFilePath, "result-file-path", "/var/lib/sztp/result.json", "Result file path")
+	flags.StringVar(&symLinkDir, "sym-link-dir", "", "Sym Link Directory")
 
 	return cmd
 }

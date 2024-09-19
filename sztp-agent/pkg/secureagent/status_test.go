@@ -20,6 +20,9 @@ func TestAgent_RunCommandStatus(t *testing.T) {
 		ProgressJSON                  ProgressJSON
 		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
 		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
+		StatusFilePath				  string
+		ResultFilePath				  string
+		SymLinkDir					  string
 	}
 	tests := []struct {
 		name    string
@@ -41,6 +44,9 @@ func TestAgent_RunCommandStatus(t *testing.T) {
 				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				StatusFilePath:				   "/var/lib/sztp/status.json",
+				ResultFilePath:				   "/var/lib/sztp/result.json",
+				SymLinkDir:					   "/run/sztp",
 			},
 		},
 	}
@@ -59,7 +65,11 @@ func TestAgent_RunCommandStatus(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				StatusFilePath:				   tt.fields.StatusFilePath,
+				ResultFilePath:				   tt.fields.ResultFilePath,
+				SymLinkDir:					   tt.fields.SymLinkDir,
 			}
+			a.PrepareStatus()
 			if err := a.RunCommandStatus(); (err != nil) != tt.wantErr {
 				t.Errorf("RunCommandStatus() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -33,6 +33,10 @@ const (
 
 // RunCommandDaemon runs the command in the background
 func (a *Agent) RunCommandDaemon() error {
+	if err := a.PrepareStatus(); err != nil {
+		log.Println("failed to prepare status: ", err)
+		return err
+	}
 	for {
 		err := a.performBootstrapSequence()
 		if err != nil {
@@ -46,6 +50,7 @@ func (a *Agent) RunCommandDaemon() error {
 }
 
 func (a *Agent) performBootstrapSequence() error {
+	_ = a.UpdateAndSaveStatus("bootstrap", true, "")
 	var err error
 	err = a.discoverBootstrapURLs()
 	if err != nil {
@@ -76,6 +81,7 @@ func (a *Agent) performBootstrapSequence() error {
 		return err
 	}
 	_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete")
+	_ = a.UpdateAndSaveStatus("bootstrap", false, "")
 	return nil
 }
 
@@ -142,6 +148,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	}
 	log.Println("[INFO] Response retrieved successfully")
 	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated")
+	_ = a.UpdateAndSaveStatus("bootstrap", true, "")
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {

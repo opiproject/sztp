@@ -28,6 +28,9 @@ func Status() *cobra.Command {
 		devicePrivateKey         string
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
+		statusFilePath           string
+		resultFilePath		     string
+		symLinkDir			     string
 	)
 
 	cmd := &cobra.Command{
@@ -35,7 +38,7 @@ func Status() *cobra.Command {
 		Short: "Run the status command",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			client := secureagent.NewHTTPClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, &client)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath, symLinkDir, &client)
 			return a.RunCommandStatus()
 		},
 	}
@@ -46,10 +49,13 @@ func Status() *cobra.Command {
 	flags.StringVar(&bootstrapURL, "bootstrap-url", "", "Bootstrap server URL")
 	flags.StringVar(&serialNumber, "serial-number", "", "Device's serial number")
 	flags.StringVar(&dhcpLeaseFile, "dhcp-lease-file", "/var/lib/dhclient/dhclient.leases", "Device's dhclient leases file")
-	flags.StringVar(&devicePassword, "device-password", "", "Device's password")
+	flags.StringVar(&devicePassword, "device-password", "", "Dehomevice's password")
 	flags.StringVar(&devicePrivateKey, "device-private-key", "", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "", "Device's End Entity cert")
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "", "Bootstrap server trust anchor Cert")
+	flags.StringVar(&statusFilePath, "status-file-path", "", "Status file path")
+	flags.StringVar(&resultFilePath, "result-file-path", "", "Result file path")
+	flags.StringVar(&symLinkDir, "sym-link-dir", "", "Sym Link Directory")
 
 	return cmd
 }

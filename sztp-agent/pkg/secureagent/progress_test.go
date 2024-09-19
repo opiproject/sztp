@@ -142,7 +142,7 @@ func TestAgent_doReportProgress(t *testing.T) {
 				DhcpLeaseFile:            "DHCPLEASEFILE",
 				ProgressJSON:             ProgressJSON{},
 			},
-			wantErr: true,
+			wantErr: true,	
 		},
 	}
 	for _, tt := range tests {

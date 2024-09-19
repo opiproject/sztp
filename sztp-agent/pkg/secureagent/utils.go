@@ -88,3 +88,21 @@ func calculateSHA256File(filePath string) (string, error) {
 	checkSum := fmt.Sprintf("%x", h.Sum(nil))
 	return checkSum, nil
 }
+
+// saveToFile writes the given data to a specified file path.
+func saveToFile(data interface{}, filePath string) error {
+	tempPath := filePath + ".tmp"
+	file, err := os.Create(tempPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(data); err != nil {
+		return err
+	}
+
+	// Atomic move of temp file to replace the original.
+	return os.Rename(tempPath, filePath)
+}

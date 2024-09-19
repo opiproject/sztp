@@ -829,6 +829,9 @@ func TestNewAgent(t *testing.T) {
 		devicePrivateKey         string
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
+		statusFilePath		   	 string
+		resultFilePath		   	 string
+		symLinkDir		   		 string
 	}
 	client := http.Client{}
 	tests := []struct {
@@ -846,6 +849,9 @@ func TestNewAgent(t *testing.T) {
 				devicePrivateKey:         "TestDevicePrivateKey",
 				deviceEndEntityCert:      "TestDeviceEndEntityCert",
 				bootstrapTrustAnchorCert: "TestBootstrapTrustCert",
+				statusFilePath:           "TestStatusFilePath",
+				resultFilePath:           "TestResultFilePath",
+				symLinkDir: 		 	  "TestSymLinkDir",
 			},
 			want: &Agent{
 				InputBootstrapURL:        "TestBootstrap",
@@ -858,13 +864,16 @@ func TestNewAgent(t *testing.T) {
 				ContentTypeReq:           "application/yang-data+json",
 				InputJSONContent:         generateInputJSONContent(),
 				DhcpLeaseFile:            "TestDhcpLeaseFile",
+				StatusFilePath:           "TestStatusFilePath",
+				ResultFilePath:           "TestResultFilePath",
+				SymLinkDir: 			  "TestSymLinkDir",
 				HttpClient:               &client,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewAgent(tt.args.bootstrapURL, tt.args.serialNumber, tt.args.dhcpLeaseFile, tt.args.devicePassword, tt.args.devicePrivateKey, tt.args.deviceEndEntityCert, tt.args.bootstrapTrustAnchorCert, &client); !reflect.DeepEqual(got, tt.want) {
+			if got := NewAgent(tt.args.bootstrapURL, tt.args.serialNumber, tt.args.dhcpLeaseFile, tt.args.devicePassword, tt.args.devicePrivateKey, tt.args.deviceEndEntityCert, tt.args.bootstrapTrustAnchorCert, tt.args.statusFilePath, tt.args.resultFilePath, tt.args.symLinkDir, &client); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewAgent() = %v, want %v", got, tt.want)
 			}
 		})
