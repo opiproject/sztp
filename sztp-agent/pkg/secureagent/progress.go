@@ -109,9 +109,9 @@ func (s ProgressType) String() string {
 	return "unknown"
 }
 
-func (a *Agent) doReportProgress(s ProgressType, message string) error {
+func (a *Agent) doReportProgress(s ProgressType, message string, bootstrapURL *string) error {
 	log.Println("[INFO] Starting the Report Progress request.")
-	url := strings.ReplaceAll(a.GetBootstrapURL(), "get-bootstrapping-data", "report-progress")
+	url := strings.ReplaceAll(*bootstrapURL, "get-bootstrapping-data", "report-progress")
 	var p ProgressJSON
 	p.IetfSztpBootstrapServerInput.ProgressType = s.String()
 	p.IetfSztpBootstrapServerInput.Message = message

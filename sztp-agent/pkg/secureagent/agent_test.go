@@ -15,7 +15,7 @@ import (
 
 func TestAgent_GetBootstrapTrustAnchorCert(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -32,7 +32,7 @@ func TestAgent_GetBootstrapTrustAnchorCert(t *testing.T) {
 		{
 			name: "Test get case BootstrapTrustAnchorCert",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -65,7 +65,7 @@ func TestAgent_GetBootstrapTrustAnchorCert(t *testing.T) {
 
 func TestAgent_GetBootstrapURL(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -77,12 +77,12 @@ func TestAgent_GetBootstrapURL(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   string
+		want   []string
 	}{
 		{
 			name: "Test get case BootstrapURL",
 			fields: fields{
-				BootstrapURL:             "testBootstrapURL",
+				BootstrapURL:             []string{"testBootstrapURL"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -91,7 +91,7 @@ func TestAgent_GetBootstrapURL(t *testing.T) {
 				ContentTypeReq:           "test",
 				InputJSONContent:         "test",
 			},
-			want: "testBootstrapURL",
+			want: []string{"testBootstrapURL"},
 		},
 	}
 	for _, tt := range tests {
@@ -106,8 +106,8 @@ func TestAgent_GetBootstrapURL(t *testing.T) {
 				ContentTypeReq:           tt.fields.ContentTypeReq,
 				InputJSONContent:         tt.fields.InputJSONContent,
 			}
-			if got := a.GetBootstrapURL(); got != tt.want {
-				t.Errorf("GetBootstrapURL() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(a.GetBootstrapURL(), tt.want) {
+				t.Errorf("GetBootstrapURL() = %v, want %v", a.GetBootstrapURL(), tt.want)
 			}
 		})
 	}
@@ -115,7 +115,7 @@ func TestAgent_GetBootstrapURL(t *testing.T) {
 
 func TestAgent_GetContentTypeReq(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -132,7 +132,7 @@ func TestAgent_GetContentTypeReq(t *testing.T) {
 		{
 			name: "Test get ContentTypeReq ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -165,7 +165,7 @@ func TestAgent_GetContentTypeReq(t *testing.T) {
 
 func TestAgent_GetDeviceEndEntityCert(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -182,7 +182,7 @@ func TestAgent_GetDeviceEndEntityCert(t *testing.T) {
 		{
 			name: "Test get GetDeviceEndEntityCert ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -215,7 +215,7 @@ func TestAgent_GetDeviceEndEntityCert(t *testing.T) {
 
 func TestAgent_GetDevicePassword(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -232,7 +232,7 @@ func TestAgent_GetDevicePassword(t *testing.T) {
 		{
 			name: "Test get GetDevicePassword ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "testDevicePassword",
 				DevicePrivateKey:         "test",
@@ -265,7 +265,7 @@ func TestAgent_GetDevicePassword(t *testing.T) {
 
 func TestAgent_GetDevicePrivateKey(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -282,7 +282,7 @@ func TestAgent_GetDevicePrivateKey(t *testing.T) {
 		{
 			name: "Test get GetDevicePrivateKey ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "testDevicePrivateKey",
@@ -315,7 +315,7 @@ func TestAgent_GetDevicePrivateKey(t *testing.T) {
 
 func TestAgent_GetInputJSONContent(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -332,7 +332,7 @@ func TestAgent_GetInputJSONContent(t *testing.T) {
 		{
 			name: "Test get GetInputJsonContent ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -365,7 +365,7 @@ func TestAgent_GetInputJSONContent(t *testing.T) {
 
 func TestAgent_GetSerialNumber(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -382,7 +382,7 @@ func TestAgent_GetSerialNumber(t *testing.T) {
 		{
 			name: "Test get GetSerialNumber ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "testSerialNumber",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -396,7 +396,7 @@ func TestAgent_GetSerialNumber(t *testing.T) {
 		{
 			name: "Test SMBIOS GetSerialNumber ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -429,7 +429,7 @@ func TestAgent_GetSerialNumber(t *testing.T) {
 
 func TestAgent_SetBootstrapTrustAnchorCert(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -449,7 +449,7 @@ func TestAgent_SetBootstrapTrustAnchorCert(t *testing.T) {
 		{
 			name: "Test set SetDeviceEndEntityCert ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -485,7 +485,7 @@ func TestAgent_SetBootstrapTrustAnchorCert(t *testing.T) {
 
 func TestAgent_SetBootstrapURL(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -495,7 +495,7 @@ func TestAgent_SetBootstrapURL(t *testing.T) {
 		InputJSONContent         string
 	}
 	type args struct {
-		bootstrapURL string
+		bootstrapURL []string
 	}
 	tests := []struct {
 		name   string
@@ -505,7 +505,7 @@ func TestAgent_SetBootstrapURL(t *testing.T) {
 		{
 			name: "Test set SetBootstrapURL ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -515,7 +515,7 @@ func TestAgent_SetBootstrapURL(t *testing.T) {
 				InputJSONContent:         "test",
 			},
 			args: args{
-				bootstrapURL: "bootstrapURL",
+				bootstrapURL: []string{"bootstrapURL"},
 			},
 		},
 	}
@@ -532,7 +532,7 @@ func TestAgent_SetBootstrapURL(t *testing.T) {
 				InputJSONContent:         tt.fields.InputJSONContent,
 			}
 			a.SetBootstrapURL(tt.args.bootstrapURL)
-			if a.GetBootstrapURL() != tt.args.bootstrapURL {
+			if !reflect.DeepEqual(a.GetBootstrapURL(), tt.args.bootstrapURL) {
 				t.Errorf("SetBootstrapURL = %v, want %v", a.GetBootstrapURL(), tt.args.bootstrapURL)
 			}
 		})
@@ -541,7 +541,7 @@ func TestAgent_SetBootstrapURL(t *testing.T) {
 
 func TestAgent_SetContentTypeReq(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -561,7 +561,7 @@ func TestAgent_SetContentTypeReq(t *testing.T) {
 		{
 			name: "Test set setContentType ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -597,7 +597,7 @@ func TestAgent_SetContentTypeReq(t *testing.T) {
 
 func TestAgent_SetDeviceEndEntityCert(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -617,7 +617,7 @@ func TestAgent_SetDeviceEndEntityCert(t *testing.T) {
 		{
 			name: "Test set SetDeviceEndEntityCert ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -653,7 +653,7 @@ func TestAgent_SetDeviceEndEntityCert(t *testing.T) {
 
 func TestAgent_SetDevicePassword(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -673,7 +673,7 @@ func TestAgent_SetDevicePassword(t *testing.T) {
 		{
 			name: "Test set SetDevicePassword ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -709,7 +709,7 @@ func TestAgent_SetDevicePassword(t *testing.T) {
 
 func TestAgent_SetDevicePrivateKey(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -729,7 +729,7 @@ func TestAgent_SetDevicePrivateKey(t *testing.T) {
 		{
 			name: "Test set GetBootstrapURL ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -765,7 +765,7 @@ func TestAgent_SetDevicePrivateKey(t *testing.T) {
 
 func TestAgent_SetSerialNumber(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -785,7 +785,7 @@ func TestAgent_SetSerialNumber(t *testing.T) {
 		{
 			name: "Test set setSerialnumber ",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -847,7 +847,7 @@ func TestNewAgent(t *testing.T) {
 			},
 			want: &Agent{
 				InputBootstrapURL:        "TestBootstrap",
-				BootstrapURL:             "",
+				BootstrapURL:             []string{""},
 				SerialNumber:             "TestSerialNumber",
 				DevicePassword:           "TestDevicePassword",
 				DevicePrivateKey:         "TestDevicePrivateKey",
@@ -870,7 +870,7 @@ func TestNewAgent(t *testing.T) {
 
 func TestAgent_GetProgressJson(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -889,7 +889,7 @@ func TestAgent_GetProgressJson(t *testing.T) {
 		{
 			name: "Test GetProgressJson",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
@@ -961,7 +961,7 @@ func TestAgent_GetProgressJson(t *testing.T) {
 // nolint:funlen
 func TestAgent_SetProgressJson(t *testing.T) {
 	type fields struct {
-		BootstrapURL             string
+		BootstrapURL             []string
 		SerialNumber             string
 		DevicePassword           string
 		DevicePrivateKey         string
@@ -983,7 +983,7 @@ func TestAgent_SetProgressJson(t *testing.T) {
 		{
 			name: "Test SetProgressJson",
 			fields: fields{
-				BootstrapURL:             "test",
+				BootstrapURL:             []string{"test"},
 				SerialNumber:             "test",
 				DevicePassword:           "test",
 				DevicePrivateKey:         "test",
