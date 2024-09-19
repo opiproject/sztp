@@ -43,6 +43,9 @@ services:
       - dhcp-leases-folder:/var/lib/dhclient/
       - /etc/os-release:/etc/os-release
       - /etc/ssh:/etc/ssh
+      - /var/lib/sztp:/var/lib/sztp
+      - /run/sztp:/run/sztp
+    privileged: true
     networks:
       - opi
     command: ['/opi-sztp-agent', 'daemon',
@@ -50,7 +53,10 @@ services:
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/third_my_cert.pem',
               '--device-private-key', '/certs/third_private_key.pem',
-              '--serial-number', 'third-serial-number']
+              '--serial-number', 'third-serial-number',
+              '--status-file-path', '/var/lib/sztp/status.json',
+              '--result-file-path', '/var/lib/sztp/result.json',
+              '--sym-link-dir', '/run/sztp']
 
   agent2:
     <<: *agent
@@ -59,7 +65,10 @@ services:
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/second_my_cert.pem',
               '--device-private-key', '/certs/second_private_key.pem',
-              '--serial-number', 'second-serial-number']
+              '--serial-number', 'second-serial-number',
+              '--status-file-path', '/var/lib/sztp/status.json',
+              '--result-file-path', '/var/lib/sztp/result.json',
+              '--sym-link-dir', '/run/sztp']
 
   agent1:
     <<: *agent
@@ -68,7 +77,10 @@ services:
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/first_my_cert.pem',
               '--device-private-key', '/certs/first_private_key.pem',
-              '--serial-number', 'first-serial-number']
+              '--serial-number', 'first-serial-number',
+              '--status-file-path', '/var/lib/sztp/status.json',
+              '--result-file-path', '/var/lib/sztp/result.json',
+              '--sym-link-dir', '/run/sztp']
 
   agent4:
     <<: *agent
@@ -77,7 +89,10 @@ services:
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/first_my_cert.pem',
               '--device-private-key', '/certs/first_private_key.pem',
-              '--serial-number', 'first-serial-number']
+              '--serial-number', 'first-serial-number',
+              '--status-file-path', '/var/lib/sztp/status.json',
+              '--result-file-path', '/var/lib/sztp/result.json',
+              '--sym-link-dir', '/run/sztp']
 
   agent5:
     <<: *agent
@@ -86,7 +101,10 @@ services:
               '--bootstrap-trust-anchor-cert', '/certs/opi.pem',
               '--device-end-entity-cert', '/certs/first_my_cert.pem',
               '--device-private-key', '/certs/first_private_key.pem',
-              '--serial-number', 'first-serial-number']
+              '--serial-number', 'first-serial-number',
+              '--status-file-path', '/var/lib/sztp/status.json',
+              '--result-file-path', '/var/lib/sztp/result.json',
+              '--sym-link-dir', '/run/sztp']
 
 volumes:
   client-certs:

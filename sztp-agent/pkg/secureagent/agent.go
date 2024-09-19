@@ -93,9 +93,12 @@ type Agent struct {
 	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo // BootstrapServerOnboardingInfo structure
 	BootstrapServerRedirectInfo   BootstrapServerRedirectInfo   // BootstrapServerRedirectInfo structure
 	HttpClient                    HttpClient
+	StatusFilePath                string                        // Path to the status file
+	ResultFilePath                string                        // Path to the result file
+	SymLinkDir					  string                        // Path to the symlink directory for the status file
 }
 
-func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string, httpClient HttpClient) *Agent {
+func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath, symLinkDir string, httpClient HttpClient) *Agent {
 	return &Agent{
 		InputBootstrapURL:             bootstrapURL,
 		BootstrapURL:                  "",
@@ -111,6 +114,9 @@ func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, deviceP
 		BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 		HttpClient:                    httpClient,
+		StatusFilePath:                statusFilePath,
+		ResultFilePath:                resultFilePath,
+		SymLinkDir:					   symLinkDir,
 	}
 }
 
@@ -150,6 +156,18 @@ func (a *Agent) GetProgressJSON() ProgressJSON {
 	return a.ProgressJSON
 }
 
+func (a *Agent) GetStatusFilePath() string {
+	return a.StatusFilePath
+}
+
+func (a *Agent) GetResultFilePath() string {
+	return a.ResultFilePath
+}
+
+func (a *Agent) GetSymLinkDir() string {
+	return a.SymLinkDir
+}
+
 func (a *Agent) SetBootstrapURL(url string) {
 	a.BootstrapURL = url
 }
@@ -180,4 +198,16 @@ func (a *Agent) SetContentTypeReq(ct string) {
 
 func (a *Agent) SetProgressJSON(p ProgressJSON) {
 	a.ProgressJSON = p
+}
+
+func (a *Agent) SetStatusFilePath(path string) {
+	a.StatusFilePath = path
+}
+
+func (a *Agent) SetResultFilePath(path string) {
+	a.ResultFilePath = path
+}
+
+func (a *Agent) SetSymLinkDir(path string) {
+	a.SymLinkDir = path
 }

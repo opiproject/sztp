@@ -13,6 +13,10 @@ import "log"
 // RunCommand runs the command in the background
 func (a *Agent) RunCommand() error {
 	log.Println("runCommand started")
+	if err := a.PrepareStatus(); err != nil {
+		log.Println("failed to prepare status: ", err)
+		return err
+	}
 	err := a.performBootstrapSequence()
 	if err != nil {
 		log.Println("Error in performBootstrapSequence inside runCommand: ", err)

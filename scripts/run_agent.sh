@@ -21,6 +21,9 @@ docker run --rm -it --network=host \
     --mount type=bind,source=/etc/ssh,target=/etc/ssh,readonly \
     --mount type=bind,source=/etc/os-release,target=/etc/os-release,readonly \
     --mount type=bind,source=/var/lib/NetworkManager,target=/var/lib/NetworkManager,readonly \
+    --mount type=bind,source=/var/lib/sztp,target=/var/lib/sztp \
+    --mount type=bind,source=/run/sztp,target=/run/sztp \
+    --privileged \
     ${DOCKER_SZTP_IMAGE} \
     /opi-sztp-agent daemon \
     --dhcp-lease-file /var/lib/NetworkManager/dhclient-eth0.lease \

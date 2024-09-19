@@ -28,6 +28,9 @@ func Enable() *cobra.Command {
 		devicePrivateKey         string
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
+		statusFilePath           string
+		resultFilePath		     string
+		symLinkDir			     string
 	)
 
 	cmd := &cobra.Command{
@@ -35,7 +38,7 @@ func Enable() *cobra.Command {
 		Short: "Run the enable command",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			client := secureagent.NewHTTPClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, &client)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath, symLinkDir, &client)
 			return a.RunCommandEnable()
 		},
 	}
@@ -50,6 +53,9 @@ func Enable() *cobra.Command {
 	flags.StringVar(&devicePrivateKey, "device-private-key", "", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "", "Device's End Entity cert")
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "", "Bootstrap server trust anchor Cert")
+	flags.StringVar(&statusFilePath, "status-file-path", "", "Status file path")
+	flags.StringVar(&resultFilePath, "result-file-path", "", "Result file path")
+	flags.StringVar(&symLinkDir, "sym-link-dir", "", "Sym Link Directory")
 
 	return cmd
 }
