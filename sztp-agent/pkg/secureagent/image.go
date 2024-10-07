@@ -8,13 +8,10 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -37,27 +34,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			return err
 		}
 
-		caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
-		cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
-
-		check := http.Client{
-			CheckRedirect: func(r *http.Request, _ []*http.Request) error {
-				r.URL.Opaque = r.URL.Path
-				return nil
-			},
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					//nolint:gosec
-					InsecureSkipVerify: true, // TODO: remove skip verify
-					RootCAs:            caCertPool,
-					Certificates:       []tls.Certificate{cert},
-				},
-			},
-		}
-
-		response, err := check.Get(item)
+		response, err := a.HttpClient.Get(item)
 		if err != nil {
 			return err
 		}

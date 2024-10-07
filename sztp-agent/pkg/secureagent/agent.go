@@ -9,6 +9,10 @@ Copyright (C) 2022 Red Hat.
 // Package secureagent implements the secure agent
 package secureagent
 
+import (
+	"net/http"
+)
+
 const (
 	CONTENT_TYPE_YANG = "application/yang-data+json"
 	OS_RELEASE_FILE   = "/etc/os-release"
@@ -68,6 +72,11 @@ type BootstrapServerErrorOutput struct {
 	} `json:"ietf-restconf:errors"`
 }
 
+type HttpClient interface {
+	Get(uri string) (*http.Response, error)
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // Agent is the basic structure to define an agent instance
 type Agent struct {
 	InputBootstrapURL             string                        // Bootstrap complete URL given by USER
@@ -83,10 +92,10 @@ type Agent struct {
 	ProgressJSON                  ProgressJSON                  // ProgressJson structure
 	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo // BootstrapServerOnboardingInfo structure
 	BootstrapServerRedirectInfo   BootstrapServerRedirectInfo   // BootstrapServerRedirectInfo structure
-
+	HttpClient                    HttpClient
 }
 
-func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string) *Agent {
+func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string, httpClient HttpClient) *Agent {
 	return &Agent{
 		InputBootstrapURL:             bootstrapURL,
 		BootstrapURL:                  "",
@@ -101,6 +110,7 @@ func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, deviceP
 		ProgressJSON:                  ProgressJSON{},
 		BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 		BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+		HttpClient:                    httpClient,
 	}
 }
 

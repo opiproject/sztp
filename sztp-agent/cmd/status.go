@@ -34,7 +34,8 @@ func Status() *cobra.Command {
 		Use:   "status",
 		Short: "Run the status command",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert)
+			client := secureagent.NewHTTPClient(bootstrapTrustAnchorCert, deviceEndEntityCert, devicePrivateKey)
+			a := secureagent.NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, &client)
 			return a.RunCommandStatus()
 		},
 	}

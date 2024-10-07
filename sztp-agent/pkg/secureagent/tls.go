@@ -18,9 +18,34 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
+
+// NewHTTPClient instantiate a new HTTP Client
+func NewHTTPClient(bootstrapTrustAnchorCert string, deviceEndEntityCert string, devicePrivateKey string) http.Client {
+	certPath := filepath.Clean(bootstrapTrustAnchorCert)
+	caCert, _ := os.ReadFile(certPath)
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	cert, _ := tls.LoadX509KeyPair(deviceEndEntityCert, devicePrivateKey)
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, _ []*http.Request) error {
+			r.URL.Opaque = r.URL.Path
+			return nil
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				//nolint:gosec
+				InsecureSkipVerify: true, // TODO: remove skip verify
+				RootCAs:            caCertPool,
+				Certificates:       []tls.Certificate{cert},
+			},
+		},
+	}
+	return client
+}
 
 func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapServerPostOutput, error) {
 	var postResponse BootstrapServerPostOutput
@@ -38,20 +63,7 @@ func (a *Agent) doTLSRequest(input string, url string, empty bool) (*BootstrapSe
 	r.SetBasicAuth(a.GetSerialNumber(), a.GetDevicePassword())
 	r.Header.Add("Content-Type", a.GetContentTypeReq())
 
-	caCert, _ := os.ReadFile(a.GetBootstrapTrustAnchorCert())
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-	cert, _ := tls.LoadX509KeyPair(a.GetDeviceEndEntityCert(), a.GetDevicePrivateKey())
-
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{ //nolint:gosec
-				RootCAs:      caCertPool,
-				Certificates: []tls.Certificate{cert},
-			},
-		},
-	}
-	res, err := client.Do(r)
+	res, err := a.HttpClient.Do(r)
 	if err != nil {
 		log.Println("Error doing the request", err.Error())
 		return nil, err

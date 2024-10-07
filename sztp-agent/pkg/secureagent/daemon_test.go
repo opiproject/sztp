@@ -418,6 +418,7 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 				ContentTypeReq:           tt.fields.ContentTypeReq,
 				InputJSONContent:         tt.fields.InputJSONContent,
 				DhcpLeaseFile:            tt.fields.DhcpLeaseFile,
+				HttpClient:               &http.Client{},
 			}
 			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)

@@ -1,6 +1,7 @@
 package secureagent
 
 import (
+	"net/http"
 	"testing"
 )
 
@@ -151,6 +152,7 @@ func TestAgent_copyConfigurationFile(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.copyConfigurationFile(); (err != nil) != tt.wantErr {
 				t.Errorf("copyConfigurationFile() error = %v, wantErr %v", err, tt.wantErr)
@@ -368,6 +370,7 @@ func TestAgent_launchScriptsConfiguration(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.launchScriptsConfiguration(tt.args.typeOf); (err != nil) != tt.wantErr {
 				t.Errorf("launchScriptsConfiguration() error = %v, wantErr %v", err, tt.wantErr)

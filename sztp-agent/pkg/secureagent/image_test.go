@@ -9,7 +9,7 @@ import (
 //nolint:funlen
 func TestAgent_downloadAndValidateImage(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/imageOK" {
+		if r.URL.Path == "/imageOK" || r.URL.Path == "/report-progress" {
 			w.WriteHeader(200)
 		} else {
 			w.WriteHeader(400)
@@ -309,6 +309,7 @@ func TestAgent_downloadAndValidateImage(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.downloadAndValidateImage(); (err != nil) != tt.wantErr {
 				t.Errorf("downloadAndValidateImage() error = %v, wantErr %v", err, tt.wantErr)
