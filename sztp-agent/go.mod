@@ -16,6 +16,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jarcoal/httpmock v1.3.1
 	github.com/jaypipes/pcidb v1.0.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect

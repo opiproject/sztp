@@ -12,6 +12,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
 )
 
 const DHCPTestContent = `lease {
@@ -422,6 +424,392 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 			}
 			if err := a.doRequestBootstrapServerOnboardingInfo(); (err != nil) != tt.wantErr {
 				t.Errorf("doRequestBootstrapServer() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestAgent_performBootstrapSequence(t *testing.T) {
+	type fields struct {
+		InputBootstrapURL             string
+		SerialNumber                  string
+		DevicePassword                string
+		DevicePrivateKey              string
+		DeviceEndEntityCert           string
+		BootstrapTrustAnchorCert      string
+		ContentTypeReq                string
+		InputJSONContent              string
+		DhcpLeaseFile                 string
+		ProgressJSON                  ProgressJSON
+		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
+		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
+	}
+
+	expectedOnboarding := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIDYwYLKoZIhvcNAQkQASugggNSBIIDTnsKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwczovL3dlYjo0NDMvdGVzdC5pbWciLAogICAgICAgICJmdHBzOi8vd2ViOjk5MC90ZXN0LmltZyIKICAgICAgXSwKICAgICAgImltYWdlLXZlcmlmaWNhdGlvbiI6IFsKICAgICAgICB7CiAgICAgICAgICAiaGFzaC1hbGdvcml0aG0iOiAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86c2hhLTI1NiIsCiAgICAgICAgICAiaGFzaC12YWx1ZSI6ICJlMzpiMDpjNDo0Mjo5ODpmYzoxYzoxNDo5YTpmYjpmNDpjODo5OTo2ZjpiOToyNDoyNzphZTo0MTplNDo2NDo5Yjo5Mzo0YzphNDo5NTo5OToxYjo3ODo1MjpiODo1NSIKICAgICAgICB9CiAgICAgIF0KICAgIH0sCiAgICAicHJlLWNvbmZpZ3VyYXRpb24tc2NyaXB0IjogIkl5RXZZbWx1TDJKaGMyZ0taV05vYnlBaWFXNXphV1JsSUhSb1pTQjBhR2x5WkMxd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0IwYUdseVpDMXdiM04wTFdOdmJtWnBaM1Z5WVhScGIyNHRjMk55YVhCMExpNHVJZ289IgogIH0KfQ==",
+		},
+	}
+	expectedRedirect := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIDfQYLKoZIhvcNAQkQASugggNsBIIDaHsKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwczovL3dlYjo0NDMvc2Vjb25kLWJvb3QtaW1hZ2UuaW1nIiwKICAgICAgICAiZnRwczovL3dlYjo5OTAvc2Vjb25kLWJvb3QtaW1hZ2UuaW1nIgogICAgICBdLAogICAgICAiaW1hZ2UtdmVyaWZpY2F0aW9uIjogWwogICAgICAgIHsKICAgICAgICAgICJoYXNoLWFsZ29yaXRobSI6ICJpZXRmLXN6dHAtY29udmV5ZWQtaW5mbzpzaGEtMjU2IiwKICAgICAgICAgICJoYXNoLXZhbHVlIjogIjdiOmNhOmU2OmFjOjIzOjA2OmQ4Ojc5OjA2OjhjOmFjOjAzOjgwOmUyOjE2OjQ0OjdlOjQwOjZhOjY1OmZhOmQ0OjY5OjYxOjZlOjA1OmNlOmY1Ojg3OmRjOjJiOjk3IgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgICJwcmUtY29uZmlndXJhdGlvbi1zY3JpcHQiOiAiSXlFdlltbHVMMkpoYzJnS1pXTm9ieUFpYVc1emFXUmxJSFJvWlNCelpXTnZibVF0Y0hKbExXTnZibVpwWjNWeVlYUnBiMjR0YzJOeWFYQjBMaTR1SWdvPSIsCiAgICAiY29uZmlndXJhdGlvbi1oYW5kbGluZyI6ICJtZXJnZSIsCiAgICAiY29uZmlndXJhdGlvbiI6ICJQSFJ2Y0NCNGJXeHVjejBpYUhSMGNITTZMMlY0WVcxd2JHVXVZMjl0TDJOdmJtWnBaeUkrQ2lBZ1BHRnVlUzE0Yld3dFkyOXVkR1Z1ZEMxdmEyRjVMejRLUEM5MGIzQStDZz09IiwKICAgICJwb3N0LWNvbmZpZ3VyYXRpb24tc2NyaXB0IjogIkl5RXZZbWx1TDJKaGMyZ0taV05vYnlBaWFXNXphV1JsSUhSb1pTQnpaV052Ym1RdGNHOXpkQzFqYjI1bWFXZDFjbUYwYVc5dUxYTmpjbWx3ZEM0dUxpSUsiCiAgfQp9",
+		},
+	}
+	expectedFailedBase64 := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "{wrongBASE64}",
+		},
+	}
+	expectedFailedImage := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIDfwYLKoZIhvcNAQkQASugggNuBIIDansKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwOi8vd2ViOjgwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIiwKICAgICAgICAiZnRwOi8vd2ViOjMwODIvdmFyL2xpYi9taXNjL215LWJvb3QtaW1hZ2UuaW1nIgogICAgICBdLAogICAgICAiaW1hZ2UtdmVyaWZpY2F0aW9uIjogWwogICAgICAgIHsKICAgICAgICAgICJoYXNoLWFsZ29yaXRobSI6ICJpZXRmLXN6dHAtY29udmV5ZWQtaW5mbzpzaGEtMjU2IiwKICAgICAgICAgICJoYXNoLXZhbHVlIjogIjdiOmNhOmU2OmFjOjIzOjA2OmQ4Ojc5OjA2OjhjOmFjOjAzOjgwOmUyOjE2OjQ0OjdlOjQwOjZhOjY1OmZhOmQ0OjY5OjYxOjZlOjA1OmNlOmY1Ojg3OmRjOjJiOjk3IgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgICJwcmUtY29uZmlndXJhdGlvbi1zY3JpcHQiOiAiSXlFdlltbHVMMkpoYzJnS1pXTm9ieUFpYVc1emFXUmxJSFJvWlNCd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0J3YjNOMExXTnZibVpwWjNWeVlYUnBiMjR0YzJOeWFYQjBMaTR1SWdvPSIKICB9Cn0=",
+		},
+	}
+	expectedFailedPreScript := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIDbwYLKoZIhvcNAQkQASugggNeBIIDWnsKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwczovL3dlYjo0NDMvdGVzdC5pbWciLAogICAgICAgICJmdHBzOi8vd2ViOjk5MC90ZXN0LmltZyIKICAgICAgXSwKICAgICAgImltYWdlLXZlcmlmaWNhdGlvbiI6IFsKICAgICAgICB7CiAgICAgICAgICAiaGFzaC1hbGdvcml0aG0iOiAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86c2hhLTI1NiIsCiAgICAgICAgICAiaGFzaC12YWx1ZSI6ICJlMzpiMDpjNDo0Mjo5ODpmYzoxYzoxNDo5YTpmYjpmNDpjODo5OTo2ZjpiOToyNDoyNzphZTo0MTplNDo2NDo5Yjo5Mzo0YzphNDo5NTo5OToxYjo3ODo1MjpiODo1NSIKICAgICAgICB9CiAgICAgIF0KICAgIH0sCiAgICAicHJlLWNvbmZpZ3VyYXRpb24tc2NyaXB0IjogIkl5RXZZbWx1TDJKaGMyZ0taV05vYnlBaWFXNXphV1JsSUhSb1pTQjBhR2x5WkMxd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNtVnljbTl5IiwKICAgICJjb25maWd1cmF0aW9uLWhhbmRsaW5nIjogIm1lcmdlIiwKICAgICJjb25maWd1cmF0aW9uIjogIlBIUnZjQ0I0Yld4dWN6MGlhSFIwY0hNNkwyVjRZVzF3YkdVdVkyOXRMMk52Ym1acFp5SStDaUFnUEdGdWVTMTRiV3d0WTI5dWRHVnVkQzF2YTJGNUx6NEtQQzkwYjNBK0NnPT0iLAogICAgInBvc3QtY29uZmlndXJhdGlvbi1zY3JpcHQiOiAiSXlFdlltbHVMMkpoYzJnS1pXTm9ieUFpYVc1emFXUmxJSFJvWlNCMGFHbHlaQzF3YjNOMExXTnZibVpwWjNWeVlYUnBiMjR0YzJOeWFYQjBMaTR1SWdwbGNuSnZjZz09IgogIH0KfQ==",
+		},
+	}
+	expectedFailedPostScript := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIDawYLKoZIhvcNAQkQASugggNaBIIDVnsKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwczovL3dlYjo0NDMvdGVzdC5pbWciLAogICAgICAgICJmdHBzOi8vd2ViOjk5MC90ZXN0LmltZyIKICAgICAgXSwKICAgICAgImltYWdlLXZlcmlmaWNhdGlvbiI6IFsKICAgICAgICB7CiAgICAgICAgICAiaGFzaC1hbGdvcml0aG0iOiAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86c2hhLTI1NiIsCiAgICAgICAgICAiaGFzaC12YWx1ZSI6ICJlMzpiMDpjNDo0Mjo5ODpmYzoxYzoxNDo5YTpmYjpmNDpjODo5OTo2ZjpiOToyNDoyNzphZTo0MTplNDo2NDo5Yjo5Mzo0YzphNDo5NTo5OToxYjo3ODo1MjpiODo1NSIKICAgICAgICB9CiAgICAgIF0KICAgIH0sCiAgICAicHJlLWNvbmZpZ3VyYXRpb24tc2NyaXB0IjogIkl5RXZZbWx1TDJKaGMyZ0taV05vYnlBaWFXNXphV1JsSUhSb1pTQjBhR2x5WkMxd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0IwYUdseVpDMXdiM04wTFdOdmJtWnBaM1Z5WVhScGIyNHRjMk55YVhCMExpNHVJZ3BsY25KdmNnbz0iCiAgfQp9",
+		},
+	}
+	expectedError := BootstrapServerErrorOutput{
+		IetfRestconfErrors: struct {
+			Error []struct {
+				ErrorType    string `json:"error-type"`
+				ErrorTag     string `json:"error-tag"`
+				ErrorMessage string `json:"error-message"`
+			} `json:"error"`
+		}{
+			Error: []struct {
+				ErrorType    string `json:"error-type"`
+				ErrorTag     string `json:"error-tag"`
+				ErrorMessage string `json:"error-message"`
+			}{
+				{
+					ErrorType:    "protocol",
+					ErrorTag:     "access-denied",
+					ErrorMessage: "failed",
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "Test KO test where discover bootstrapURL fails",
+			fields: fields{
+				InputBootstrapURL:             "",
+				SerialNumber:                  "my-serial-number",
+				DevicePassword:                "my-password",
+				DevicePrivateKey:              "privateKey",
+				DeviceEndEntityCert:           "endEntityCert",
+				BootstrapTrustAnchorCert:      "trustAnchorCert",
+				ContentTypeReq:                "application/json",
+				InputJSONContent:              generateInputJSONContent(),
+				DhcpLeaseFile:                 "/file/does/not/exist",
+				ProgressJSON:                  ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test KO where doRequestBootstrapServerOnboardingInfo fails",
+			fields: fields{
+				InputBootstrapURL:        "https://bootstrap-server.com",
+				SerialNumber:             "KOBASE64",
+				DevicePassword:           "KO",
+				DevicePrivateKey:         "",
+				DeviceEndEntityCert:      "",
+				BootstrapTrustAnchorCert: "",
+				ContentTypeReq:           "",
+				InputJSONContent:         "",
+				DhcpLeaseFile:            "",
+				ProgressJSON:             ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test KO where doHandleBootstrapRedirect fails",
+			fields: fields{
+				InputBootstrapURL: "https://bootstrap-server.com",
+				SerialNumber: 	"REDIRECT",
+				DevicePassword: "PASS",
+				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{
+					IetfSztpConveyedInfoRedirectInformation: struct {
+						BootstrapServer []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						} `json:"bootstrap-server"`
+					}{
+						BootstrapServer: []struct {
+							Address     string `json:"address"`
+							Port        int    `json:"port"`
+							TrustAnchor string `json:"trust-anchor"`
+						}{{
+							Address: "",
+							Port:    0,
+						}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test KO where downloadAndValidateImage fails",
+			fields: fields{
+				InputBootstrapURL:        "https://bootstrap-server.com",
+				SerialNumber:             "KOIMAGE",
+				DevicePassword:           "KO",
+				DevicePrivateKey:         "",
+				DeviceEndEntityCert:      "",
+				BootstrapTrustAnchorCert: "",
+				ContentTypeReq:           "",
+				InputJSONContent:         "",
+				DhcpLeaseFile:            "",
+				ProgressJSON:             ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test KO where launchScriptsConfiguration PRE fails",
+			fields: fields{
+				InputBootstrapURL:        "https://bootstrap-server.com",
+				SerialNumber:             "KOPRESCRIPT",
+				DevicePassword:           "KO",
+				DevicePrivateKey:         "/certs/second_private_key.pem",
+				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert: "/certs/opi.pem",
+				ContentTypeReq:           "application/yang-data+json",
+				InputJSONContent:         generateInputJSONContent(),
+				DhcpLeaseFile:            "",
+				ProgressJSON:             ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test KO where launchScriptsConfiguration POST fails",
+			fields: fields{
+				InputBootstrapURL:        "https://bootstrap-server.com",
+				SerialNumber:             "KOPOSTSCRIPT",
+				DevicePassword:           "KO",
+				DevicePrivateKey:         "/certs/second_private_key.pem",
+				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert: "/certs/opi.pem",
+				ContentTypeReq:           "application/yang-data+json",
+				InputJSONContent:         generateInputJSONContent(),
+				DhcpLeaseFile:            "",
+				ProgressJSON:             ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test OK",
+			fields: fields{
+				InputBootstrapURL:        "https://bootstrap-server.com",
+				SerialNumber:             "USER",
+				DevicePassword:           "PASS",
+				DevicePrivateKey:         "/certs/second_private_key.pem",
+				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert: "/certs/opi.pem",
+				ContentTypeReq:           "application/yang-data+json",
+				InputJSONContent:         generateInputJSONContent(),
+				DhcpLeaseFile:            "",
+				ProgressJSON:             ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+			},
+			wantErr: false,
+		},
+	}
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://bootstrap-server.com", func(req *http.Request) (*http.Response, error) {
+        user, pass, _ := req.BasicAuth()
+
+		if (user + ":" + pass) == "USER:PASS" {
+			output, _ := json.Marshal(expectedOnboarding)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+
+		if (user + ":" + pass) == "REDIRECT:PASS" {
+			output, _ := json.Marshal(expectedRedirect)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+
+		if (user + ":" + pass) == "KOBASE64:KO" {
+			output, _ := json.Marshal(expectedFailedBase64)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+
+		if (user + ":" + pass) == "KOIMAGE:KO" {
+			output, _ := json.Marshal(expectedFailedImage)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+
+		if (user + ":" + pass) == "KOPRESCRIPT:KO" {
+			output, _ := json.Marshal(expectedFailedPreScript)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+
+		if (user + ":" + pass) == "KOPOSTSCRIPT:KO" {
+			output, _ := json.Marshal(expectedFailedPostScript)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+
+		if (user + ":" + pass) == "KO:KO" {
+			output, _ := json.Marshal(expectedError)
+			return httpmock.NewStringResponse(401, string(output)), nil
+		}
+
+		return httpmock.NewStringResponse(401, string("output")), nil
+    })
+
+	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(req *http.Request) (*http.Response, error) {
+		return httpmock.NewBytesResponse(200, []byte{}), nil
+	})
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &Agent{
+				InputBootstrapURL:             tt.fields.InputBootstrapURL,
+				SerialNumber:                  tt.fields.SerialNumber,
+				DevicePassword:                tt.fields.DevicePassword,
+				DevicePrivateKey:              tt.fields.DevicePrivateKey,
+				DeviceEndEntityCert:           tt.fields.DeviceEndEntityCert,
+				BootstrapTrustAnchorCert:      tt.fields.BootstrapTrustAnchorCert,
+				ContentTypeReq:                tt.fields.ContentTypeReq,
+				InputJSONContent:              tt.fields.InputJSONContent,
+				DhcpLeaseFile:                 tt.fields.DhcpLeaseFile,
+				ProgressJSON:                  tt.fields.ProgressJSON,
+				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
+				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:					   &http.Client{},
+			}
+			if err := a.performBootstrapSequence(); (err != nil) != tt.wantErr {
+				t.Errorf("RunCommand() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+		})
+	}
+}
+
+func TestAgent_DaemonCommand(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	
+	type fields struct {
+		InputBootstrapURL             string
+		SerialNumber                  string
+		DevicePassword                string
+		DevicePrivateKey              string
+		DeviceEndEntityCert           string
+		BootstrapTrustAnchorCert      string
+		ContentTypeReq                string
+		InputJSONContent              string
+		DhcpLeaseFile                 string
+		ProgressJSON                  ProgressJSON
+		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
+		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
+	}
+
+	expectedOnboarding := BootstrapServerPostOutput{
+		IetfSztpBootstrapServerOutput: struct {
+			ConveyedInformation string `json:"conveyed-information"`
+		}{
+			ConveyedInformation: "MIIDYwYLKoZIhvcNAQkQASugggNSBIIDTnsKICAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86b25ib2FyZGluZy1pbmZvcm1hdGlvbiI6IHsKICAgICJib290LWltYWdlIjogewogICAgICAiZG93bmxvYWQtdXJpIjogWwogICAgICAgICJodHRwczovL3dlYjo0NDMvdGVzdC5pbWciLAogICAgICAgICJmdHBzOi8vd2ViOjk5MC90ZXN0LmltZyIKICAgICAgXSwKICAgICAgImltYWdlLXZlcmlmaWNhdGlvbiI6IFsKICAgICAgICB7CiAgICAgICAgICAiaGFzaC1hbGdvcml0aG0iOiAiaWV0Zi1zenRwLWNvbnZleWVkLWluZm86c2hhLTI1NiIsCiAgICAgICAgICAiaGFzaC12YWx1ZSI6ICJlMzpiMDpjNDo0Mjo5ODpmYzoxYzoxNDo5YTpmYjpmNDpjODo5OTo2ZjpiOToyNDoyNzphZTo0MTplNDo2NDo5Yjo5Mzo0YzphNDo5NTo5OToxYjo3ODo1MjpiODo1NSIKICAgICAgICB9CiAgICAgIF0KICAgIH0sCiAgICAicHJlLWNvbmZpZ3VyYXRpb24tc2NyaXB0IjogIkl5RXZZbWx1TDJKaGMyZ0taV05vYnlBaWFXNXphV1JsSUhSb1pTQjBhR2x5WkMxd2NtVXRZMjl1Wm1sbmRYSmhkR2x2YmkxelkzSnBjSFF1TGk0aUNnPT0iLAogICAgImNvbmZpZ3VyYXRpb24taGFuZGxpbmciOiAibWVyZ2UiLAogICAgImNvbmZpZ3VyYXRpb24iOiAiUEhSdmNDQjRiV3h1Y3owaWFIUjBjSE02TDJWNFlXMXdiR1V1WTI5dEwyTnZibVpwWnlJK0NpQWdQR0Z1ZVMxNGJXd3RZMjl1ZEdWdWRDMXZhMkY1THo0S1BDOTBiM0ErQ2c9PSIsCiAgICAicG9zdC1jb25maWd1cmF0aW9uLXNjcmlwdCI6ICJJeUV2WW1sdUwySmhjMmdLWldOb2J5QWlhVzV6YVdSbElIUm9aU0IwYUdseVpDMXdiM04wTFdOdmJtWnBaM1Z5WVhScGIyNHRjMk55YVhCMExpNHVJZ289IgogIH0KfQ==",
+		},
+	}
+
+	httpmock.RegisterResponder("POST", "https://daemon-command.com", func(req *http.Request) (*http.Response, error) {
+        user, pass, _ := req.BasicAuth()
+
+		if (user + ":" + pass) == "USER:PASS" {
+			output, _ := json.Marshal(expectedOnboarding)
+			return httpmock.NewStringResponse(200, string(output)), nil
+		}
+		return httpmock.NewStringResponse(401, ""), nil
+	})
+
+	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(req *http.Request) (*http.Response, error) {
+		return httpmock.NewBytesResponse(200, []byte{}), nil
+	})
+
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+
+		{
+			name: "TestAgent_RunCommand",
+			fields: fields{
+				InputBootstrapURL:        "https://daemon-command.com",
+				SerialNumber:             "USER",
+				DevicePassword:           "PASS",
+				DevicePrivateKey:         "/certs/second_private_key.pem",
+				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert: "/certs/opi.pem",
+				ContentTypeReq:           "application/yang-data+json",
+				InputJSONContent:         generateInputJSONContent(),
+				DhcpLeaseFile:            "",
+				ProgressJSON:             ProgressJSON{},
+				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &Agent{
+				InputBootstrapURL:             tt.fields.InputBootstrapURL,
+				SerialNumber:                  tt.fields.SerialNumber,
+				DevicePassword:                tt.fields.DevicePassword,
+				DevicePrivateKey:              tt.fields.DevicePrivateKey,
+				DeviceEndEntityCert:           tt.fields.DeviceEndEntityCert,
+				BootstrapTrustAnchorCert:      tt.fields.BootstrapTrustAnchorCert,
+				ContentTypeReq:                tt.fields.ContentTypeReq,
+				InputJSONContent:              tt.fields.InputJSONContent,
+				DhcpLeaseFile:                 tt.fields.DhcpLeaseFile,
+				ProgressJSON:                  tt.fields.ProgressJSON,
+				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
+				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				HttpClient:					   &http.Client{},
+			}
+			if err := a.RunCommandDaemon(); (err != nil) != tt.wantErr {
+				t.Errorf("RunCommand() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
