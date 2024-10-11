@@ -16,7 +16,6 @@ import (
 const (
 	CONTENT_TYPE_YANG = "application/yang-data+json"
 	OS_RELEASE_FILE   = "/etc/os-release"
-	SZTP_REDIRECT_URL = "sztp-redirect-urls"
 	ARTIFACTS_PATH    = "/tmp/"
 )
 
@@ -80,7 +79,7 @@ type HttpClient interface {
 // Agent is the basic structure to define an agent instance
 type Agent struct {
 	InputBootstrapURL             string                        // Bootstrap complete URL given by USER
-	BootstrapURL                  string                        // Bootstrap complete URL
+	BootstrapURL                  []string                      // Bootstrap complete URL
 	SerialNumber                  string                        // Device's Serial Number
 	DevicePassword                string                        // Device's Password
 	DevicePrivateKey              string                        // Device's private key
@@ -98,7 +97,7 @@ type Agent struct {
 func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert string, httpClient HttpClient) *Agent {
 	return &Agent{
 		InputBootstrapURL:             bootstrapURL,
-		BootstrapURL:                  "",
+		BootstrapURL:                  []string{""},
 		SerialNumber:                  GetSerialNumber(serialNumber),
 		DevicePassword:                devicePassword,
 		DevicePrivateKey:              devicePrivateKey,
@@ -114,7 +113,7 @@ func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, deviceP
 	}
 }
 
-func (a *Agent) GetBootstrapURL() string {
+func (a *Agent) GetBootstrapURL() []string {
 	return a.BootstrapURL
 }
 
@@ -150,7 +149,7 @@ func (a *Agent) GetProgressJSON() ProgressJSON {
 	return a.ProgressJSON
 }
 
-func (a *Agent) SetBootstrapURL(url string) {
+func (a *Agent) SetBootstrapURL(url []string) {
 	a.BootstrapURL = url
 }
 

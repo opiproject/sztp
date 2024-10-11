@@ -20,9 +20,9 @@ import (
 )
 
 //nolint:funlen
-func (a *Agent) downloadAndValidateImage() error {
+func (a *Agent) downloadAndValidateImage(bootstrapURL *string) error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
-	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated")
+	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated", bootstrapURL)
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -77,7 +77,7 @@ func (a *Agent) downloadAndValidateImage() error {
 				return errors.New("checksum mismatch")
 			}
 			log.Println("[INFO] Checksum verified successfully")
-			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete")
+			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete", bootstrapURL)
 			return nil
 		default:
 			return errors.New("unsupported hash algorithm")
