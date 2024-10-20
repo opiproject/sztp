@@ -10,7 +10,7 @@ import (
 func (a *Agent) copyConfigurationFile() error {
 	log.Println("[INFO] Starting the Copy Configuration.")
 	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated")
-	_ = a.UpdateAndSaveStatus("config", true, "")
+	_ = a.updateAndSaveStatus("config", true, "")
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -37,7 +37,7 @@ func (a *Agent) copyConfigurationFile() error {
 	}
 	log.Println("[INFO] Configuration file copied successfully")
 	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete")
-	_ = a.UpdateAndSaveStatus("config", false, "")
+	_ = a.updateAndSaveStatus("config", false, "")
 	return nil
 }
 
@@ -58,7 +58,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
 	_ = a.doReportProgress(reportStart, "Report starting")
-	_ = a.UpdateAndSaveStatus(scriptName+"-script", true, "")
+	_ = a.updateAndSaveStatus(scriptName+"-script", true, "")
 	// nolint:gosec
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
@@ -92,7 +92,7 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	}
 	log.Println(string(out)) // remove it
 	_ = a.doReportProgress(reportEnd, "Report end")
-	_ = a.UpdateAndSaveStatus(scriptName+"-script", false, "")
+	_ = a.updateAndSaveStatus(scriptName+"-script", false, "")
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }
