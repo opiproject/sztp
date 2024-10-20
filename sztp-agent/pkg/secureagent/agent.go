@@ -93,9 +93,9 @@ type Agent struct {
 	BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo // BootstrapServerOnboardingInfo structure
 	BootstrapServerRedirectInfo   BootstrapServerRedirectInfo   // BootstrapServerRedirectInfo structure
 	HttpClient                    HttpClient
-	StatusFilePath                string                        // Path to the status file
-	ResultFilePath                string                        // Path to the result file
-	SymLinkDir					  string                        // Path to the symlink directory for the status file
+	StatusFilePath                string // Path to the status file
+	ResultFilePath                string // Path to the result file
+	SymLinkDir                    string // Path to the symlink directory for the status file
 }
 
 func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath, symLinkDir string, httpClient HttpClient) *Agent {
@@ -116,7 +116,7 @@ func NewAgent(bootstrapURL, serialNumber, dhcpLeaseFile, devicePassword, deviceP
 		HttpClient:                    httpClient,
 		StatusFilePath:                statusFilePath,
 		ResultFilePath:                resultFilePath,
-		SymLinkDir:					   symLinkDir,
+		SymLinkDir:                    symLinkDir,
 	}
 }
 

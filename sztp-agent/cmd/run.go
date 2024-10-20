@@ -33,8 +33,8 @@ func Run() *cobra.Command {
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
 		statusFilePath           string
-		resultFilePath		     string
-		symLinkDir			     string
+		resultFilePath           string
+		symLinkDir               string
 	)
 
 	cmd := &cobra.Command{
@@ -54,15 +54,6 @@ func Run() *cobra.Command {
 			if bootstrapURL != "" {
 				_, err := url.ParseRequestURI(bootstrapURL)
 				cobra.CheckErr(err)
-			}
-			if statusFilePath == "" {
-				return fmt.Errorf("'--status-file-path' is required")
-			}
-			if resultFilePath == "" {
-				return fmt.Errorf("'--result-file-path' is required")
-			}
-			if symLinkDir == "" {
-				return fmt.Errorf("'--symlink-dir' is required")
 			}
 			for _, filePath := range arrayChecker {
 				info, err := os.Stat(filePath)
@@ -89,7 +80,7 @@ func Run() *cobra.Command {
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/certs/opi.pem", "Bootstrap server trust anchor Cert")
 	flags.StringVar(&statusFilePath, "status-file-path", "/var/lib/sztp/status.json", "Status file path")
 	flags.StringVar(&resultFilePath, "result-file-path", "/var/lib/sztp/result.json", "Result file path")
-	flags.StringVar(&symLinkDir, "sym-link-dir", "", "Sym Link Directory")
+	flags.StringVar(&symLinkDir, "sym-link-dir", "/run/sztp", "Sym Link Directory")
 
 	return cmd
 }

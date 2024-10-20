@@ -10,7 +10,7 @@ import (
 func (a *Agent) copyConfigurationFile() error {
 	log.Println("[INFO] Starting the Copy Configuration.")
 	_ = a.doReportProgress(ProgressTypeConfigInitiated, "Configuration Initiated")
-	_ = a.updateAndSaveStatus("config", true, "")
+	_ = a.updateAndSaveStatus(StageTypeConfig, true, "")
 	// Copy the configuration file to the device
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + "-config")
 	if err != nil {
@@ -37,7 +37,7 @@ func (a *Agent) copyConfigurationFile() error {
 	}
 	log.Println("[INFO] Configuration file copied successfully")
 	_ = a.doReportProgress(ProgressTypeConfigComplete, "Configuration Complete")
-	_ = a.updateAndSaveStatus("config", false, "")
+	_ = a.updateAndSaveStatus(StageTypeConfig, false, "")
 	return nil
 }
 
@@ -45,20 +45,24 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	var script, scriptName string
 	var reportStart, reportEnd ProgressType
 	switch typeOf {
-	case "post":
+	case POST:
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PostConfigurationScript
-		scriptName = "post"
+		scriptName = POST
 		reportStart = ProgressTypePostScriptInitiated
 		reportEnd = ProgressTypePostScriptComplete
 	default: // pre or default
 		script = a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.PreConfigurationScript
-		scriptName = "pre"
+		scriptName = PRE
 		reportStart = ProgressTypePreScriptInitiated
 		reportEnd = ProgressTypePreScriptComplete
 	}
 	log.Println("[INFO] Starting the " + scriptName + "-configuration.")
 	_ = a.doReportProgress(reportStart, "Report starting")
-	_ = a.updateAndSaveStatus(scriptName+"-script", true, "")
+	if scriptName == PRE {
+		_ = a.updateAndSaveStatus(StageTypePreScript, true, "")
+	} else if scriptName == POST {
+		_ = a.updateAndSaveStatus(StageTypePostScript, true, "")
+	}
 	// nolint:gosec
 	file, err := os.Create(ARTIFACTS_PATH + a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference + scriptName + "configuration.sh")
 	if err != nil {
@@ -92,7 +96,11 @@ func (a *Agent) launchScriptsConfiguration(typeOf string) error {
 	}
 	log.Println(string(out)) // remove it
 	_ = a.doReportProgress(reportEnd, "Report end")
-	_ = a.updateAndSaveStatus(scriptName+"-script", false, "")
+	if scriptName == PRE {
+		_ = a.updateAndSaveStatus(StageTypePreScript, false, "")
+	} else if scriptName == POST {
+		_ = a.updateAndSaveStatus(StageTypePostScript, false, "")
+	}
 	log.Println("[INFO] " + scriptName + "-Configuration script executed successfully")
 	return nil
 }

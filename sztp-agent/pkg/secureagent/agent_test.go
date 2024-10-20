@@ -829,9 +829,9 @@ func TestNewAgent(t *testing.T) {
 		devicePrivateKey         string
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
-		statusFilePath		   	 string
-		resultFilePath		   	 string
-		symLinkDir		   		 string
+		statusFilePath           string
+		resultFilePath           string
+		symLinkDir               string
 	}
 	client := http.Client{}
 	tests := []struct {
@@ -851,7 +851,7 @@ func TestNewAgent(t *testing.T) {
 				bootstrapTrustAnchorCert: "TestBootstrapTrustCert",
 				statusFilePath:           "TestStatusFilePath",
 				resultFilePath:           "TestResultFilePath",
-				symLinkDir: 		 	  "TestSymLinkDir",
+				symLinkDir:               "TestSymLinkDir",
 			},
 			want: &Agent{
 				InputBootstrapURL:        "TestBootstrap",
@@ -866,7 +866,7 @@ func TestNewAgent(t *testing.T) {
 				DhcpLeaseFile:            "TestDhcpLeaseFile",
 				StatusFilePath:           "TestStatusFilePath",
 				ResultFilePath:           "TestResultFilePath",
-				SymLinkDir: 			  "TestSymLinkDir",
+				SymLinkDir:               "TestSymLinkDir",
 				HttpClient:               &client,
 			},
 		},
