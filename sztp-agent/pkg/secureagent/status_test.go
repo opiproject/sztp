@@ -69,7 +69,7 @@ func TestAgent_RunCommandStatus(t *testing.T) {
 				ResultFilePath:				   tt.fields.ResultFilePath,
 				SymLinkDir:					   tt.fields.SymLinkDir,
 			}
-			a.PrepareStatus()
+			a.prepareStatus()
 			if err := a.RunCommandStatus(); (err != nil) != tt.wantErr {
 				t.Errorf("RunCommandStatus() error = %v, wantErr %v", err, tt.wantErr)
 			}

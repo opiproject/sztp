@@ -59,7 +59,7 @@ func (a *Agent) loadStatusFile() (*Status, error) {
     return &status, nil
 }
 
-func (a *Agent) UpdateAndSaveStatus(stage string, isStart bool, errMsg string) error {
+func (a *Agent) updateAndSaveStatus(stage string, isStart bool, errMsg string) error {
 	status, err := a.loadStatusFile()
 	if err != nil {
 		fmt.Println("Creating a new status file.")
@@ -143,57 +143,6 @@ func (a *Agent) saveResult(result *Result) error {
 	return saveToFile(result, a.GetResultFilePath())
 }
 
-// EnsureDirExists checks if a directory exists, and creates it if it doesn't.
-func EnsureDirExists(dir string) error {
-    if _, err := os.Stat(dir); os.IsNotExist(err) {
-        err := os.MkdirAll(dir, 0755) // Create the directory with appropriate permissions
-        if err != nil {
-            return fmt.Errorf("failed to create directory %s: %v", dir, err)
-        }
-    }
-    return nil
-}
-
-// EnsureFile ensures that a file exists; creates it if it does not.
-func EnsureFileExists(filePath string) error {
-    // Ensure the directory exists
-    dir := filepath.Dir(filePath)
-    if err := EnsureDirExists(dir); err != nil {
-        return err
-    }
-
-    // Check if the file already exists
-    if _, err := os.Stat(filePath); os.IsNotExist(err) {
-        // File does not exist, create it
-        file, err := os.Create(filePath)
-        if err != nil {
-            return fmt.Errorf("failed to create file %s: %v", filePath, err)
-        }
-        defer file.Close()
-        fmt.Printf("File %s created successfully.\n", filePath)
-    } else {
-        fmt.Printf("File %s already exists.\n", filePath)
-    }
-    return nil
-}
-
-// CreateSymlink creates a symlink for a file from target to link location.
-func CreateSymlink(targetFile, linkFile string) error {
-    // Ensure the directory for the symlink exists
-    linkDir := filepath.Dir(linkFile)
-    if err := EnsureDirExists(linkDir); err != nil {
-        return err
-    }
-
-    // Remove any existing symlink
-    if _, err := os.Lstat(linkFile); err == nil {
-        os.Remove(linkFile)
-    }
-
-    // Create a new symlink
-    return os.Symlink(targetFile, linkFile)
-}
-
 // RunCommandStatus runs the command in the background
 func (a *Agent) RunCommandStatus() error {
 	log.Println("RunCommandStatus")
@@ -207,19 +156,19 @@ func (a *Agent) RunCommandStatus() error {
 	return nil
 }
 
-func (a *Agent) PrepareStatus() error {
+func (a *Agent) prepareStatus() error {
 	log.Println("prepareStatus")
 
 	// Ensure /run/sztp directory exists
-	if err := EnsureDirExists(a.GetSymLinkDir()); err != nil {
+	if err := ensureDirExists(a.GetSymLinkDir()); err != nil {
 		fmt.Printf("Failed to create directory %s: %v\n", a.GetSymLinkDir(), err)
 		return err
 	}
 
-    if err := EnsureFileExists(a.GetStatusFilePath()); err != nil {
+    if err := ensureFileExists(a.GetStatusFilePath()); err != nil {
         return err
     }
-    if err := EnsureFileExists(a.GetResultFilePath()); err != nil {
+    if err := ensureFileExists(a.GetResultFilePath()); err != nil {
         return err
     }
 
@@ -227,18 +176,18 @@ func (a *Agent) PrepareStatus() error {
     resultSymlinkPath := filepath.Join(a.GetSymLinkDir(), "result.json")
 
     // Create symlinks for status.json and result.json
-    if err := CreateSymlink(a.GetStatusFilePath(), statusSymlinkPath); err != nil {
+    if err := createSymlink(a.GetStatusFilePath(), statusSymlinkPath); err != nil {
         fmt.Printf("Failed to create symlink for status.json: %v\n", err)
         return err
     }
-    if err := CreateSymlink(a.GetResultFilePath(), resultSymlinkPath); err != nil {
+    if err := createSymlink(a.GetResultFilePath(), resultSymlinkPath); err != nil {
         fmt.Printf("Failed to create symlink for result.json: %v\n", err)
         return err
     }
 
     fmt.Println("Symlinks created successfully.")
 
-    if err := a.UpdateAndSaveStatus("init", true, ""); err != nil {
+    if err := a.updateAndSaveStatus("init", true, ""); err != nil {
         return err
     }
 

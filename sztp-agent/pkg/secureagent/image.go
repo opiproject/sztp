@@ -23,7 +23,7 @@ import (
 func (a *Agent) downloadAndValidateImage() error {
 	log.Printf("[INFO] Starting the Download Image: %v", a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI)
 	_ = a.doReportProgress(ProgressTypeBootImageInitiated, "BootImage Initiated")
-	_ = a.UpdateAndSaveStatus("boot-image", true, "")
+	_ = a.updateAndSaveStatus("boot-image", true, "")
 	// Download the image from DownloadURI and save it to a file
 	a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.InfoTimestampReference = fmt.Sprintf("%8d", time.Now().Unix())
 	for i, item := range a.BootstrapServerOnboardingInfo.IetfSztpConveyedInfoOnboardingInformation.BootImage.DownloadURI {
@@ -79,7 +79,7 @@ func (a *Agent) downloadAndValidateImage() error {
 			}
 			log.Println("[INFO] Checksum verified successfully")
 			_ = a.doReportProgress(ProgressTypeBootImageComplete, "BootImage Complete")
-			_ = a.UpdateAndSaveStatus("boot-image", false, "")
+			_ = a.updateAndSaveStatus("boot-image", false, "")
 			return nil
 		default:
 			return errors.New("unsupported hash algorithm")

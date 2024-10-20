@@ -106,3 +106,54 @@ func saveToFile(data interface{}, filePath string) error {
 	// Atomic move of temp file to replace the original.
 	return os.Rename(tempPath, filePath)
 }
+
+// EnsureDirExists checks if a directory exists, and creates it if it doesn't.
+func ensureDirExists(dir string) error {
+    if _, err := os.Stat(dir); os.IsNotExist(err) {
+        err := os.MkdirAll(dir, 0755) // Create the directory with appropriate permissions
+        if err != nil {
+            return fmt.Errorf("failed to create directory %s: %v", dir, err)
+        }
+    }
+    return nil
+}
+
+// EnsureFile ensures that a file exists; creates it if it does not.
+func ensureFileExists(filePath string) error {
+    // Ensure the directory exists
+    dir := filepath.Dir(filePath)
+    if err := ensureDirExists(dir); err != nil {
+        return err
+    }
+
+    // Check if the file already exists
+    if _, err := os.Stat(filePath); os.IsNotExist(err) {
+        // File does not exist, create it
+        file, err := os.Create(filePath)
+        if err != nil {
+            return fmt.Errorf("failed to create file %s: %v", filePath, err)
+        }
+        defer file.Close()
+        fmt.Printf("File %s created successfully.\n", filePath)
+    } else {
+        fmt.Printf("File %s already exists.\n", filePath)
+    }
+    return nil
+}
+
+// CreateSymlink creates a symlink for a file from target to link location.
+func createSymlink(targetFile, linkFile string) error {
+    // Ensure the directory for the symlink exists
+    linkDir := filepath.Dir(linkFile)
+    if err := ensureDirExists(linkDir); err != nil {
+        return err
+    }
+
+    // Remove any existing symlink
+    if _, err := os.Lstat(linkFile); err == nil {
+        os.Remove(linkFile)
+    }
+
+    // Create a new symlink
+    return os.Symlink(targetFile, linkFile)
+}
