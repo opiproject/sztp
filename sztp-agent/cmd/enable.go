@@ -29,8 +29,8 @@ func Enable() *cobra.Command {
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
 		statusFilePath           string
-		resultFilePath		     string
-		symLinkDir			     string
+		resultFilePath           string
+		symLinkDir               string
 	)
 
 	cmd := &cobra.Command{
@@ -53,9 +53,9 @@ func Enable() *cobra.Command {
 	flags.StringVar(&devicePrivateKey, "device-private-key", "", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "", "Device's End Entity cert")
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "", "Bootstrap server trust anchor Cert")
-	flags.StringVar(&statusFilePath, "status-file-path", "", "Status file path")
-	flags.StringVar(&resultFilePath, "result-file-path", "", "Result file path")
-	flags.StringVar(&symLinkDir, "sym-link-dir", "", "Sym Link Directory")
+	flags.StringVar(&statusFilePath, "status-file-path", "/var/lib/sztp/status.json", "Status file path")
+	flags.StringVar(&resultFilePath, "result-file-path", "/var/lib/sztp/result.json", "Result file path")
+	flags.StringVar(&symLinkDir, "sym-link-dir", "/run/sztp", "Sym Link Directory")
 
 	return cmd
 }

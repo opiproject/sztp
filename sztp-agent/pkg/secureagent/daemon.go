@@ -37,51 +37,60 @@ func (a *Agent) RunCommandDaemon() error {
 		log.Println("failed to prepare status: ", err)
 		return err
 	}
+	_ = a.updateAndSaveStatus(StageTypeIsCompleted, true, "")
 	for {
 		err := a.performBootstrapSequence()
 		if err != nil {
 			log.Println("[ERROR] Failed to perform the bootstrap sequence: ", err.Error())
 			log.Println("[INFO] Retrying in 5 seconds")
 			time.Sleep(5 * time.Second)
+			_ = a.updateAndSaveStatus(StageTypeIsCompleted, false, err.Error())
 			continue
 		}
+		_ = a.updateAndSaveStatus(StageTypeIsCompleted, false, "")
 		return nil
 	}
 }
 
 func (a *Agent) performBootstrapSequence() error {
-	_ = a.updateAndSaveStatus("bootstrap", true, "")
 	var err error
 	err = a.discoverBootstrapURLs()
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypeParsing, false, err.Error())
 		return err
 	}
 	err = a.doRequestBootstrapServerOnboardingInfo()
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypeOnboarding, false, err.Error())
 		return err
 	}
 	err = a.doHandleBootstrapRedirect()
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypeBootImage, false, err.Error())
 		return err
 	}
 	err = a.downloadAndValidateImage()
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypeBootImage, false, err.Error())
 		return err
 	}
 	err = a.copyConfigurationFile()
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypeConfig, false, err.Error())
 		return err
 	}
 	err = a.launchScriptsConfiguration(PRE)
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypePreScript, false, err.Error())
 		return err
 	}
 	err = a.launchScriptsConfiguration(POST)
 	if err != nil {
+		_ = a.updateAndSaveStatus(StageTypePostScript, false, err.Error())
 		return err
 	}
 	_ = a.doReportProgress(ProgressTypeBootstrapComplete, "Bootstrap Complete")
-	_ = a.updateAndSaveStatus("bootstrap", false, "")
+	_ = a.updateAndSaveStatus(StageTypeBootstrap, false, "")
 	return nil
 }
 
@@ -148,7 +157,7 @@ func (a *Agent) doRequestBootstrapServerOnboardingInfo() error {
 	}
 	log.Println("[INFO] Response retrieved successfully")
 	_ = a.doReportProgress(ProgressTypeBootstrapInitiated, "Bootstrap Initiated")
-	_ = a.updateAndSaveStatus("bootstrap", true, "")
+	_ = a.updateAndSaveStatus(StageTypeBootstrap, true, "")
 	crypto := res.IetfSztpBootstrapServerOutput.ConveyedInformation
 	newVal, err := base64.StdEncoding.DecodeString(crypto)
 	if err != nil {

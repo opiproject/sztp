@@ -84,7 +84,11 @@ func Test_saveToFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("failed to remove temp directory: %v", err)
+		}
+	}()
 
 	filePath := filepath.Join(tempDir, "test.json")
 	data := map[string]string{"key": "value"}
@@ -99,11 +103,16 @@ func Test_saveToFile(t *testing.T) {
 		t.Fatalf("file %s was not created", filePath)
 	}
 
+	filePath = filepath.Clean(filePath)
 	file, err := os.Open(filePath)
 	if err != nil {
 		t.Fatalf("failed to open the file: %v", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			t.Fatalf("failed to close the file: %v", err)
+		}
+	}()
 
 	var readData map[string]string
 	decoder := json.NewDecoder(file)
@@ -117,12 +126,16 @@ func Test_saveToFile(t *testing.T) {
 	}
 }
 
-func TestEnsureDirExists(t *testing.T) {
+func Test_ensureDirExists(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "test_ensure_dir_exists")
 	if err != nil {
 		t.Fatalf("failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("failed to remove temp directory: %v", err)
+		}
+	}()
 
 	newDir := filepath.Join(tempDir, "newdir")
 
@@ -145,12 +158,16 @@ func TestEnsureDirExists(t *testing.T) {
 	}
 }
 
-func TestEnsureFileExists(t *testing.T) {
+func Test_ensureFileExists(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "test_ensure_file_exists")
 	if err != nil {
 		t.Fatalf("failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("failed to remove temp directory: %v", err)
+		}
+	}()
 
 	newFilePath := filepath.Join(tempDir, "newdir", "testfile.txt")
 
@@ -169,17 +186,21 @@ func TestEnsureFileExists(t *testing.T) {
 	}
 }
 
-func TestCreateSymlink(t *testing.T) {
+func Test_createSymlink(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "test_create_symlink")
 	if err != nil {
 		t.Fatalf("failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("failed to remove temp directory: %v", err)
+		}
+	}()
 
 	targetFile := filepath.Join(tempDir, "target.txt")
 	linkFile := filepath.Join(tempDir, "link.txt")
 
-	err = os.WriteFile(targetFile, []byte("test data"), 0644)
+	err = os.WriteFile(targetFile, []byte("test data"), 0600)
 	if err != nil {
 		t.Fatalf("failed to create target file: %v", err)
 	}
@@ -190,7 +211,6 @@ func TestCreateSymlink(t *testing.T) {
 	}
 
 	linkInfo, err := os.Lstat(linkFile)
-	t.Logf("linkInfo: %v", linkInfo) ///
 	if err != nil {
 		t.Fatalf("failed to stat symlink: %v", err)
 	}
@@ -207,7 +227,7 @@ func TestCreateSymlink(t *testing.T) {
 	}
 
 	newTargetFile := filepath.Join(tempDir, "new_target.txt")
-	err = os.WriteFile(newTargetFile, []byte("new data"), 0644)
+	err = os.WriteFile(newTargetFile, []byte("new data"), 0600)
 	if err != nil {
 		t.Fatalf("failed to create new target file: %v", err)
 	}

@@ -33,15 +33,15 @@ func Daemon() *cobra.Command {
 		deviceEndEntityCert      string
 		bootstrapTrustAnchorCert string
 		statusFilePath           string
-		resultFilePath		     string
-		symLinkDir			     string
+		resultFilePath           string
+		symLinkDir               string
 	)
 
 	cmd := &cobra.Command{
 		Use:   "daemon",
 		Short: "Run the daemon command",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			arrayChecker := []string{devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath}
+			arrayChecker := []string{devicePrivateKey, deviceEndEntityCert, bootstrapTrustAnchorCert, statusFilePath, resultFilePath}
 			if bootstrapURL != "" && dhcpLeaseFile != "" {
 				return fmt.Errorf("'--bootstrap-url' and '--dhcp-lease-file' are mutualy exclusive")
 			}
@@ -54,15 +54,6 @@ func Daemon() *cobra.Command {
 			if bootstrapURL != "" {
 				_, err := url.ParseRequestURI(bootstrapURL)
 				cobra.CheckErr(err)
-			}
-			if statusFilePath == "" {
-				return fmt.Errorf("'--status-file-path' is required")
-			}
-			if resultFilePath == "" {
-				return fmt.Errorf("'--result-file-path' is required")
-			}
-			if symLinkDir == "" {
-				return fmt.Errorf("'--symlink-dir' is required")
 			}
 			for _, filePath := range arrayChecker {
 				info, err := os.Stat(filePath)
@@ -87,9 +78,9 @@ func Daemon() *cobra.Command {
 	flags.StringVar(&devicePrivateKey, "device-private-key", "/certs/private_key.pem", "Device's private key")
 	flags.StringVar(&deviceEndEntityCert, "device-end-entity-cert", "/certs/my_cert.pem", "Device's End Entity cert")
 	flags.StringVar(&bootstrapTrustAnchorCert, "bootstrap-trust-anchor-cert", "/certs/opi.pem", "Bootstrap server trust anchor Cert")
-	flags.StringVar(&statusFilePath, "status-file-path", "/var/lib/sztp/status.json", "Path to the status file")
-	flags.StringVar(&resultFilePath, "result-file-path", "/var/lib/sztp/result.json", "Path to the result file")
-	flags.StringVar(&symLinkDir, "sym-link-dir", "/run/sztp", "Path to the symlink directory")
+	flags.StringVar(&statusFilePath, "status-file-path", "/var/lib/sztp/status.json", "Status file path")
+	flags.StringVar(&resultFilePath, "result-file-path", "/var/lib/sztp/result.json", "Result file path")
+	flags.StringVar(&symLinkDir, "sym-link-dir", "/run/sztp", "Sym Link Directory")
 
 	return cmd
 }
