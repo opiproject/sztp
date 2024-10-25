@@ -4,9 +4,36 @@
 // Package secureagent implements the secure agent
 package secureagent
 
-import "testing"
+import (
+	"testing"
+)
+
+const StatusTestContent = `{
+  "init": {"errors": [], "start": 1729891263, "end": 0},
+  "downloading-file": {"errors": [], "start": 0, "end": 0},
+  "pending-reboot": {"errors": [], "start": 0, "end": 0},
+  "parsing": {"errors": [], "start": 0, "end": 0},
+  "onboarding": {"errors": [], "start": 0, "end": 0},
+  "redirect": {"errors": [], "start": 0, "end": 0},
+  "boot-image": {"errors": [], "start": 1729891263, "end": 1729891263},
+  "pre-script": {"errors": [], "start": 1729891264, "end": 1729891264},
+  "config": {"errors": [], "start": 1729891264, "end": 1729891264},
+  "post-script": {"errors": [], "start": 1729891264, "end": 1729891264},
+  "bootstrap": {"errors": [], "start": 1729891263, "end": 1729891264},
+  "is-completed": {"errors": [], "start": 1729891263, "end": 1729891264},
+  "informational": "",
+  "stage": "is-completed-completed"
+}`
+
+const ResultTestContent = `{
+  "errors": ["error1", "error2"],
+}`
 
 func TestAgent_RunCommandStatus(t *testing.T) {
+	testStatusFile := "/tmp/sztp/status.json"
+	testResultFile := "/tmp/sztp/result.json"
+	testSymLinkDir := "/tmp/symlink"
+
 	type fields struct {
 		BootstrapURL                  string
 		SerialNumber                  string
@@ -44,9 +71,9 @@ func TestAgent_RunCommandStatus(t *testing.T) {
 				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
-				StatusFilePath:                "/var/lib/sztp/status.json",
-				ResultFilePath:                "/var/lib/sztp/result.json",
-				SymLinkDir:                    "/run/sztp",
+				StatusFilePath:                testStatusFile,
+				ResultFilePath:                testResultFile,
+				SymLinkDir:                    testSymLinkDir,
 			},
 		},
 	}

@@ -169,7 +169,6 @@ func (a *Agent) updateStageStatus(status *Status, stageType StageType, isStart b
 		return fmt.Errorf("unknown stage: %s", stage)
 	}
 
-	// Update the current stage
 	if isStart {
 		status.Stage = stage + "-in-progress"
 	} else {
