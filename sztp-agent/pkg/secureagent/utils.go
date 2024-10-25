@@ -9,6 +9,7 @@ Copyright (C) 2022 Red Hat.
 package secureagent
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -90,7 +91,9 @@ func calculateSHA256File(filePath string) (string, error) {
 }
 
 func saveToFile(data interface{}, filePath string) error {
-	tempPath := filePath + ".tmp"
+	filePath = filepath.Clean(filePath)
+	random, _ := rand.Prime(rand.Reader, 64)
+	tempPath := fmt.Sprintf("%s.%d.tmp", filePath, random) // rand number to avoid conflicts when multiple agents are running
 	tempPath = filepath.Clean(tempPath)
 	file, err := os.Create(tempPath)
 	if err != nil {
@@ -108,7 +111,11 @@ func saveToFile(data interface{}, filePath string) error {
 	}
 
 	// Atomic move of temp file to replace the original.
-	return os.Rename(tempPath, filePath)
+	if err := os.Rename(tempPath, filePath); err != nil {
+		return fmt.Errorf("failed to rename %s to %s: %v", tempPath, filePath, err)
+	}
+
+	return nil
 }
 
 func ensureDirExists(dir string) error {
@@ -127,11 +134,13 @@ func ensureFileExists(filePath string) error {
 		return err
 	}
 
+	fmt.Printf("Checking if file %s exists...\n", filePath)
+
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		filePath = filepath.Clean(filePath)
 		file, err := os.Create(filePath)
 		if err != nil {
-			return fmt.Errorf("failed to create file %s: %v", filePath, err)
+			return fmt.Errorf("[ERROR] failed to create file %s: %v", filePath, err)
 		}
 		defer func() {
 			if err := file.Close(); err != nil {
@@ -157,7 +166,7 @@ func createSymlink(targetFile, linkFile string) error {
 	// Check if linkFile exists and is a symlink to targetFile
 	if existingTarget, err := os.Readlink(linkFile); err == nil {
 		if existingTarget == targetFile {
-			return nil // Symlink already points to the target; skip creation
+			return nil // Symlink already points to the target -> skip creation
 		}
 		// Remove the existing file (even if it's a wrong symlink or regular file)
 		if err := os.Remove(linkFile); err != nil {
