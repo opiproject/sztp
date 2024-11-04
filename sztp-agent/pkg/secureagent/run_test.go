@@ -31,7 +31,7 @@ const DHCPTestContent1 = `lease {
 func TestAgent_RunCommand(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
-	
+
 	type fields struct {
 		InputBootstrapURL             string
 		SerialNumber                  string
@@ -56,7 +56,7 @@ func TestAgent_RunCommand(t *testing.T) {
 	}
 
 	httpmock.RegisterResponder("POST", "https://run-command.com", func(req *http.Request) (*http.Response, error) {
-        user, pass, _ := req.BasicAuth()
+		user, pass, _ := req.BasicAuth()
 
 		if (user + ":" + pass) == "USER:PASS" {
 			output, _ := json.Marshal(expectedOnboarding)
@@ -65,7 +65,7 @@ func TestAgent_RunCommand(t *testing.T) {
 		return httpmock.NewStringResponse(401, ""), nil
 	})
 
-	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(req *http.Request) (*http.Response, error) {
+	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(_ *http.Request) (*http.Response, error) {
 		return httpmock.NewBytesResponse(200, []byte{}), nil
 	})
 
@@ -78,16 +78,16 @@ func TestAgent_RunCommand(t *testing.T) {
 		{
 			name: "TestAgent_RunCommand",
 			fields: fields{
-				InputBootstrapURL:        "https://run-command.com",
-				SerialNumber:             "USER",
-				DevicePassword:           "PASS",
-				DevicePrivateKey:         "/certs/second_private_key.pem",
-				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
-				BootstrapTrustAnchorCert: "/certs/opi.pem",
-				ContentTypeReq:           "application/yang-data+json",
-				InputJSONContent:         generateInputJSONContent(),
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://run-command.com",
+				SerialNumber:                  "USER",
+				DevicePassword:                "PASS",
+				DevicePrivateKey:              "/certs/second_private_key.pem",
+				DeviceEndEntityCert:           "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert:      "/certs/opi.pem",
+				ContentTypeReq:                "application/yang-data+json",
+				InputJSONContent:              generateInputJSONContent(),
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
@@ -109,7 +109,7 @@ func TestAgent_RunCommand(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
-				HttpClient:					   &http.Client{},
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.RunCommand(); (err != nil) != tt.wantErr {
 				t.Errorf("RunCommand() error = %v, wantErr %v", err, tt.wantErr)

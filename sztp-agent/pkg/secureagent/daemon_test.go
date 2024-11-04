@@ -293,13 +293,13 @@ func TestAgent_doReqBootstrap(t *testing.T) {
 		log.Println(user, pass)
 
 		switch {
-		case (user + ":" + pass) == "USER:PASS":
+		case (user + ":" + pass) == "USER:PASS": // nolint:goconst
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedOnboarding)
 		case (user + ":" + pass) == "REDIRECT:PASS":
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedRedirect)
-		case (user + ":" + pass) == "KOBASE64:KO":
+		case (user + ":" + pass) == "KOBASE64:KO": // nolint:goconst
 			w.WriteHeader(200)
 			output, _ = json.Marshal(expectedFailedBase64)
 		case (user + ":" + pass) == "KO:KO":
@@ -536,16 +536,16 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 		{
 			name: "Test KO where doRequestBootstrapServerOnboardingInfo fails",
 			fields: fields{
-				InputBootstrapURL:        "https://bootstrap-server.com",
-				SerialNumber:             "KOBASE64",
-				DevicePassword:           "KO",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://bootstrap-server.com",
+				SerialNumber:                  "KOBASE64",
+				DevicePassword:                "KO",
+				DevicePrivateKey:              "",
+				DeviceEndEntityCert:           "",
+				BootstrapTrustAnchorCert:      "",
+				ContentTypeReq:                "",
+				InputJSONContent:              "",
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
@@ -555,8 +555,8 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 			name: "Test KO where doHandleBootstrapRedirect fails",
 			fields: fields{
 				InputBootstrapURL: "https://bootstrap-server.com",
-				SerialNumber: 	"REDIRECT",
-				DevicePassword: "PASS",
+				SerialNumber:      "REDIRECT",
+				DevicePassword:    "PASS",
 				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{
 					IetfSztpConveyedInfoRedirectInformation: struct {
 						BootstrapServer []struct {
@@ -581,34 +581,34 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 		{
 			name: "Test KO where downloadAndValidateImage fails",
 			fields: fields{
-				InputBootstrapURL:        "https://bootstrap-server.com",
-				SerialNumber:             "KOIMAGE",
-				DevicePassword:           "KO",
-				DevicePrivateKey:         "",
-				DeviceEndEntityCert:      "",
-				BootstrapTrustAnchorCert: "",
-				ContentTypeReq:           "",
-				InputJSONContent:         "",
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://bootstrap-server.com",
+				SerialNumber:                  "KOIMAGE",
+				DevicePassword:                "KO",
+				DevicePrivateKey:              "",
+				DeviceEndEntityCert:           "",
+				BootstrapTrustAnchorCert:      "",
+				ContentTypeReq:                "",
+				InputJSONContent:              "",
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
-				BootstrapServerRedirectInfo: BootstrapServerRedirectInfo{},
+				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Test KO where launchScriptsConfiguration PRE fails",
 			fields: fields{
-				InputBootstrapURL:        "https://bootstrap-server.com",
-				SerialNumber:             "KOPRESCRIPT",
-				DevicePassword:           "KO",
-				DevicePrivateKey:         "/certs/second_private_key.pem",
-				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
-				BootstrapTrustAnchorCert: "/certs/opi.pem",
-				ContentTypeReq:           "application/yang-data+json",
-				InputJSONContent:         generateInputJSONContent(),
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://bootstrap-server.com",
+				SerialNumber:                  "KOPRESCRIPT",
+				DevicePassword:                "KO",
+				DevicePrivateKey:              "/certs/second_private_key.pem",
+				DeviceEndEntityCert:           "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert:      "/certs/opi.pem",
+				ContentTypeReq:                "application/yang-data+json",
+				InputJSONContent:              generateInputJSONContent(),
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
@@ -617,16 +617,16 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 		{
 			name: "Test KO where launchScriptsConfiguration POST fails",
 			fields: fields{
-				InputBootstrapURL:        "https://bootstrap-server.com",
-				SerialNumber:             "KOPOSTSCRIPT",
-				DevicePassword:           "KO",
-				DevicePrivateKey:         "/certs/second_private_key.pem",
-				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
-				BootstrapTrustAnchorCert: "/certs/opi.pem",
-				ContentTypeReq:           "application/yang-data+json",
-				InputJSONContent:         generateInputJSONContent(),
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://bootstrap-server.com",
+				SerialNumber:                  "KOPOSTSCRIPT",
+				DevicePassword:                "KO",
+				DevicePrivateKey:              "/certs/second_private_key.pem",
+				DeviceEndEntityCert:           "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert:      "/certs/opi.pem",
+				ContentTypeReq:                "application/yang-data+json",
+				InputJSONContent:              generateInputJSONContent(),
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
@@ -635,16 +635,16 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 		{
 			name: "Test OK",
 			fields: fields{
-				InputBootstrapURL:        "https://bootstrap-server.com",
-				SerialNumber:             "USER",
-				DevicePassword:           "PASS",
-				DevicePrivateKey:         "/certs/second_private_key.pem",
-				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
-				BootstrapTrustAnchorCert: "/certs/opi.pem",
-				ContentTypeReq:           "application/yang-data+json",
-				InputJSONContent:         generateInputJSONContent(),
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://bootstrap-server.com",
+				SerialNumber:                  "USER",
+				DevicePassword:                "PASS",
+				DevicePrivateKey:              "/certs/second_private_key.pem",
+				DeviceEndEntityCert:           "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert:      "/certs/opi.pem",
+				ContentTypeReq:                "application/yang-data+json",
+				InputJSONContent:              generateInputJSONContent(),
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
@@ -656,7 +656,7 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder("POST", "https://bootstrap-server.com", func(req *http.Request) (*http.Response, error) {
-        user, pass, _ := req.BasicAuth()
+		user, pass, _ := req.BasicAuth()
 
 		if (user + ":" + pass) == "USER:PASS" {
 			output, _ := json.Marshal(expectedOnboarding)
@@ -694,9 +694,9 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 		}
 
 		return httpmock.NewStringResponse(401, string("output")), nil
-    })
+	})
 
-	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(req *http.Request) (*http.Response, error) {
+	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(_ *http.Request) (*http.Response, error) {
 		return httpmock.NewBytesResponse(200, []byte{}), nil
 	})
 
@@ -715,12 +715,11 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
-				HttpClient:					   &http.Client{},
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.performBootstrapSequence(); (err != nil) != tt.wantErr {
 				t.Errorf("RunCommand() error = %v, wantErr %v", err, tt.wantErr)
 			}
-
 		})
 	}
 }
@@ -728,7 +727,7 @@ func TestAgent_performBootstrapSequence(t *testing.T) {
 func TestAgent_DaemonCommand(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
-	
+
 	type fields struct {
 		InputBootstrapURL             string
 		SerialNumber                  string
@@ -753,7 +752,7 @@ func TestAgent_DaemonCommand(t *testing.T) {
 	}
 
 	httpmock.RegisterResponder("POST", "https://daemon-command.com", func(req *http.Request) (*http.Response, error) {
-        user, pass, _ := req.BasicAuth()
+		user, pass, _ := req.BasicAuth()
 
 		if (user + ":" + pass) == "USER:PASS" {
 			output, _ := json.Marshal(expectedOnboarding)
@@ -762,7 +761,7 @@ func TestAgent_DaemonCommand(t *testing.T) {
 		return httpmock.NewStringResponse(401, ""), nil
 	})
 
-	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(req *http.Request) (*http.Response, error) {
+	httpmock.RegisterResponder("GET", "https://web:443/test.img", func(_ *http.Request) (*http.Response, error) {
 		return httpmock.NewBytesResponse(200, []byte{}), nil
 	})
 
@@ -775,16 +774,16 @@ func TestAgent_DaemonCommand(t *testing.T) {
 		{
 			name: "TestAgent_RunCommand",
 			fields: fields{
-				InputBootstrapURL:        "https://daemon-command.com",
-				SerialNumber:             "USER",
-				DevicePassword:           "PASS",
-				DevicePrivateKey:         "/certs/second_private_key.pem",
-				DeviceEndEntityCert:      "/certs/second_my_cert.pem",
-				BootstrapTrustAnchorCert: "/certs/opi.pem",
-				ContentTypeReq:           "application/yang-data+json",
-				InputJSONContent:         generateInputJSONContent(),
-				DhcpLeaseFile:            "",
-				ProgressJSON:             ProgressJSON{},
+				InputBootstrapURL:             "https://daemon-command.com",
+				SerialNumber:                  "USER",
+				DevicePassword:                "PASS",
+				DevicePrivateKey:              "/certs/second_private_key.pem",
+				DeviceEndEntityCert:           "/certs/second_my_cert.pem",
+				BootstrapTrustAnchorCert:      "/certs/opi.pem",
+				ContentTypeReq:                "application/yang-data+json",
+				InputJSONContent:              generateInputJSONContent(),
+				DhcpLeaseFile:                 "",
+				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
 			},
@@ -806,7 +805,7 @@ func TestAgent_DaemonCommand(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
-				HttpClient:					   &http.Client{},
+				HttpClient:                    &http.Client{},
 			}
 			if err := a.RunCommandDaemon(); (err != nil) != tt.wantErr {
 				t.Errorf("RunCommand() error = %v, wantErr %v", err, tt.wantErr)
