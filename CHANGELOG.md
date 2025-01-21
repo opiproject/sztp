@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.3.0](https://github.com/opiproject/sztp/compare/v0.2.0...v0.3.0) (2025-01-21)
+
+
+### Features
+
+* add PR Template ([e1c781e](https://github.com/opiproject/sztp/commit/e1c781e7b857dea8f7b5ae64b4ed8ac1c81bc76d))
+* add run command and run agent ([4f3ea7a](https://github.com/opiproject/sztp/commit/4f3ea7acb5c07c04db3912048beb23f9b3e76592))
+* **agent:** disover serial number if not given ([702542a](https://github.com/opiproject/sztp/commit/702542a9ba8e2488981fd8a75f561b875b30f564))
+* **ci:** spin 3 agents ([db89f90](https://github.com/opiproject/sztp/commit/db89f906387ed1787aac5e1819a2e62264015855))
+* **config:** add 3 devices ([1d09bff](https://github.com/opiproject/sztp/commit/1d09bffd561d786437495f8ded9f7913bc2a7f42))
+* moving the doProgressReport ([e61f053](https://github.com/opiproject/sztp/commit/e61f053835df52a8dda1b0c4a8d11918e48accec))
+* prepare for more then single device ([491bd75](https://github.com/opiproject/sztp/commit/491bd75070ac8db754cbb88a82c2d02021d119f4))
+* status command ([f771983](https://github.com/opiproject/sztp/commit/f77198353f6d3222c364f2b47696ca8774975a29))
+* tests for daemon and run ([af45887](https://github.com/opiproject/sztp/commit/af4588702bb22be6bf3b59238e508586d479ea6f))
+* tests for status util funtions ([3687535](https://github.com/opiproject/sztp/commit/36875359792add580a20ba3bbeec3ea801513e27))
+
+
+### Bug Fixes
+
+* add user input validation ([a1c2abf](https://github.com/opiproject/sztp/commit/a1c2abfff862e1689f838baae0d6ffb8b4438f34)), closes [#388](https://github.com/opiproject/sztp/issues/388)
+* **agent:** rename my-serial-number for testing ([e1078c9](https://github.com/opiproject/sztp/commit/e1078c9ae92becb716dc9e95afbb92a344ffd6c5))
+* all linter issues ([e722aa4](https://github.com/opiproject/sztp/commit/e722aa40b6f9114307daf477939e390b10a7c208))
+* allow to skip dhcp using url option ([4c114e0](https://github.com/opiproject/sztp/commit/4c114e062e5e2dcfc5c72291e20eab32f048b145)), closes [#401](https://github.com/opiproject/sztp/issues/401)
+* amend ssh to use go ssh pkg ([a9e5b9a](https://github.com/opiproject/sztp/commit/a9e5b9ab0b69f69ea7e1e8f70539ab947b303483))
+* but in index regex match dhcp urls ([e45f533](https://github.com/opiproject/sztp/commit/e45f533b2f4efce574991c732ed1fe575cc8e408))
+* **certs:** avoid curl install ([618ab51](https://github.com/opiproject/sztp/commit/618ab51f1308f6bc072213a7fef9e3588111c03b))
+* **certs:** avoid irrelevant compilation ([c2f36c5](https://github.com/opiproject/sztp/commit/c2f36c54fc5bacf8ee1daeabffa3c3f7ed1d142f)), closes [#375](https://github.com/opiproject/sztp/issues/375)
+* **certs:** use mounted certs instead of built into image ones ([d38ee44](https://github.com/opiproject/sztp/commit/d38ee4471640644cec099f8cd473640cf694517f))
+* cobra commands ([b694841](https://github.com/opiproject/sztp/commit/b69484151f97301c98e9d7ded35e1a548914ac9e))
+* **config:** typo ([cc72c4d](https://github.com/opiproject/sztp/commit/cc72c4dcb7ea09528f3e32b7dc43de4490ec8082))
+* **deps:** update module github.com/spf13/cobra to v1.8.1 ([856a04e](https://github.com/opiproject/sztp/commit/856a04e51e0245389429d35d83a625450fcb55da))
+* explicit cmdline parameters ([0a7c8c9](https://github.com/opiproject/sztp/commit/0a7c8c917de3c12727fb03cab2760060c47a6037))
+* fill read ssh host key pub keys ([f969315](https://github.com/opiproject/sztp/commit/f9693152b6c8b993a63a044a52755d692e6f11dd)), closes [#404](https://github.com/opiproject/sztp/issues/404)
+* helper script change container name ([12252dd](https://github.com/opiproject/sztp/commit/12252dd0ac3ef3b025857c46502c8bbc5f46245f))
+* improve log message ([120947f](https://github.com/opiproject/sztp/commit/120947f7e362e89ff8c27e8497d5631682acc148))
+* linter ([c6dcf8b](https://github.com/opiproject/sztp/commit/c6dcf8bc7d690d7938a416961e822138c0dd97ab))
+* modify configuration option output.format to output.formats ([b436a13](https://github.com/opiproject/sztp/commit/b436a13ff204404de92c0d98c1eca85e2ddf6924))
+* move certs from build to runtime ([d6ebfce](https://github.com/opiproject/sztp/commit/d6ebfce241d74365f4a393904e8e89e0731c6fc5))
+* move image binary from dockerfile to runtime ([609f7fd](https://github.com/opiproject/sztp/commit/609f7fd01e5462457c7e8c3e36f5461f9d6ecb01)), closes [#8](https://github.com/opiproject/sztp/issues/8)
+* move images to top folder ([b2faebe](https://github.com/opiproject/sztp/commit/b2faebefe1dc3d54175fb5f98737b63a7829b1f9))
+* remove certs from sztp image completely ([65a30d4](https://github.com/opiproject/sztp/commit/65a30d40f4cbaaf1af023db9164289f8149687e3)), closes [#188](https://github.com/opiproject/sztp/issues/188)
+* remove json files ([c025dc5](https://github.com/opiproject/sztp/commit/c025dc5528ae19169abe84795c899228b28c2c35)), closes [#349](https://github.com/opiproject/sztp/issues/349)
+* rename my to third ([7e7c500](https://github.com/opiproject/sztp/commit/7e7c500e68ccfc9a3a4d1cdd45f6543eb05c52e7))
+* rename opi-serial-number to third-serial-number ([127eb9f](https://github.com/opiproject/sztp/commit/127eb9f7d64843b28bead9384d2a43ca9ae759dc))
+* result and status ([097aaff](https://github.com/opiproject/sztp/commit/097aaffcf05309e0dc714c27c9824c2af34c83e0))
+* **revert:** avoid curl install ([39c4e32](https://github.com/opiproject/sztp/commit/39c4e32b15b70245722a6ebc309b8359c8e4b646))
+* run bootstrap sequence in a loop continuously ([3e1ac1a](https://github.com/opiproject/sztp/commit/3e1ac1a5130c40fe260187a7e92d5f94bb12e0e7))
+* **server:** move config files from buildtime to runtime ([159d11c](https://github.com/opiproject/sztp/commit/159d11cad854b7a484543a5fa9b964eea3cdfccb))
+* **server:** remove docker image completely ([07b2ab5](https://github.com/opiproject/sztp/commit/07b2ab578d1516f8b010bd907044d1c247c2f02b))
+* small print ([a17af68](https://github.com/opiproject/sztp/commit/a17af687ca1a405a463189397fc2f623d603190a))
+* switch agent to curl images ([8b0f5e9](https://github.com/opiproject/sztp/commit/8b0f5e9d5e2eea05939dc2f54271e59d13c9a3aa))
+* tests for daemon and run command ([527e05a](https://github.com/opiproject/sztp/commit/527e05aa03dfba65d249a20e331c077fb2f60281))
+* use rand no for temp file ([fa528b8](https://github.com/opiproject/sztp/commit/fa528b84b50b47c682d5e9f8b49acc765bde5cf1))
+* wrong badge link ([7b005f6](https://github.com/opiproject/sztp/commit/7b005f6f4582c6f62b8dfad95519a5c443f9c695))
+
 ## [0.2.0](https://github.com/opiproject/sztp/compare/v0.1.1...v0.2.0) (2024-06-12)
 
 ### Features
