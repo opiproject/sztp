@@ -7,6 +7,7 @@ package secureagent
 import (
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -45,7 +46,12 @@ func TestAgent_RunCommand(t *testing.T) {
 		ProgressJSON                  ProgressJSON
 		BootstrapServerOnboardingInfo BootstrapServerOnboardingInfo
 		BootstrapServerRedirectInfo   BootstrapServerRedirectInfo
+		StatusFilePath                string
+		ResultFilePath                string
+		SymLinkDir                    string
 	}
+
+	tmpDir := t.TempDir()
 
 	expectedOnboarding := BootstrapServerPostOutput{
 		IetfSztpBootstrapServerOutput: struct {
@@ -90,6 +96,9 @@ func TestAgent_RunCommand(t *testing.T) {
 				ProgressJSON:                  ProgressJSON{},
 				BootstrapServerOnboardingInfo: BootstrapServerOnboardingInfo{},
 				BootstrapServerRedirectInfo:   BootstrapServerRedirectInfo{},
+				StatusFilePath:                filepath.Join(tmpDir, "status.json"),
+				ResultFilePath:                filepath.Join(tmpDir, "result.json"),
+				SymLinkDir:                    filepath.Join(tmpDir, "symlink"),
 			},
 		},
 	}
@@ -109,6 +118,9 @@ func TestAgent_RunCommand(t *testing.T) {
 				ProgressJSON:                  tt.fields.ProgressJSON,
 				BootstrapServerOnboardingInfo: tt.fields.BootstrapServerOnboardingInfo,
 				BootstrapServerRedirectInfo:   tt.fields.BootstrapServerRedirectInfo,
+				StatusFilePath:                tt.fields.StatusFilePath,
+				ResultFilePath:                tt.fields.ResultFilePath,
+				SymLinkDir:                    tt.fields.SymLinkDir,
 				HttpClient:                    &http.Client{},
 			}
 			if err := a.RunCommand(); (err != nil) != tt.wantErr {
