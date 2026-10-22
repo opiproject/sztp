@@ -1,0 +1,16 @@
+! Cisco IOS / IOS-XE DHCP pool snippet for RFC 8572 §8.2 option 143.
+!
+! Regenerate the dotted-hex payload for your own URL(s) with:
+!
+!   (cd sztp-agent && go run . option143 --format ios https://YOUR-BOOTSTRAP-HOST:8080)
+!
+! The example below encodes a single URI: https://10.127.127.3:9090.
+
+ip dhcp excluded-address 10.127.127.1 10.127.127.99
+ip dhcp excluded-address 10.127.127.254 10.127.127.255
+
+ip dhcp pool SZTP
+ network 10.127.127.0 255.255.255.0
+ default-router 10.127.127.1
+ lease 0 1
+ option 143 hex 0015.6874.7470.733a.2f2f.3130.2e31.2e31.2e33.3a39.3039.30

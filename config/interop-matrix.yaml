@@ -1,0 +1,75 @@
+---
+# SZTP stack-preflight matrix (server-side checks; not device interop evidence).
+#
+# Each row describes one target platform/IOS-XE combination plus the
+# server-side configuration needed to provision it successfully.
+# Consumed by scripts/run-interop-matrix.sh.
+#
+# Fields:
+#   id             short slug, used for artifact folder names
+#   platform       Cisco product family
+#   ios_xe_version software version tested against
+#   trust_anchor   act2-sudi  (ACT2, SHA-1)   or
+#                  circa-2020 (HA-SUDI, SHA-256)
+#   flow           redirect | direct-bootstrap
+#   sztp_url       URL advertised via DHCP option 143
+#   sztp_device_sn Subject.serialNumber after
+#                  split(' ')[0] on the SUDI cert (typically the PID)
+#   voucher_file   path inside the container (/local_files/...)
+#   owner_cert    path inside the container (/local_files/...)
+#   notes          free-text
+#   status         known | pending | broken
+
+matrix:
+  - id: c9300-24t-17.18.01-act2-redirect
+    platform: Catalyst C9300-24T
+    ios_xe_version: 17.18.01
+    trust_anchor: act2-sudi
+    flow: redirect
+    sztp_url: https://10.127.127.3:8080
+    sztp_device_sn: C9300-24T
+    voucher_file: /local_files/FCW1234ABCD.vcj
+    owner_cert: /local_files/owner_cert_chain.cms
+    status: known
+    notes: >-
+      Reference bring-up. Full redirect → bootstrap flow,
+      GuestShell pre-config script runs, hostname changes to
+      sztp-provisioning.
+
+  - id: c9300-24t-17.18.01-act2-direct
+    platform: Catalyst C9300-24T
+    ios_xe_version: 17.18.01
+    trust_anchor: act2-sudi
+    flow: direct-bootstrap
+    sztp_url: https://10.127.127.3:9090
+    sztp_device_sn: C9300-24T
+    voucher_file: /local_files/FCW1234ABCD.vcj
+    owner_cert: /local_files/owner_cert_chain.cms
+    status: known
+    notes: >-
+      Bootstrap bypass (opt 143 → :9090). Used during XML format
+      debugging.
+
+  - id: c9200-24t-17.x-act2-redirect
+    platform: Catalyst C9200-24T
+    ios_xe_version: 17.x
+    trust_anchor: act2-sudi
+    flow: redirect
+    sztp_url: https://10.127.127.3:8080
+    sztp_device_sn: C9200-24T
+    voucher_file: /local_files/C9200SN.vcj
+    owner_cert: /local_files/owner_cert_chain.cms
+    status: pending
+    notes: Needs a per-device MASA-signed voucher. Same PKI as C9300.
+
+  - id: c9300x-24y-17.x-circa2020-redirect
+    platform: Catalyst C9300X-24Y
+    ios_xe_version: 17.x
+    trust_anchor: circa-2020
+    flow: redirect
+    sztp_url: https://10.127.127.3:8080
+    sztp_device_sn: C9300X-24Y
+    voucher_file: /local_files/C9300XSN.vcj
+    owner_cert: /local_files/owner_cert_chain.cms
+    status: pending
+    notes: HA-SUDI (SHA-256). Patches 3.1 + 3.4 not strictly required.

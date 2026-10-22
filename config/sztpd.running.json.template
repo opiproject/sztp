@@ -96,7 +96,7 @@
           "verification": {
             "local-truststore-reference": {
               "certificate-bag": "my-device-identity-ca-certs",
-              "certificate": "my-device-identity-ca-cert-circa-2020"
+              "certificate": "my-device-identity-ca-cert-${SZTP_TRUST_ANCHOR}"
             }
           },
           "serial-number-extraction": "wn-x509-c2n:serial-number"
@@ -107,7 +107,7 @@
   "wn-sztpd-1:devices": {
     "device": [
       {
-        "serial-number": "first-serial-number",
+        "serial-number": "${SZTP_DEVICE_SN}",
         "device-type": "my-device-type",
         "activation-code": "$0$my-secret",
         "response-manager": {

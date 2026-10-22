@@ -17,6 +17,12 @@ wait_curl () {
 
 env
 
+# Defaults for env-driven template substitution (see config/catalyst/).
+# Values are preserved if already set by the caller (compose / --env-file).
+: "${SZTP_TRUST_ANCHOR:=circa-2020}"
+: "${SZTP_DEVICE_SN:=first-serial-number}"
+export SZTP_TRUST_ANCHOR SZTP_DEVICE_SN
+
 declare -a names
 
 # files and configs
@@ -50,7 +56,7 @@ envsubst '$CLIENT_CERT_TA_B64,$SBI_PRI_KEY_B64,$SBI_PUB_KEY_B64,$SBI_EE_CERT_B64
 diff /tmp/"${SZTPD_OPI_MODE}".json.images /tmp/"${SZTPD_OPI_MODE}".json.keys || true
 
 # shellcheck disable=SC2016
-envsubst '$SZTPD_INIT_PORT,$SZTPD_NBI_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR,$BOOTSVR_PORT,$BOOTSVR_ADDR' < /tmp/"${SZTPD_OPI_MODE}".json.keys > /tmp/running.json
+envsubst '$SZTPD_INIT_PORT,$SZTPD_NBI_PORT,$SZTPD_SBI_PORT,$SZTPD_INIT_ADDR,$BOOTSVR_PORT,$BOOTSVR_ADDR,$SZTP_TRUST_ANCHOR,$SZTP_DEVICE_SN' < /tmp/"${SZTPD_OPI_MODE}".json.keys > /tmp/running.json
 diff /tmp/"${SZTPD_OPI_MODE}".json.keys /tmp/running.json || true
 
 echo "starting server in the background"

@@ -15,3 +15,12 @@
 # vendor/
 
 dist/
+
+# Never commit private keys or MASA vouchers; use
+# scripts/export-sanitized-bundle.sh to package for sharing.
+*.key
+*.vcj
+local_files/*.key
+local_files/*.der
+local_files/*.srl
+local_files/*.bak.*

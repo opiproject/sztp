@@ -19,6 +19,30 @@ This project welcomes contributions and suggestions.  We are happy to have the C
 
 See [CONTRIBUTING](https://github.com/opiproject/opi/blob/main/CONTRIBUTING.md) and [GitHub Basic Process](https://github.com/opiproject/opi/blob/main/doc-github-rules.md) for more details.
 
+## Lab tooling
+
+Helper scripts for bringing up and validating the SZTP stack:
+
+| Script | Purpose |
+| --- | --- |
+| [sztp-agent `option143`](sztp-agent/pkg/dhcp) | Encode one or more `https://` URIs as an RFC 8572 section 8.2 DHCPv4 option-143 payload (ISC, plain hex, or Cisco IOS dotted-hex output). |
+| [scripts/render-dhcpd-conf.sh](scripts/render-dhcpd-conf.sh) | Encode `$SZTP_URL` and render `dhcp/dhcpd.conf` (used by the `iosxe` profile). |
+| [scripts/validate-sztp-artifacts.sh](scripts/validate-sztp-artifacts.sh) | Run 6 pre-flight checks on the voucher + owner-cert bundle. |
+| [scripts/sztp-preflight.sh](scripts/sztp-preflight.sh) | End-to-end readiness check against the running stack. |
+| [scripts/run-interop-matrix.sh](scripts/run-interop-matrix.sh) | Drive `config/interop-matrix.yaml` through encoder + preflight per row. |
+| [scripts/export-sanitized-bundle.sh](scripts/export-sanitized-bundle.sh) | Build a tarball for sharing, with private keys and vouchers stripped. |
+
+Cisco Catalyst lab bring-up (non-default, activated with a profile):
+
+```bash
+export SZTP_URL="https://10.127.127.3:8080"
+docker compose --env-file config/catalyst/c9300.env --profile iosxe up -d
+scripts/sztp-preflight.sh --env-file config/catalyst/c9300.env
+```
+
+See [dhcp/examples/](dhcp/examples/README.md) for paste-ready DHCP
+snippets (ISC dhcpd, Cisco IOS/IOS-XE).
+
 ## Docs
 
 * [RFC 8572](https://www.rfc-editor.org/rfc/pdfrfc/rfc8572.txt.pdf)
